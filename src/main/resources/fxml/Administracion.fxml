@@ -12,6 +12,13 @@
             fx:controller="org.example.sgef_petalex_v_09.controllers.AdministracionController"
             prefWidth="800" prefHeight="600">
 
+    <!-- Área de contenido (fondo blanco) -->
+    <AnchorPane fx:id="contentPane"
+                AnchorPane.topAnchor="80"
+                AnchorPane.bottomAnchor="0"
+                AnchorPane.leftAnchor="180"
+                AnchorPane.rightAnchor="0" />
+
     <!-- Botón Volver al Menú Principal -->
     <Button fx:id="btnBack"
             onAction="#onBack"
@@ -21,7 +28,7 @@
         <graphic>
             <ImageView fitWidth="20" preserveRatio="true">
                 <image>
-                    <Image url="@/images/icon_back.png"/>
+                    <Image url="@../images/icon_back.png"/>
                 </image>
             </ImageView>
         </graphic>
@@ -30,11 +37,12 @@
         </text>
     </Button>
 
-    <!-- Sidebar vertical -->
+    <!-- Sidebar vertical (iniciado 60px hacia abajo) -->
     <VBox fx:id="sidebar"
+          prefWidth="180"
           spacing="10"
           AnchorPane.leftAnchor="0"
-          AnchorPane.topAnchor="0"
+          AnchorPane.topAnchor="60"
           AnchorPane.bottomAnchor="0"
           styleClass="sidebar">
 
@@ -44,7 +52,7 @@
             <graphic>
                 <ImageView fitWidth="24" preserveRatio="true">
                     <image>
-                        <Image url="@/images/gestion_usuarios.png"/>
+                        <Image url="@../images/gestion_usuarios.png"/>
                     </image>
                 </ImageView>
             </graphic>
@@ -59,7 +67,7 @@
             <graphic>
                 <ImageView fitWidth="24" preserveRatio="true">
                     <image>
-                        <Image url="@/images/roles_permisos.png"/>
+                        <Image url="@../images/image_cliente.png"/>
                     </image>
                 </ImageView>
             </graphic>
@@ -74,7 +82,7 @@
             <graphic>
                 <ImageView fitWidth="24" preserveRatio="true">
                     <image>
-                        <Image url="@/images/parametros_negocio.png"/>
+                        <Image url="@../images/parametros_negocio.png"/>
                     </image>
                 </ImageView>
             </graphic>
@@ -85,17 +93,10 @@
 
     </VBox>
 
-    <!-- Encabezado -->
+    <!-- Título del módulo -->
     <Label text="Administración del Sistema"
            styleClass="header-title"
            AnchorPane.topAnchor="10"
            AnchorPane.leftAnchor="270" />
-
-    <!-- Contenido dinámico -->
-    <AnchorPane fx:id="contentPane"
-                AnchorPane.topAnchor="50"
-                AnchorPane.bottomAnchor="0"
-                AnchorPane.leftAnchor="180"
-                AnchorPane.rightAnchor="0" />
 
 </AnchorPane>

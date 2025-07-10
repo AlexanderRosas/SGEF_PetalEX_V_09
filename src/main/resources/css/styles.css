@@ -72,3 +72,59 @@
 .menu-button:pressed {
     -fx-background-color: #d81b60;
 }
+/* ===== Sidebar ===== */
+.sidebar {
+    -fx-background-color: #F8F8F8;   /* un gris muy claro */
+    -fx-padding: 20;
+}
+
+/* Botones de la barra lateral */
+.sidebar-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333333;
+    -fx-font-size: 16px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 20;
+}
+.sidebar-button:hover {
+    -fx-background-color: rgba(255,133,184,0.3);
+}
+/* Botón activo */
+.sidebar-button.active {
+    -fx-background-color: #FF85B8;
+    -fx-text-fill: white;
+}
+
+/* Iconos dentro del botón */
+.sidebar-button .graphic {
+    -fx-padding: 0 10 0 0;  /* separa icono y texto */
+}
+
+/* ===== Botón Volver ===== */
+.back-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333333;
+    -fx-font-size: 14px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 5 10;
+}
+.back-button:hover {
+    -fx-background-color: rgba(0,0,0,0.05);
+}
+
+/* ===== Encabezado ===== */
+.header-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+}
+
+/* ===== Content Pane ===== */
+#contentPane {
+    -fx-padding: 20;
+    -fx-background-color: white;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}

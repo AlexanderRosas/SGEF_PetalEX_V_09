@@ -22,7 +22,7 @@ public class AdministracionController {
 
     @FXML
     public void initialize() {
-        cargarSeccion("GestionUsuarios.fxml");
+        //cargarSeccion("GestionUsuarios.fxml");
         resaltarBoton(btnGestionUsuarios);
     }
 
@@ -53,13 +53,13 @@ public class AdministracionController {
 
     @FXML
     private void onRolesPermisos(ActionEvent event) {
-        cargarSeccion("RolesPermisos.fxml");
+        //cargarSeccion("RolesPermisos.fxml");
         resaltarBoton(btnRolesPermisos);
     }
 
     @FXML
     private void onParametrosNegocio(ActionEvent event) {
-        cargarSeccion("ParametrosNegocio.fxml");
+        //cargarSeccion("ParametrosNegocio.fxml");
         resaltarBoton(btnParametrosNegocio);
     }
 
