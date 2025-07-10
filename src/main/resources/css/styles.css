@@ -1,0 +1,74 @@
+/* Fondo general */
+.root {
+    -fx-background-color: white;
+}
+@font-face {
+    font-family: "TRAVAX";
+    src: url("../fonts/TRAVAX.ttf");
+}
+/* Logo */
+.image-logo {
+    -fx-fit-width: 200;
+    -fx-preserve-ratio: true;
+    -fx-padding: 20 0 10 0;
+}
+/* Título Bienvenido */
+.title-label {
+    -fx-font-family: "TRAVAX";
+    -fx-font-weight: bold;
+    -fx-font-size: 30px;
+    -fx-text-fill: #333333;
+    -fx-padding: 0 0 20 0;
+}
+/* Campos de entrada estilo "pill" */
+.input-field {
+    -fx-background-color: #1E73BE;
+    -fx-background-radius: 20;
+    -fx-border-color: transparent;
+    -fx-prompt-text-fill: rgba(255,255,255,0.8);
+    -fx-text-fill: white;
+    -fx-padding: 10 15;
+    -fx-font-size: 14px;
+    -fx-pref-width: 240px;
+}
+/* Botón de Ingresar */
+.login-button {
+    -fx-background-color: #00D28F;
+    -fx-background-radius: 20;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-padding: 8 30;
+    -fx-pref-width: 180px;
+}
+/* Efectos de interacción para los .login-button */
+.login-button:hover {
+    -fx-background-color: #3e7163;
+}
+.login-button:pressed {
+    -fx-background-color: #81cbb6;
+}
+
+/* ==== Botones de menú principales ==== */
+.menu-button {
+    -fx-background-color: #FF85B8;      /* rosa brillante */
+    -fx-background-radius: 15;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-pref-width: 120px;
+    -fx-pref-height: 120px;
+    -fx-content-display: TOP;
+    -fx-alignment: CENTER;
+    -fx-padding: 10;
+}
+.menu-button .text {
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+/* Efectos de interacción para los .menu-button */
+.menu-button:hover {
+    -fx-background-color: #e573a1;
+}
+.menu-button:pressed {
+    -fx-background-color: #d81b60;
+}

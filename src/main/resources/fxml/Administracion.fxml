@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import java.lang.String?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.sgef_petalex_v_09.controllers.AdministracionController"
+            prefWidth="800" prefHeight="600">
+
+    <!-- Botón Volver al Menú Principal -->
+    <Button fx:id="btnBack"
+            onAction="#onBack"
+            styleClass="back-button"
+            AnchorPane.topAnchor="10"
+            AnchorPane.leftAnchor="180">
+        <graphic>
+            <ImageView fitWidth="20" preserveRatio="true">
+                <image>
+                    <Image url="@/images/icon_back.png"/>
+                </image>
+            </ImageView>
+        </graphic>
+        <text>
+            <String fx:value="Volver"/>
+        </text>
+    </Button>
+
+    <!-- Sidebar vertical -->
+    <VBox fx:id="sidebar"
+          spacing="10"
+          AnchorPane.leftAnchor="0"
+          AnchorPane.topAnchor="0"
+          AnchorPane.bottomAnchor="0"
+          styleClass="sidebar">
+
+        <Button fx:id="btnGestionUsuarios"
+                onAction="#onGestionUsuarios"
+                styleClass="sidebar-button">
+            <graphic>
+                <ImageView fitWidth="24" preserveRatio="true">
+                    <image>
+                        <Image url="@/images/gestion_usuarios.png"/>
+                    </image>
+                </ImageView>
+            </graphic>
+            <text>
+                <String fx:value="Gestión de Usuarios"/>
+            </text>
+        </Button>
+
+        <Button fx:id="btnRolesPermisos"
+                onAction="#onRolesPermisos"
+                styleClass="sidebar-button">
+            <graphic>
+                <ImageView fitWidth="24" preserveRatio="true">
+                    <image>
+                        <Image url="@/images/roles_permisos.png"/>
+                    </image>
+                </ImageView>
+            </graphic>
+            <text>
+                <String fx:value="Roles y Permisos"/>
+            </text>
+        </Button>
+
+        <Button fx:id="btnParametrosNegocio"
+                onAction="#onParametrosNegocio"
+                styleClass="sidebar-button">
+            <graphic>
+                <ImageView fitWidth="24" preserveRatio="true">
+                    <image>
+                        <Image url="@/images/parametros_negocio.png"/>
+                    </image>
+                </ImageView>
+            </graphic>
+            <text>
+                <String fx:value="Parámetros de Negocio"/>
+            </text>
+        </Button>
+
+    </VBox>
+
+    <!-- Encabezado -->
+    <Label text="Administración del Sistema"
+           styleClass="header-title"
+           AnchorPane.topAnchor="10"
+           AnchorPane.leftAnchor="270" />
+
+    <!-- Contenido dinámico -->
+    <AnchorPane fx:id="contentPane"
+                AnchorPane.topAnchor="50"
+                AnchorPane.bottomAnchor="0"
+                AnchorPane.leftAnchor="180"
+                AnchorPane.rightAnchor="0" />
+
+</AnchorPane>

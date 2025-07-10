@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import java.lang.String?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.sgef_petalex_v_09.controllers.LoginController"
+            prefWidth="400" prefHeight="450">
+
+    <children>
+        <VBox alignment="CENTER" spacing="10" layoutX="50" layoutY="30" prefWidth="300">
+            <ImageView fx:id="logo"
+                       fitWidth="300"
+                       preserveRatio="true">
+                <styleClass>
+                    <String fx:value="image-logo"/>
+                </styleClass>
+                <image>
+                    <Image url="@../images/index_blooms_logo.png"/>
+                </image>
+            </ImageView>
+
+            <!-- Título -->
+            <Label text="Bienvenido" styleClass="title-label"/>
+
+            <!-- Inputs estilo pill -->
+            <TextField fx:id="txtUser" promptText="Ingrese su Usuario"
+                       styleClass="input-field"/>
+            <PasswordField fx:id="txtPass" promptText="Ingrese su contraseña"
+                           styleClass="input-field"/>
+
+            <!-- Botón -->
+            <Button fx:id="btnIngresar" text="INGRESAR"
+                    onAction="#onIngresar" styleClass="login-button"/>
+        </VBox>
+    </children>
+</AnchorPane>

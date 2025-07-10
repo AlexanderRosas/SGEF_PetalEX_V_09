@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import java.lang.String?>
+<?import javafx.scene.effect.ColorAdjust?>
+
+
+<AnchorPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.sgef_petalex_v_09.controllers.MainMenuController"
+            prefWidth="800" prefHeight="600">
+
+    <VBox alignment="CENTER" spacing="10"
+          layoutX="50" layoutY="20" prefWidth="700">
+        <!-- Logo anidado como Image -->
+        <ImageView fitWidth="450" preserveRatio="true">
+            <styleClass>
+                <String fx:value="image-logo"/>
+            </styleClass>
+            <image>
+                <Image url="@../images/index_blooms_logo.png"/>
+            </image>
+        </ImageView>
+
+        <Label text="Sistema de Gestión de Exportación de Flores"
+               styleClass="title-label" />
+    </VBox>
+
+    <HBox alignment="CENTER" spacing="20"
+          layoutX="50" layoutY="250" prefWidth="700">
+
+        <!-- Clientes -->
+        <Button fx:id="btnClientes" text="CLIENTES"
+                styleClass="menu-button"
+                onAction="#onClientes">
+            <graphic>
+                <ImageView fitWidth="75" preserveRatio="true">
+                    <effect>
+                        <ColorAdjust brightness="1.0"/>
+                    </effect>
+                    <styleClass>
+                        <String fx:value="image-icon"/>
+                    </styleClass>
+                    <image>
+                        <Image url="@../images/image_cliente.png"/>
+                    </image>
+                </ImageView>
+            </graphic>
+        </Button>
+
+        <!-- Ventas -->
+        <Button fx:id="btnVentas" text="VENTAS"
+                styleClass="menu-button"
+                onAction="#onVentas">
+            <graphic>
+                <ImageView fitWidth="75" preserveRatio="true">
+                    <effect>
+                        <ColorAdjust brightness="1.0"/>
+                    </effect>
+                    <styleClass>
+                        <String fx:value="image-icon"/>
+                    </styleClass>
+                    <image>
+                        <Image url="@../images/image_ventas.png"/>
+                    </image>
+                </ImageView>
+            </graphic>
+        </Button>
+
+        <!-- Compras y Pedidos -->
+        <Button fx:id="btnCompras" text="COMPRAS-PEDIDOS"
+                styleClass="menu-button"
+                onAction="#onCompras">
+            <graphic>
+                <ImageView fitWidth="75" preserveRatio="true">
+                    <effect>
+                        <ColorAdjust brightness="1.0"/>
+                    </effect>
+                    <styleClass>
+                        <String fx:value="image-icon"/>
+                    </styleClass>
+                    <image>
+                        <Image url="@../images/image_compras.png"/>
+                    </image>
+                </ImageView>
+            </graphic>
+        </Button>
+
+        <!-- Proveedores -->
+        <Button fx:id="btnProveedores" text="PROVEEDORES"
+                styleClass="menu-button"
+                onAction="#onProveedores">
+            <graphic>
+                <ImageView fitWidth="75" preserveRatio="true">
+                    <effect>
+                        <ColorAdjust brightness="1.0"/>
+                    </effect>
+                    <styleClass>
+                        <String fx:value="image-icon"/>
+                    </styleClass>
+                    <image>
+                        <Image url="@../images/image_proveedores.png"/>
+                    </image>
+                </ImageView>
+            </graphic>
+        </Button>
+
+        <!-- Sistema (configuración) -->
+        <Button fx:id="btnSistema" text="SISTEMA"
+                styleClass="menu-button"
+                onAction="#onSistema">
+            <graphic>
+                <ImageView fitWidth="75" preserveRatio="true">
+                    <effect>
+                        <ColorAdjust brightness="1.0"/>
+                    </effect>
+                    <styleClass>
+                        <String fx:value="image-icon"/>
+                    </styleClass>
+                    <image>
+                        <Image url="@../images/image_sistema.png"/>
+                    </image>
+                </ImageView>
+            </graphic>
+        </Button>
+
+    </HBox>
+</AnchorPane>
