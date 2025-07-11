@@ -29,20 +29,30 @@ public class AdministracionController {
     @FXML
     private void onBack(ActionEvent event) {
         try {
-            // Carga del menú principal
+            // Carga el FXML del menú principal
             Parent mainRoot = FXMLLoader.load(
                     getClass().getResource("/fxml/MainMenu.fxml")
             );
-            Scene mainScene = new Scene(mainRoot);
-            mainScene.getStylesheets().add(
+            // Obtiene el Stage y reutiliza la Scene actual
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Scene scene = stage.getScene();
+
+            // Reemplaza la raíz sin crear nueva Scene
+            scene.setRoot(mainRoot);
+
+            // Reaplica tu CSS
+            scene.getStylesheets().clear();
+            scene.getStylesheets().add(
                     getClass().getResource("/css/styles.css").toExternalForm()
             );
-            Stage stage = (Stage) btnBack.getScene().getWindow();
-            stage.setScene(mainScene);
+
+            // Asegura que siga maximizado
+            stage.setMaximized(true);
+
+            // Actualiza el título
             stage.setTitle("Index Blooms – Menú Principal");
         } catch (IOException e) {
             e.printStackTrace();
-            // Podrías mostrar otra alerta aquí si falla la carga
         }
     }
 

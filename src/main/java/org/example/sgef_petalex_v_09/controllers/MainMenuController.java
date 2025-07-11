@@ -1,6 +1,5 @@
 package org.example.sgef_petalex_v_09.controllers;
 
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,8 +11,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
 
 public class MainMenuController {
+
     @FXML private AnchorPane root;
     @FXML private Button btnClientes;
     @FXML private Button btnVentas;
@@ -22,54 +23,65 @@ public class MainMenuController {
     @FXML private Button btnSistema;
 
     @FXML
-    private Node anyNodeInsideRoot;
-
-    @FXML
     private void onClientes(ActionEvent event) {
-        // TODO: navegar a Clientes.fxml
+        cargarVista(event, "/fxml/Clientes.fxml",       "Index Blooms – Clientes");
     }
 
     @FXML
     private void onVentas(ActionEvent event) {
-        // TODO: navegar a Ventas.fxml
+        cargarVista(event, "/fxml/Ventas.fxml",         "Index Blooms – Ventas");
     }
 
     @FXML
     private void onCompras(ActionEvent event) {
-        // TODO: navegar a ComprasPedidos.fxml
+        cargarVista(event, "/fxml/ComprasPedidos.fxml", "Index Blooms – Compras y Pedidos");
     }
 
     @FXML
     private void onProveedores(ActionEvent event) {
-        // TODO: navegar a Proveedores.fxml
+        cargarVista(event, "/fxml/Proveedores.fxml",    "Index Blooms – Proveedores");
     }
-
 
     @FXML
     private void onSistema(ActionEvent event) {
+        cargarVista(event, "/fxml/Administracion.fxml","Index Blooms – Administración del Sistema");
+    }
+
+    /**
+     * Carga un FXML en una nueva Scene para el Stage actual,
+     * reaplica CSS y restaura el tamaño o maximizado.
+     *
+     * @param event     el evento de clic
+     * @param fxmlPath  ruta al recurso FXML (empieza con '/')
+     * @param title     título de la ventana
+     */
+    private void cargarVista(ActionEvent event, String fxmlPath, String title) {
         try {
-            // Obtiene la ventana actual y guarda sus dimensiones
-            Stage stage = (Stage)((Node) event.getSource()).getScene().getWindow();
-            double width = stage.getWidth();
-            double height = stage.getHeight();
+            // 1) Obtener Stage y guardar estado
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            double width       = stage.getWidth();
+            double height      = stage.getHeight();
             boolean wasMaximized = stage.isMaximized();
 
-            // Carga la vista de Administración
-            Parent adminRoot = FXMLLoader.load(
-                    getClass().getResource("/fxml/Administracion.fxml")
-            );
+            // 2) Localizar y cargar el FXML
+            URL resource = getClass().getResource(fxmlPath);
+            if (resource == null) {
+                System.err.println("ERROR: FXML no encontrado en " + fxmlPath);
+                return;
+            }
+            Parent rootNode = FXMLLoader.load(resource);
 
-            // Crea una nueva escena (y reaplica el CSS)
-            Scene scene = new Scene(adminRoot);
+            // 3) Nueva Scene y CSS
+            Scene scene = new Scene(rootNode);
             scene.getStylesheets().add(
                     getClass().getResource("/css/styles.css").toExternalForm()
             );
 
-            // Ajusta la escena y el título
+            // 4) Aplicar Scene y título
             stage.setScene(scene);
-            stage.setTitle("Index Blooms – Administración del Sistema");
+            stage.setTitle(title);
 
-            // Restaura las dimensiones originales
+            // 5) Restaurar tamaño o maximizado
             if (wasMaximized) {
                 stage.setMaximized(true);
             } else {
@@ -81,5 +93,4 @@ public class MainMenuController {
             e.printStackTrace();
         }
     }
-
 }

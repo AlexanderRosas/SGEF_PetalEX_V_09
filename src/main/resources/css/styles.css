@@ -138,3 +138,81 @@
 .sidebar-button.selected {
     -fx-background-color: #FF9AC8; /* resaltado rosa */
 }
+
+/* ===== Módulo Clientes ===== */
+
+/* Fondo blanco para toda la vista */
+.root {
+    -fx-background-color: white;
+}
+
+/* Botón “Volver” */
+.back-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333333;
+    -fx-font-size: 14px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 5 10;
+}
+.back-button:hover {
+    -fx-background-color: rgba(0,0,0,0.05);
+}
+
+/* Título “Clientes” */
+.header-title {
+    -fx-font-family: "TRAVAX";
+    -fx-font-weight: bold;
+    -fx-font-size: 24px;
+    -fx-text-fill: #333333;
+    -fx-padding: 0 0 10 0;
+}
+
+/* Barra de acciones (toolbar) */
+.toolbar {
+    -fx-background-color: white;
+    -fx-padding: 10 0 10 0;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* Botones de la toolbar */
+.toolbar-button {
+    -fx-background-color: #FF85B8;      /* rosa brillante */
+    -fx-background-radius: 15;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-pref-width: 100px;
+    -fx-pref-height: 40px;
+    -fx-alignment: CENTER;
+    -fx-padding: 0;
+}
+.toolbar-button:hover {
+    -fx-background-color: #e573a1;
+}
+.toolbar-button:pressed {
+    -fx-background-color: #d81b60;
+}
+
+/* Tabla de clientes */
+.table-clientes {
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-table-cell-border-color: #eee;
+}
+
+.table-clientes .column-header-background {
+    -fx-background-color: #e484e8;
+}
+
+.table-clientes .table-row-cell:filled:selected,
+.table-clientes .table-row-cell:filled:selected:focused {
+    -fx-background-color: #FFEBF4;
+}
+
+/* Columnas (alineación opcional) */
+.table-clientes .table-column-id {
+    -fx-alignment: CENTER;
+}
