@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.sgef_petalex_v_09.controllers.ComprasPedidosController">
+
+    <!-- Sidebar vertical, ancho fijo 280px -->
+    <VBox fx:id="sidebar"
+          prefWidth="280"
+          spacing="10"
+          AnchorPane.leftAnchor="0"
+          AnchorPane.topAnchor="60"
+          AnchorPane.bottomAnchor="0"
+          styleClass="sidebar">
+
+        <Button fx:id="btnCompras"
+                onAction="#onCompras"
+                styleClass="sidebar-button">
+            <graphic>
+                <ImageView fitWidth="24" preserveRatio="true">
+                    <image>
+                        <Image url="@../images/image_cliente.png"/>
+                    </image>
+                </ImageView>
+            </graphic>
+            <text>
+                <String fx:value="Gestión de Compras"/>
+            </text>
+        </Button>
+
+        <Button fx:id="btnPedidos"
+                onAction="#onPedidos"
+                styleClass="sidebar-button">
+            <graphic>
+                <ImageView fitWidth="24" preserveRatio="true">
+                    <image>
+                        <Image url="@../images/icon_role.png"/>
+                    </image>
+                </ImageView>
+            </graphic>
+            <text>
+                <String fx:value="Gestión de Pedidos"/>
+            </text>
+        </Button>
+    </VBox>
+
+    <!-- Área de contenido -->
+    <AnchorPane fx:id="contentPane"
+                AnchorPane.topAnchor="80"
+                AnchorPane.bottomAnchor="0"
+                AnchorPane.leftAnchor="280"
+                AnchorPane.rightAnchor="0" />
+
+    <!-- Botón Volver al Menú Principal -->
+    <Button fx:id="btnBack"
+            onAction="#onBack"
+            styleClass="back-button"
+            AnchorPane.topAnchor="10"
+            AnchorPane.leftAnchor="280">
+        <graphic>
+            <ImageView fitWidth="20" preserveRatio="true">
+                <image>
+                    <Image url="@../images/icon_back.png"/>
+                </image>
+            </ImageView>
+        </graphic>
+        <text>
+            <String fx:value="Volver"/>
+        </text>
+    </Button>
+
+    <Label text="Compras y Pedidos"
+           styleClass="header-title"
+           AnchorPane.topAnchor="10"
+           AnchorPane.leftAnchor="400" />
+</AnchorPane>

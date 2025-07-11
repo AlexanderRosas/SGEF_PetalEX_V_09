@@ -15,9 +15,12 @@ import javafx.scene.control.Alert.AlertType;
 import java.io.IOException;
 
 public class LoginController {
-    @FXML private TextField txtUser;
-    @FXML private PasswordField txtPass;
-    @FXML private Button btnIngresar;
+    @FXML
+    private TextField txtUser;
+    @FXML
+    private PasswordField txtPass;
+    @FXML
+    private Button btnIngresar;
 
     @FXML
     private void onIngresar(ActionEvent event) {
@@ -28,15 +31,14 @@ public class LoginController {
             try {
                 // Carga del menú principal
                 Parent mainRoot = FXMLLoader.load(
-                        getClass().getResource("/fxml/MainMenu.fxml")
-                );
+                        getClass().getResource("/fxml/MainMenu.fxml"));
                 Scene mainScene = new Scene(mainRoot);
                 mainScene.getStylesheets().add(
-                        getClass().getResource("/css/styles.css").toExternalForm()
-                );
+                        getClass().getResource("/css/styles.css").toExternalForm());
                 Stage stage = (Stage) btnIngresar.getScene().getWindow();
                 stage.setScene(mainScene);
-                //stage.setFullScreen(true);
+                stage.setMaximized(true);
+
                 stage.centerOnScreen();
                 stage.setTitle("Index Blooms – Menú Principal");
             } catch (IOException e) {
@@ -56,6 +58,7 @@ public class LoginController {
             txtUser.requestFocus();
         }
     }
+
     private boolean authenticate(String user, String pass) {
         return "admin".equals(user) && "admin".equals(pass);
     }
