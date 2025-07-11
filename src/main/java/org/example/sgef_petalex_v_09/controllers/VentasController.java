@@ -24,14 +24,24 @@ import java.util.Optional;
 
 public class VentasController {
 
-    @FXML private AnchorPane root;
-    @FXML private Button btnBack;
-    @FXML private Button btnAddVenta;
-    @FXML private Button btnViewVenta;
-    @FXML private TableView<Venta> tableVentas;
-    @FXML private TableColumn<Venta, String>  colCliente;
-    @FXML private TableColumn<Venta, String>  colFecha;
-    @FXML private TableColumn<Venta, Number>  colTotal;
+    @FXML
+    private AnchorPane root;
+    @FXML
+    private Button btnBack;
+    @FXML
+    private Button btnAddVenta;
+    @FXML
+    private Button btnViewVenta;
+    @FXML
+    private Button btnAnularVenta;
+    @FXML
+    private TableView<Venta> tableVentas;
+    @FXML
+    private TableColumn<Venta, String> colCliente;
+    @FXML
+    private TableColumn<Venta, String> colFecha;
+    @FXML
+    private TableColumn<Venta, Number> colTotal;
 
     private final ObservableList<Venta> ventas = FXCollections.observableArrayList();
 
@@ -39,8 +49,8 @@ public class VentasController {
     public void initialize() {
         // Vincula las columnas a las propiedades de Venta
         colCliente.setCellValueFactory(v -> v.getValue().clienteProperty());
-        colFecha  .setCellValueFactory(v -> v.getValue().fechaProperty().asString());
-        colTotal  .setCellValueFactory(v -> v.getValue().totalProperty());
+        colFecha.setCellValueFactory(v -> v.getValue().fechaProperty().asString());
+        colTotal.setCellValueFactory(v -> v.getValue().totalProperty());
 
         tableVentas.setItems(ventas);
     }
@@ -70,20 +80,18 @@ public class VentasController {
 
         Cliente c = selCtrl.getSelectedCliente();
 
-
         // 2) Confirmar selección
         boolean confirmado = DialogHelper.confirm(
                 btnAddVenta.getScene().getWindow(),
-                "¿Está seguro que desea Seleccionar al " + c.getNombre() + "?"
-        );
-        if (!confirmado) return;
+                "¿Está seguro que desea Seleccionar al " + c.getNombre() + "?");
+        if (!confirmado)
+            return;
 
         // 3) Crear objeto Venta con nombre, dirección, fecha
         Venta nuevaVenta = new Venta(
                 c.getNombre(),
                 c.getDireccion(),
-                LocalDate.now()
-        );
+                LocalDate.now());
 
         // 4) Abrir detalle de venta
         FXMLLoader detLoader = new FXMLLoader(getClass().getResource("/fxml/VentaDetail.fxml"));
@@ -108,8 +116,7 @@ public class VentasController {
         if (ventaSeleccionada == null) {
             DialogHelper.showWarning(
                     btnViewVenta.getScene().getWindow(),
-                    "Selecciona una venta primero"
-            );
+                    "Selecciona una venta primero");
             return;
         }
 
@@ -127,4 +134,30 @@ public class VentasController {
         detailStage.setTitle("Detalle de Venta");
         detailStage.showAndWait();
     }
+
+
+    @FXML
+    private void onAnularVenta(ActionEvent event) {
+        Venta ventaSeleccionada = tableVentas.getSelectionModel().getSelectedItem();
+        if (ventaSeleccionada == null) {
+            DialogHelper.showWarning(
+                    btnAnularVenta.getScene().getWindow(),
+                    "Seleccione una venta para anular.");
+            return;
+        }
+
+        boolean confirmado = DialogHelper.confirm(
+                btnAnularVenta.getScene().getWindow(),
+                "¿Está seguro que desea anular la venta seleccionada?");
+        if (!confirmado)
+            return;
+
+        // Remover venta de la lista observable (actualiza automáticamente la tabla)
+        ventas.remove(ventaSeleccionada);
+
+        DialogHelper.showSuccess(
+                btnAnularVenta.getScene().getWindow(),
+                "anular venta");
+    }
+
 }
