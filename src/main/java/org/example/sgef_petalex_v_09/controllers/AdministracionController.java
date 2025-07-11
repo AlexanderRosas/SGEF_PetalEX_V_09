@@ -34,25 +34,26 @@ public class AdministracionController {
     @FXML
     private void onBack(ActionEvent event) {
         try {
-            // Carga el FXML del menú principal
-            Parent mainRoot = FXMLLoader.load(
-                    getClass().getResource("/fxml/MainMenu.fxml"));
-            // Obtiene el Stage y reutiliza la Scene actual
+            Parent mainRoot = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = stage.getScene();
 
-            // Reemplaza la raíz sin crear nueva Scene
             scene.setRoot(mainRoot);
-
-            // Reaplica tu CSS
             scene.getStylesheets().clear();
             scene.getStylesheets().add(
                     getClass().getResource("/css/styles.css").toExternalForm());
 
-            // Asegura que siga maximizado
-            // stage.setMaximized(true);
-
-            // Actualiza el título
+            try {
+                Thread.sleep(500);
+                stage.setHeight(600);
+                stage.setWidth(1000);
+                System.out.println("Ajustando tamaño...");
+                stage.setMaximized(true);
+                stage.centerOnScreen();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                Thread.currentThread().interrupt();
+            }
             stage.setTitle("Index Blooms – Menú Principal");
         } catch (IOException e) {
             e.printStackTrace();
@@ -97,7 +98,7 @@ public class AdministracionController {
         // Remover la clase active de todos los botones
         btnGestionUsuarios.getStyleClass().remove("active");
         btnRolesPermisos.getStyleClass().remove("active");
-        btnParametrosNegocio.getStyleClass().remove("active");
+        // btnParametrosNegocio.getStyleClass().remove("active");
 
         // Agregar la clase active al botón seleccionado
         activo.getStyleClass().add("active");

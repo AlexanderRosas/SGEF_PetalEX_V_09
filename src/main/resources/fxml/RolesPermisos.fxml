@@ -14,15 +14,14 @@
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.example.sgef_petalex_v_09.controllers.RolesPermisosController"
             fx:id="root"
-            styleClass="root"
-            prefWidth="800" prefHeight="700">
+            styleClass="root">
 
     <!-- Toolbar: acciones específicas para roles y permisos -->
-    <VBox spacing="5" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+    <VBox spacing="10" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
         <HBox spacing="10" styleClass="toolbar-buttons">
             <Button fx:id="btnActualizarRoles" text="Actualizar Roles" onAction="#onActualizarRoles" styleClass="toolbar-button">
                 <graphic>
-                    <ImageView fitWidth="16" preserveRatio="true">
+                    <ImageView fitWidth="20" preserveRatio="true">
                         <image>
                             <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_role.png"/>
                         </image>
@@ -31,7 +30,7 @@
             </Button>
             <Button fx:id="btnActualizarPermisos" text="Actualizar Permisos" onAction="#onActualizarPermisos" styleClass="toolbar-button">
                 <graphic>
-                    <ImageView fitWidth="16" preserveRatio="true">
+                    <ImageView fitWidth="20" preserveRatio="true">
                         <image>
                             <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_lock.png"/>
                         </image>

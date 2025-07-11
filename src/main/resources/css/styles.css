@@ -120,12 +120,12 @@
 
 /* ===== Content Pane ===== */
 #contentPane {
-    -fx-padding: 20;
-    -fx-background-color: #a25252;
+    -fx-padding: 10;
+    -fx-background-color: #ff7676;
     -fx-border-color: #E0E0E0;
     -fx-border-width: 1;
-    -fx-border-radius: 5;
-    -fx-background-radius: 5;
+    -fx-border-radius: 1;
+    -fx-background-radius: 1;
 }
 
 .user-label {
@@ -195,7 +195,7 @@
 
 /* Tabla de clientes */
 .table-clientes {
-    -fx-border-color: #E0E0E0;
+    -fx-border-color: #ed9898;
     -fx-border-width: 1;
     -fx-background-radius: 5;
     -fx-border-radius: 5;
@@ -208,7 +208,7 @@
 
 .table-clientes .table-row-cell:filled:selected,
 .table-clientes .table-row-cell:filled:selected:focused {
-    -fx-background-color: #FFEBF4;
+    -fx-background-color: #ed1c7b;
 }
 
 /* Columnas (alineación opcional) */

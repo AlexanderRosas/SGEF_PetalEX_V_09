@@ -245,27 +245,29 @@ public class ClientesController {
     @FXML
     private void onBack(ActionEvent event) {
         try {
-            // Carga el FXML del menú principal
-            Parent mainRoot = FXMLLoader.load(
-                    getClass().getResource("/fxml/MainMenu.fxml")
-            );
-            // Obtiene el Stage y reutiliza la Scene actual
+            Parent mainRoot = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = stage.getScene();
 
-            // Reemplaza la raíz sin crear nueva Scene
             scene.setRoot(mainRoot);
-
-            // Reaplica tu CSS
             scene.getStylesheets().clear();
             scene.getStylesheets().add(
                     getClass().getResource("/css/styles.css").toExternalForm()
             );
 
-            // Asegura que siga maximizado
-            //stage.setMaximized(true);
+            try {
+                Thread.sleep(500);
+                stage.setHeight(600);
+                stage.setWidth(1000);
+                System.out.println("Ajustando tamaño...");
+                stage.setMaximized(true);
+                stage.centerOnScreen();
 
-            // Actualiza el título
+            }
+            catch (InterruptedException e) {
+                e.printStackTrace();
+                Thread.currentThread().interrupt();
+            }
             stage.setTitle("Index Blooms – Menú Principal");
         } catch (IOException e) {
             e.printStackTrace();

@@ -57,6 +57,6 @@ public class LoginController {
         }
     }
     private boolean authenticate(String user, String pass) {
-        return "admin".equals(user) && "admin".equals(pass);
+        return "r.cordova".equals(user) && "admin1234".equals(pass);
     }
 }

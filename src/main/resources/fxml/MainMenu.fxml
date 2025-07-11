@@ -11,13 +11,14 @@
 <?import java.lang.String?>
 <AnchorPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.example.sgef_petalex_v_09.controllers.MainMenuController">
+            fx:controller="org.example.sgef_petalex_v_09.controllers.MainMenuController"
+            prefWidth="1000" prefHeight="700">
 
     <!-- Usuario estático en esquina superior derecha -->
-    <Label text="Bienvenido: admin"
+    <Label text="Bienvenido: Ing Raúl Córdova"
            styleClass="user-label"
            AnchorPane.topAnchor="10.0"
-           AnchorPane.rightAnchor="10.0" />
+           AnchorPane.rightAnchor="15.0" />
 
     <!-- Logo y título centrados -->
     <VBox alignment="CENTER" spacing="10"

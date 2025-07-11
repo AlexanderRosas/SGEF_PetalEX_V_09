@@ -40,7 +40,7 @@
 
     <!-- Barra de herramientas (CRUD) -->
     <HBox spacing="10" styleClass="toolbar-buttons"
-          AnchorPane.topAnchor="45">
+          AnchorPane.topAnchor="42">
         <Button fx:id="btnNuevo" text="Nuevo" onAction="#onNuevo" styleClass="toolbar-button">
             <graphic>
                 <ImageView fitWidth="16" preserveRatio="true">

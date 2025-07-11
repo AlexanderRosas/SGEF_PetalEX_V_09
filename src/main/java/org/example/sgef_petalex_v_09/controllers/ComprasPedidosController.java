@@ -38,7 +38,21 @@ public class ComprasPedidosController {
             scene.getStylesheets().add(
                     getClass().getResource("/css/styles.css").toExternalForm()
             );
-            stage.setMaximized(true);
+
+            try {
+                Thread.sleep(500);
+                stage.setHeight(600);
+                stage.setWidth(1000);
+                System.out.println("Ajustando tamaño...");
+                stage.setMaximized(true);
+                stage.centerOnScreen();
+
+
+            }
+            catch (InterruptedException e) {
+                e.printStackTrace();
+                Thread.currentThread().interrupt();
+            }
             stage.setTitle("Index Blooms – Menú Principal");
         } catch (IOException e) {
             e.printStackTrace();
@@ -83,8 +97,6 @@ public class ComprasPedidosController {
     private void resaltarBoton(Button activo) {
         btnSubmoduloCompras.getStyleClass().remove("active");
         btnSubmoduloPedidos.getStyleClass().remove("active");
-
-
         activo.getStyleClass().add("active");
     }
 }
