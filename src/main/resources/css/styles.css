@@ -182,7 +182,7 @@
     -fx-text-fill: white;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
-    -fx-pref-width: 100px;
+    -fx-pref-width: 120px;
     -fx-pref-height: 40px;
     -fx-alignment: CENTER;
     -fx-padding: 0;
@@ -209,7 +209,7 @@
 
 .table-clientes .table-row-cell:filled:selected,
 .table-clientes .table-row-cell:filled:selected:focused {
-    -fx-background-color: #f41b7d;
+    -fx-background-color: #FFEBF4;
 }
 
 /* Columnas (alineación opcional) */

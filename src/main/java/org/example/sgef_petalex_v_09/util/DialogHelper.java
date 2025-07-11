@@ -31,4 +31,11 @@ public class DialogHelper {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    public static boolean confirm(Window owner, String message) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.initOwner(owner);
+        alert.setTitle("Confirmación");
+        return true;
+    };
 }
