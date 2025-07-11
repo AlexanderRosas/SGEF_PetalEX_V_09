@@ -15,24 +15,24 @@ import java.io.IOException;
 public class ComprasPedidosController {
 
     @FXML private Button btnBack;
-    @FXML private Button btnCompras;
-    @FXML private Button btnPedidos;
+    @FXML private Button btnSubmoduloCompras;
+    @FXML private Button btnSubmoduloPedidos;
+    //@FXML private Button btnSubmoduloReportes;
     @FXML private AnchorPane contentPane;
 
     @FXML
     public void initialize() {
-        cargarSeccion("GestionCompras.fxml");
-        resaltarBoton(btnCompras);
+        cargarSeccion("Compras.fxml");
+        resaltarBoton(btnSubmoduloCompras);
     }
 
     @FXML
     private void onBack(ActionEvent event) {
         try {
-            Parent mainRoot = FXMLLoader.load(
-                    getClass().getResource("/fxml/MainMenu.fxml")
-            );
+            Parent mainRoot = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = stage.getScene();
+
             scene.setRoot(mainRoot);
             scene.getStylesheets().clear();
             scene.getStylesheets().add(
@@ -46,16 +46,24 @@ public class ComprasPedidosController {
     }
 
     @FXML
-    private void onCompras(ActionEvent event) {
-        cargarSeccion("GestionCompras.fxml");
-        resaltarBoton(btnCompras);
+    private void onSubmoduloCompras(ActionEvent event) {
+        cargarSeccion("Compras.fxml");
+        resaltarBoton(btnSubmoduloCompras);
     }
 
     @FXML
-    private void onPedidos(ActionEvent event) {
-        cargarSeccion("GestionPedidos.fxml");
-        resaltarBoton(btnPedidos);
+    private void onSubmoduloPedidos(ActionEvent event) {
+        cargarSeccion("Pedidos.fxml");
+        resaltarBoton(btnSubmoduloPedidos);
     }
+    // Sección no utilizada actualmente
+    /*
+    @FXML
+    private void onSubmoduloReportes(ActionEvent event) {
+        cargarSeccion("Reportes.fxml");
+        resaltarBoton(btnSubmoduloReportes);
+    }
+    */
 
     private void cargarSeccion(String fxmlFile) {
         try {
@@ -73,11 +81,10 @@ public class ComprasPedidosController {
     }
 
     private void resaltarBoton(Button activo) {
-        btnCompras.getStyleClass().remove("active");
-        btnPedidos.getStyleClass().remove("active");
+        btnSubmoduloCompras.getStyleClass().remove("active");
+        btnSubmoduloPedidos.getStyleClass().remove("active");
 
-        if (!activo.getStyleClass().contains("active")) {
-            activo.getStyleClass().add("active");
-        }
+
+        activo.getStyleClass().add("active");
     }
 }

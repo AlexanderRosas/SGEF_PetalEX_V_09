@@ -4,16 +4,18 @@ import java.time.LocalDate;
 
 public class Compra {
     private int id;
-    private Proveedor proveedor; // usa el RUC internamente
+    private String proveedor;   // antes proveedorNombre
+    private String ruc;         // antes proveedorRuc
     private String tipoRosa;
-    private String tipoCorte; // Americano, Ruso, etc.
-    private int largoTallo; // en cm
+    private String tipoCorte;
+    private double largoTallo;  // cambió a double para que coincida con controlador
     private int cantidad;
-    private String unidad; // "tallos", "cajas"
+    private String unidad;
     private double costoUnitario;
     private LocalDate fechaCompra;
 
-    private EstadoProcesamiento estadoActual;
+    private String estadoActual;
+
     private LocalDate fechaHidratacion;
     private LocalDate fechaCuartoFrio;
     private LocalDate fechaEmpaque;
@@ -23,12 +25,12 @@ public class Compra {
 
     public Compra() {}
 
-    public Compra(int id, Proveedor proveedor, String tipoRosa, String tipoCorte, int largoTallo, int cantidad,
-                  String unidad, double costoUnitario, LocalDate fechaCompra, EstadoProcesamiento estadoActual,
-                  LocalDate fechaHidratacion, LocalDate fechaCuartoFrio, LocalDate fechaEmpaque,
-                  LocalDate fechaExportacion, String observaciones) {
+    public Compra(int id, String proveedor, String ruc, String tipoRosa, String tipoCorte,
+                  double largoTallo, int cantidad, String unidad, double costoUnitario,
+                  LocalDate fechaCompra, String estadoActual) {
         this.id = id;
         this.proveedor = proveedor;
+        this.ruc = ruc;
         this.tipoRosa = tipoRosa;
         this.tipoCorte = tipoCorte;
         this.largoTallo = largoTallo;
@@ -37,20 +39,18 @@ public class Compra {
         this.costoUnitario = costoUnitario;
         this.fechaCompra = fechaCompra;
         this.estadoActual = estadoActual;
-        this.fechaHidratacion = fechaHidratacion;
-        this.fechaCuartoFrio = fechaCuartoFrio;
-        this.fechaEmpaque = fechaEmpaque;
-        this.fechaExportacion = fechaExportacion;
-        this.observaciones = observaciones;
     }
 
-    // Getters y Setters
+    // Getters y setters
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
-    public Proveedor getProveedor() { return proveedor; }
-    public void setProveedor(Proveedor proveedor) { this.proveedor = proveedor; }
+    public String getProveedor() { return proveedor; }
+    public void setProveedor(String proveedor) { this.proveedor = proveedor; }
+
+    public String getRuc() { return ruc; }
+    public void setRuc(String ruc) { this.ruc = ruc; }
 
     public String getTipoRosa() { return tipoRosa; }
     public void setTipoRosa(String tipoRosa) { this.tipoRosa = tipoRosa; }
@@ -58,8 +58,8 @@ public class Compra {
     public String getTipoCorte() { return tipoCorte; }
     public void setTipoCorte(String tipoCorte) { this.tipoCorte = tipoCorte; }
 
-    public int getLargoTallo() { return largoTallo; }
-    public void setLargoTallo(int largoTallo) { this.largoTallo = largoTallo; }
+    public double getLargoTallo() { return largoTallo; }
+    public void setLargoTallo(double largoTallo) { this.largoTallo = largoTallo; }
 
     public int getCantidad() { return cantidad; }
     public void setCantidad(int cantidad) { this.cantidad = cantidad; }
@@ -73,8 +73,8 @@ public class Compra {
     public LocalDate getFechaCompra() { return fechaCompra; }
     public void setFechaCompra(LocalDate fechaCompra) { this.fechaCompra = fechaCompra; }
 
-    public EstadoProcesamiento getEstadoActual() { return estadoActual; }
-    public void setEstadoActual(EstadoProcesamiento estadoActual) { this.estadoActual = estadoActual; }
+    public String getEstadoActual() { return estadoActual; }
+    public void setEstadoActual(String estadoActual) { this.estadoActual = estadoActual; }
 
     public LocalDate getFechaHidratacion() { return fechaHidratacion; }
     public void setFechaHidratacion(LocalDate fechaHidratacion) { this.fechaHidratacion = fechaHidratacion; }
@@ -91,11 +91,36 @@ public class Compra {
     public String getObservaciones() { return observaciones; }
     public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
 
+    /**
+     * Establece la fecha correspondiente según el estado cambiado.
+     * Por ejemplo, al cambiar a "Hidratado" pone la fechaHidratacion a la fecha actual.
+     */
+    public void setFechaEstado(String estado, LocalDate fecha) {
+        switch (estado) {
+            case "Hidratado":
+                setFechaHidratacion(fecha);
+                break;
+            case "En Cuarto Frío":
+                setFechaCuartoFrio(fecha);
+                break;
+            case "Empacado":
+                setFechaEmpaque(fecha);
+                break;
+            case "Exportado":
+                setFechaExportacion(fecha);
+                break;
+            default:
+                // Para "Recibido" o estados no listados no se guarda fecha especial
+                break;
+        }
+    }
+
     @Override
     public String toString() {
         return "Compra{" +
                 "id=" + id +
-                ", proveedor=" + proveedor.getNombre() + " (RUC: " + proveedor.getRuc() + ")" +
+                ", proveedor='" + proveedor + '\'' +
+                ", ruc='" + ruc + '\'' +
                 ", tipoRosa='" + tipoRosa + '\'' +
                 ", tipoCorte='" + tipoCorte + '\'' +
                 ", largoTallo=" + largoTallo +
@@ -103,7 +128,7 @@ public class Compra {
                 ", unidad='" + unidad + '\'' +
                 ", costoUnitario=" + costoUnitario +
                 ", fechaCompra=" + fechaCompra +
-                ", estadoActual=" + estadoActual +
+                ", estadoActual='" + estadoActual + '\'' +
                 ", fechaHidratacion=" + fechaHidratacion +
                 ", fechaCuartoFrio=" + fechaCuartoFrio +
                 ", fechaEmpaque=" + fechaEmpaque +

@@ -1,6 +1,10 @@
 package org.example.sgef_petalex_v_09.util;
 
+import java.util.Optional;
+
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Window;
 
 public class DialogHelper {
@@ -31,4 +35,15 @@ public class DialogHelper {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    public static boolean confirm(Window owner, String message) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.initOwner(owner);
+        alert.setTitle("Confirmación");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        Optional<ButtonType> res = alert.showAndWait();
+        return res.isPresent() && res.get().getButtonData() == ButtonBar.ButtonData.OK_DONE;
+    }
+
 }

@@ -3,6 +3,7 @@ module org.example.sgef_petalex_v_09 {
     requires javafx.fxml;
 
     requires org.controlsfx.controls;
+    requires javafx.base;
 
 
     opens org.example.sgef_petalex_v_09 to javafx.fxml;

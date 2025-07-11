@@ -1,79 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.example.sgef_petalex_v_09.controllers.ComprasPedidosController">
+    xmlns:fx="http://javafx.com/fxml"
+    fx:controller="org.example.sgef_petalex_v_09.controllers.ComprasPedidosController">
 
-    <!-- Sidebar vertical, ancho fijo 280px -->
+    <!-- Sidebar lateral -->
     <VBox fx:id="sidebar"
-          prefWidth="280"
-          spacing="10"
-          AnchorPane.leftAnchor="0"
-          AnchorPane.topAnchor="60"
-          AnchorPane.bottomAnchor="0"
-          styleClass="sidebar">
+        prefWidth="280"
+        spacing="10"
+        AnchorPane.leftAnchor="0"
+        AnchorPane.topAnchor="60"
+        AnchorPane.bottomAnchor="0"
+        styleClass="sidebar">
 
-        <Button fx:id="btnCompras"
-                onAction="#onCompras"
-                styleClass="sidebar-button">
+        <Button fx:id="btnSubmoduloCompras"
+            onAction="#onSubmoduloCompras"
+            styleClass="sidebar-button"
+            text="Gestión de Compras">
             <graphic>
                 <ImageView fitWidth="24" preserveRatio="true">
                     <image>
-                        <Image url="@../images/image_cliente.png"/>
+                        <Image url="@../images/gestion_usuarios.png" />
                     </image>
                 </ImageView>
             </graphic>
-            <text>
-                <String fx:value="Gestión de Compras"/>
-            </text>
         </Button>
 
-        <Button fx:id="btnPedidos"
-                onAction="#onPedidos"
-                styleClass="sidebar-button">
+        <Button fx:id="btnSubmoduloPedidos"
+            onAction="#onSubmoduloPedidos"
+            styleClass="sidebar-button"
+            text="Gestión de Pedidos">
             <graphic>
                 <ImageView fitWidth="24" preserveRatio="true">
                     <image>
-                        <Image url="@../images/icon_role.png"/>
+                        <Image url="@../images/image_cliente.png" />
                     </image>
                 </ImageView>
             </graphic>
-            <text>
-                <String fx:value="Gestión de Pedidos"/>
-            </text>
         </Button>
+
     </VBox>
 
-    <!-- Área de contenido -->
-    <AnchorPane fx:id="contentPane"
-                AnchorPane.topAnchor="80"
-                AnchorPane.bottomAnchor="0"
-                AnchorPane.leftAnchor="280"
-                AnchorPane.rightAnchor="0" />
 
-    <!-- Botón Volver al Menú Principal -->
+    <!-- Área de contenido central -->
+    <AnchorPane fx:id="contentPane"
+        AnchorPane.topAnchor="80"
+        AnchorPane.bottomAnchor="0"
+        AnchorPane.leftAnchor="280"
+        AnchorPane.rightAnchor="0" />
+
+    <!-- Botón volver -->
     <Button fx:id="btnBack"
-            onAction="#onBack"
-            styleClass="back-button"
-            AnchorPane.topAnchor="10"
-            AnchorPane.leftAnchor="280">
+        onAction="#onBack"
+        styleClass="back-button"
+        AnchorPane.topAnchor="10"
+        AnchorPane.leftAnchor="280"
+        text="Volver">
         <graphic>
             <ImageView fitWidth="20" preserveRatio="true">
                 <image>
-                    <Image url="@../images/icon_back.png"/>
+                    <Image url="@../images/icon_back.png" />
                 </image>
             </ImageView>
         </graphic>
-        <text>
-            <String fx:value="Volver"/>
-        </text>
     </Button>
 
+    <!-- Título del módulo -->
     <Label text="Compras y Pedidos"
-           styleClass="header-title"
-           AnchorPane.topAnchor="10"
-           AnchorPane.leftAnchor="400" />
+        styleClass="header-title"
+        AnchorPane.topAnchor="10"
+        AnchorPane.leftAnchor="400" />
+
 </AnchorPane>

@@ -47,10 +47,6 @@ public class MainMenuController {
         cargarVista(event, "/fxml/Administracion.fxml","Index Blooms – Administración del Sistema");
     }
 
-    @FXML
-    private void onComprasPedidos(ActionEvent event) {
-        cargarVista(event, "/fxml/ComprasPedidos.fxml","Index Blooms – Administración del Sistema");
-    }
     /**
      * Carga un FXML en una nueva Scene para el Stage actual,
      * reaplica CSS y restaura el tamaño o maximizado.

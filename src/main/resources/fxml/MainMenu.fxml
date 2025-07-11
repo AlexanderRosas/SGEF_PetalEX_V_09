@@ -14,7 +14,7 @@
             fx:controller="org.example.sgef_petalex_v_09.controllers.MainMenuController">
 
     <!-- Usuario estático en esquina superior derecha -->
-    <Label text="Bienvenido admin"
+    <Label text="Bienvenido: admin"
            styleClass="user-label"
            AnchorPane.topAnchor="10.0"
            AnchorPane.rightAnchor="10.0" />
