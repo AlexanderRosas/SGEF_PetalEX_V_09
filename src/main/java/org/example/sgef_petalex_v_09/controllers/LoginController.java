@@ -36,12 +36,11 @@ public class LoginController {
                 );
                 Stage stage = (Stage) btnIngresar.getScene().getWindow();
                 stage.setScene(mainScene);
+                //stage.setFullScreen(true);
+                stage.centerOnScreen();
                 stage.setTitle("Index Blooms – Menú Principal");
-                stage.centerOnScreen(); // Centra la ventana
-                stage.setMaximized(true);
             } catch (IOException e) {
                 e.printStackTrace();
-                // Podrías mostrar otra alerta aquí si falla la carga
             }
         } else {
             // Credenciales incorrectas: mostramos una alerta de error

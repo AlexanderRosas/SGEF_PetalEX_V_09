@@ -55,7 +55,7 @@
     -fx-text-fill: white;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
-    -fx-pref-width: 120px;
+    -fx-pref-width: 200px;
     -fx-pref-height: 120px;
     -fx-content-display: TOP;
     -fx-alignment: CENTER;
@@ -72,19 +72,19 @@
 .menu-button:pressed {
     -fx-background-color: #d81b60;
 }
-/* ===== Sidebar ===== */
 .sidebar {
-    -fx-background-color: #F8F8F8;   /* un gris muy claro */
+    -fx-background-color: #F8F8F8;
     -fx-padding: 20;
+    -fx-pref-width: 250px;
+    -fx-min-width: 200px;
 }
 
 /* Botones de la barra lateral */
 .sidebar-button {
-    -fx-background-color: transparent;
-    -fx-text-fill: #333333;
-    -fx-font-size: 16px;
+    -fx-pref-width: 240px;
+    -fx-pref-height: 48px;
     -fx-alignment: CENTER_LEFT;
-    -fx-padding: 10 20;
+    -fx-graphic-text-gap: 10;
 }
 .sidebar-button:hover {
     -fx-background-color: rgba(255,133,184,0.3);
@@ -127,4 +127,14 @@
     -fx-border-width: 1;
     -fx-border-radius: 5;
     -fx-background-radius: 5;
+}
+
+.user-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+    -fx-padding: 0 0 10 0;
+}
+.sidebar-button.selected {
+    -fx-background-color: #FF9AC8; /* resaltado rosa */
 }

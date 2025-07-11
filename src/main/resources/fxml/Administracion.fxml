@@ -9,37 +9,11 @@
 
 <AnchorPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.example.sgef_petalex_v_09.controllers.AdministracionController"
-            prefWidth="800" prefHeight="600">
+            fx:controller="org.example.sgef_petalex_v_09.controllers.AdministracionController">
 
-    <!-- Área de contenido (fondo blanco) -->
-    <AnchorPane fx:id="contentPane"
-                AnchorPane.topAnchor="80"
-                AnchorPane.bottomAnchor="0"
-                AnchorPane.leftAnchor="180"
-                AnchorPane.rightAnchor="0" />
-
-    <!-- Botón Volver al Menú Principal -->
-    <Button fx:id="btnBack"
-            onAction="#onBack"
-            styleClass="back-button"
-            AnchorPane.topAnchor="10"
-            AnchorPane.leftAnchor="180">
-        <graphic>
-            <ImageView fitWidth="20" preserveRatio="true">
-                <image>
-                    <Image url="@../images/icon_back.png"/>
-                </image>
-            </ImageView>
-        </graphic>
-        <text>
-            <String fx:value="Volver"/>
-        </text>
-    </Button>
-
-    <!-- Sidebar vertical (iniciado 60px hacia abajo) -->
+    <!-- Sidebar vertical, ancho fijo 280px -->
     <VBox fx:id="sidebar"
-          prefWidth="180"
+          prefWidth="280"
           spacing="10"
           AnchorPane.leftAnchor="0"
           AnchorPane.topAnchor="60"
@@ -93,10 +67,35 @@
 
     </VBox>
 
-    <!-- Título del módulo -->
+    <!-- Área de contenido (fondo blanco) siempre a la derecha del sidebar -->
+    <AnchorPane fx:id="contentPane"
+                AnchorPane.topAnchor="80"
+                AnchorPane.bottomAnchor="0"
+                AnchorPane.leftAnchor="280"
+                AnchorPane.rightAnchor="0" />
+
+    <!-- Botón Volver al Menú Principal, alineado junto al contenido -->
+    <Button fx:id="btnBack"
+            onAction="#onBack"
+            styleClass="back-button"
+            AnchorPane.topAnchor="10"
+            AnchorPane.leftAnchor="280">
+        <graphic>
+            <ImageView fitWidth="20" preserveRatio="true">
+                <image>
+                    <Image url="@../images/icon_back.png"/>
+                </image>
+            </ImageView>
+        </graphic>
+        <text>
+            <String fx:value="Volver"/>
+        </text>
+    </Button>
+
+    <!-- Título del módulo, a la derecha del sidebar -->
     <Label text="Administración del Sistema"
            styleClass="header-title"
            AnchorPane.topAnchor="10"
-           AnchorPane.leftAnchor="270" />
+           AnchorPane.leftAnchor="400" />
 
 </AnchorPane>

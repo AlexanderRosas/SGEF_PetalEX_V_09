@@ -22,28 +22,30 @@ public class AdministracionController {
 
     @FXML
     public void initialize() {
-        //cargarSeccion("GestionUsuarios.fxml");
+        cargarSeccion("GestionUsuarios.fxml");
         resaltarBoton(btnGestionUsuarios);
     }
 
     @FXML
     private void onBack(ActionEvent event) {
         try {
+            // Carga del menú principal
             Parent mainRoot = FXMLLoader.load(
                     getClass().getResource("/fxml/MainMenu.fxml")
             );
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene scene = new Scene(mainRoot);
-            scene.getStylesheets().add(
+            Scene mainScene = new Scene(mainRoot);
+            mainScene.getStylesheets().add(
                     getClass().getResource("/css/styles.css").toExternalForm()
             );
-            stage.setScene(scene);
+            Stage stage = (Stage) btnBack.getScene().getWindow();
+            stage.setScene(mainScene);
             stage.setTitle("Index Blooms – Menú Principal");
-            stage.centerOnScreen();
         } catch (IOException e) {
             e.printStackTrace();
+            // Podrías mostrar otra alerta aquí si falla la carga
         }
     }
+
 
     @FXML
     private void onGestionUsuarios(ActionEvent event) {
@@ -53,22 +55,23 @@ public class AdministracionController {
 
     @FXML
     private void onRolesPermisos(ActionEvent event) {
-        //cargarSeccion("RolesPermisos.fxml");
+        cargarSeccion("RolesPermisos.fxml");
         resaltarBoton(btnRolesPermisos);
     }
 
     @FXML
     private void onParametrosNegocio(ActionEvent event) {
-        //cargarSeccion("ParametrosNegocio.fxml");
+        cargarSeccion("ParametrosNegocio.fxml");
         resaltarBoton(btnParametrosNegocio);
     }
 
     private void cargarSeccion(String fxmlFile) {
         try {
-            AnchorPane pane = FXMLLoader.load(
-                    getClass().getResource("/fxml/" + fxmlFile)
-            );
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/" + fxmlFile));
+            AnchorPane pane = loader.load();
             contentPane.getChildren().setAll(pane);
+            
+            // Ajustar el panel cargado para que ocupe todo el espacio disponible
             AnchorPane.setTopAnchor(pane, 0.0);
             AnchorPane.setRightAnchor(pane, 0.0);
             AnchorPane.setBottomAnchor(pane, 0.0);
@@ -79,9 +82,12 @@ public class AdministracionController {
     }
 
     private void resaltarBoton(Button activo) {
+        // Remover la clase active de todos los botones
         btnGestionUsuarios.getStyleClass().remove("active");
         btnRolesPermisos.getStyleClass().remove("active");
         btnParametrosNegocio.getStyleClass().remove("active");
+        
+        // Agregar la clase active al botón seleccionado
         activo.getStyleClass().add("active");
     }
 }
