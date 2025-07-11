@@ -11,14 +11,13 @@
 <?import java.lang.String?>
 <AnchorPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.example.sgef_petalex_v_09.controllers.MainMenuController"
-            prefWidth="1000" prefHeight="700">
+            fx:controller="org.example.sgef_petalex_v_09.controllers.MainMenuController">
 
     <!-- Usuario estático en esquina superior derecha -->
-    <Label text="Bienvenido: Ing Raúl Córdova"
+    <Label text="Bienvenido: Raúl Córdova"
            styleClass="user-label"
            AnchorPane.topAnchor="10.0"
-           AnchorPane.rightAnchor="15.0" />
+           AnchorPane.rightAnchor="10.0" />
 
     <!-- Logo y título centrados -->
     <VBox alignment="CENTER" spacing="10"
@@ -33,7 +32,7 @@
                 <String fx:value="image-logo"/>
             </styleClass>
             <image>
-                <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/index_blooms_logo.png"/>
+                <Image url="@../images/index_blooms_logo.png"/>
             </image>
         </ImageView>
         <Label text="Sistema de Gestión de Exportación de Flores"
@@ -61,7 +60,7 @@
                         <String fx:value="image-icon"/>
                     </styleClass>
                     <image>
-                        <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/image_cliente.png"/>
+                        <Image url="@../images/image_cliente.png"/>
                     </image>
                 </ImageView>
             </graphic>
@@ -80,7 +79,7 @@
                         <String fx:value="image-icon"/>
                     </styleClass>
                     <image>
-                        <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/image_ventas.png"/>
+                        <Image url="@../images/image_ventas.png"/>
                     </image>
                 </ImageView>
             </graphic>
@@ -99,7 +98,7 @@
                         <String fx:value="image-icon"/>
                     </styleClass>
                     <image>
-                        <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/image_compras.png"/>
+                        <Image url="@../images/image_compras.png"/>
                     </image>
                 </ImageView>
             </graphic>
@@ -118,7 +117,7 @@
                         <String fx:value="image-icon"/>
                     </styleClass>
                     <image>
-                        <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/image_proveedores.png"/>
+                        <Image url="@../images/image_proveedores.png"/>
                     </image>
                 </ImageView>
             </graphic>
@@ -137,7 +136,7 @@
                         <String fx:value="image-icon"/>
                     </styleClass>
                     <image>
-                        <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/image_sistema.png"/>
+                        <Image url="@../images/image_sistema.png"/>
                     </image>
                 </ImageView>
             </graphic>

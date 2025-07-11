@@ -17,7 +17,7 @@
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
-                            <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_new.png"/>
+                            <Image url="@../images/icon_new.png"/>
                         </image>
                     </ImageView>
                 </graphic>
@@ -26,7 +26,7 @@
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
-                            <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_role.png"/>
+                            <Image url="@../images/icon_role.png"/>
                         </image>
                     </ImageView>
                 </graphic>
@@ -35,7 +35,7 @@
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
-                            <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_delete.png"/>
+                            <Image url="@../images/icon_delete.png"/>
                         </image>
                     </ImageView>
                 </graphic>
@@ -44,7 +44,7 @@
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
-                            <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_export.png"/>
+                            <Image url="@../images/icon_export.png"/>
                         </image>
                     </ImageView>
                 </graphic>

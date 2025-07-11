@@ -61,6 +61,9 @@ public class RolesPermisosController {
                 masterData.addAll(
                                 new Usuario("Laura Gomez", "laura@example.com", "lgomez", "Administrador", "Activo",
                                                 "Gestionar Compras, Gestionar Pedidos, Cambiar Estados de Lotes,  , Administrar Usuarios, Modificar Parámetros"),
+                                new Usuario("Raúl Córdova", "raul.cordova@example.com", "rcordova", "Administrador",
+                                                "Activo",
+                                                "Gestionar Compras, Gestionar Pedidos, Cambiar Estados de Lotes, Administrar Usuarios, Modificar Parámetros"),
 
                                 new Usuario("Carlos Pérez", "carlos@example.com", "cperez", "Ventas", "Activo",
                                                 "Gestionar Pedidos,  "),

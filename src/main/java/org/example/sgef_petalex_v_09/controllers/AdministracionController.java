@@ -17,7 +17,6 @@ public class AdministracionController {
     @FXML private Button btnBack;
     @FXML private Button btnGestionUsuarios;
     @FXML private Button btnRolesPermisos;
-    @FXML private Button btnParametrosNegocio;
     @FXML private AnchorPane contentPane;
 
     @FXML
@@ -29,28 +28,27 @@ public class AdministracionController {
     @FXML
     private void onBack(ActionEvent event) {
         try {
-            Parent mainRoot = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
+            // Carga el FXML del menú principal
+            Parent mainRoot = FXMLLoader.load(
+                    getClass().getResource("/fxml/MainMenu.fxml")
+            );
+            // Obtiene el Stage y reutiliza la Scene actual
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = stage.getScene();
 
+            // Reemplaza la raíz sin crear nueva Scene
             scene.setRoot(mainRoot);
+
+            // Reaplica tu CSS
             scene.getStylesheets().clear();
             scene.getStylesheets().add(
                     getClass().getResource("/css/styles.css").toExternalForm()
             );
 
-            try {
-                Thread.sleep(500);
-                stage.setHeight(600);
-                stage.setWidth(1000);
-                System.out.println("Ajustando tamaño...");
-                stage.setMaximized(true);
-                stage.centerOnScreen();
-            }
-            catch (InterruptedException e) {
-                e.printStackTrace();
-                Thread.currentThread().interrupt();
-            }
+            // Asegura que siga maximizado
+            stage.setMaximized(true);
+
+            // Actualiza el título
             stage.setTitle("Index Blooms – Menú Principal");
         } catch (IOException e) {
             e.printStackTrace();
@@ -70,11 +68,6 @@ public class AdministracionController {
         resaltarBoton(btnRolesPermisos);
     }
 
-    @FXML
-    private void onParametrosNegocio(ActionEvent event) {
-        cargarSeccion("ParametrosNegocio.fxml");
-        resaltarBoton(btnParametrosNegocio);
-    }
 
     private void cargarSeccion(String fxmlFile) {
         try {
@@ -96,7 +89,7 @@ public class AdministracionController {
         // Remover la clase active de todos los botones
         btnGestionUsuarios.getStyleClass().remove("active");
         btnRolesPermisos.getStyleClass().remove("active");
-        //btnParametrosNegocio.getStyleClass().remove("active");
+
         
         // Agregar la clase active al botón seleccionado
         activo.getStyleClass().add("active");

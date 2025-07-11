@@ -6,7 +6,6 @@ import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -223,29 +222,17 @@ public class ProveedoresController {
     @FXML
     private void onBack(ActionEvent event) {
         try {
-            Parent mainRoot = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Parent mainRoot = FXMLLoader.load(
+                    getClass().getResource("/fxml/MainMenu.fxml")
+            );
+            Stage stage = (Stage) btnBack.getScene().getWindow();
             Scene scene = stage.getScene();
-
             scene.setRoot(mainRoot);
             scene.getStylesheets().clear();
             scene.getStylesheets().add(
                     getClass().getResource("/css/styles.css").toExternalForm()
             );
-
-            try {
-                Thread.sleep(500);
-                stage.setHeight(600);
-                stage.setWidth(1000);
-                System.out.println("Ajustando tamaño...");
-                stage.setMaximized(true);
-                stage.centerOnScreen();
-
-            }
-            catch (InterruptedException e) {
-                e.printStackTrace();
-                Thread.currentThread().interrupt();
-            }
+            stage.setMaximized(true);
             stage.setTitle("Index Blooms – Menú Principal");
         } catch (IOException e) {
             e.printStackTrace();

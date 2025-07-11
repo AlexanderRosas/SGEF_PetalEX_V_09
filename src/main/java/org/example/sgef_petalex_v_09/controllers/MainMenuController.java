@@ -56,40 +56,35 @@ public class MainMenuController {
      * @param title     título de la ventana
      */
     private void cargarVista(ActionEvent event, String fxmlPath, String title) {
-        // 1) Obtengo el Stage actual y guardo su estado
-        Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
-        double prevW = stage.getWidth();
-        double prevH = stage.getHeight();
-        boolean wasMaximized = stage.isMaximized();
-
         try {
-            // 2) Cargo el FXML con FXMLLoader para poder obtener el Controller si quisiera
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
+            // 1) Obtener Stage y guardar estado
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            double width       = stage.getWidth();
+            double height      = stage.getHeight();
+            boolean wasMaximized = stage.isMaximized();
 
-            // 3) Preparo la nueva Scene y aplico el CSS
-            Scene scene = new Scene(root);
+            // 2) Localizar y cargar el FXML
+            URL resource = getClass().getResource(fxmlPath);
+            if (resource == null) {
+                System.err.println("ERROR: FXML no encontrado en " + fxmlPath);
+                return;
+            }
+            Parent rootNode = FXMLLoader.load(resource);
+
+            // 3) Nueva Scene y CSS
+            Scene scene = new Scene(rootNode);
             scene.getStylesheets().add(
                     getClass().getResource("/css/styles.css").toExternalForm()
             );
 
-            // 4) Cambio la escena y el título
+            // 4) Aplicar Scene y título
             stage.setScene(scene);
             stage.setTitle(title);
 
-            // 5) Restauro maximizado o tamaño anterior
-            if (wasMaximized) {
-                stage.setMaximized(true);
-            } else {
-                stage.setWidth(prevW);
-                stage.setHeight(prevH);
+            // 5) Restaurar tamaño o maximizado
                 stage.centerOnScreen();
-            }
-
         } catch (IOException e) {
-            System.err.println("No se pudo cargar FXML: " + fxmlPath);
             e.printStackTrace();
         }
     }
-
 }

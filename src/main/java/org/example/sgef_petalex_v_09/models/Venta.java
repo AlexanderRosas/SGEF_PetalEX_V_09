@@ -11,6 +11,7 @@ public class Venta {
     private final StringProperty cliente   = new SimpleStringProperty();
     private final ObjectProperty<LocalDate> fecha   = new SimpleObjectProperty<>();
     private final DoubleProperty total      = new SimpleDoubleProperty();
+    private final StringProperty estado     = new SimpleStringProperty("Activo"); // Por defecto "Activo"
     private final List<ItemVenta> items     = new ArrayList<>();
     private String direccion;
 
@@ -20,6 +21,7 @@ public class Venta {
         this.cliente.set(cliente);
         this.direccion = direccion;
         this.fecha.set(fecha);
+        this.estado.set("Activo"); // Estado inicial por defecto
     }
 
     public String getCliente() { return cliente.get(); }
@@ -34,11 +36,13 @@ public class Venta {
     public void setTotal(double t) { total.set(t); }
     public ObservableValue<Number> totalProperty() { return total; }
 
+    public String getEstado() { return estado.get(); }
+    public void setEstado(String e) { estado.set(e); }
+    public StringProperty estadoProperty() { return estado; }
+
     public List<ItemVenta> getItems() { return items; }
 
     public String getDireccion() { return direccion; }
-
-
 
     public void addItem(ItemVenta item) {
         items.add(item);

@@ -1,5 +1,7 @@
 package org.example.sgef_petalex_v_09.controllers;
 
+import javafx.collections.transformation.FilteredList;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -24,52 +26,105 @@ import java.util.Random;
 
 public class ClientesController {
 
-    @FXML private TableView<Cliente> tablaClientes;
-    @FXML private TableColumn<Cliente, Integer> colId;
-    @FXML private TableColumn<Cliente, String> colNombre;
-    @FXML private TableColumn<Cliente, String> colDireccion;
-    @FXML private TableColumn<Cliente, String> colTelefono;
-    @FXML private TableColumn<Cliente, String> colCorreo;
+    @FXML
+    private TableView<Cliente> tablaClientes;
+    @FXML
+    private TableColumn<Cliente, Integer> colId;
+    @FXML
+    private TableColumn<Cliente, String> colNombre;
+    @FXML
+    private TableColumn<Cliente, String> colDireccion;
+    @FXML
+    private TableColumn<Cliente, String> colTelefono;
+    @FXML
+    private TableColumn<Cliente, String> colCorreo;
+    @FXML
+    private TableColumn<Cliente, String> colEstado;
+    @FXML
+    private ComboBox<String> cbEstado;
 
-    @FXML private Button btnNuevo;
-    @FXML private Button btnEditar;
-    @FXML private Button btnEliminar;
-    @FXML private Button btnRefrescar;
-    @FXML private Button btnBuscar;
+    @FXML
+    private Button btnNuevo;
+    @FXML
+    private Button btnEditar;
 
+    @FXML
+    private Button btnBuscar;
+    @FXML
+    private Button btnEstado;
+
+    @FXML
+    private TextField txtBuscar;
     private final ObservableList<Cliente> data = FXCollections.observableArrayList();
+    private FilteredList<Cliente> filteredData; // <-- NUEVO filtered list para filtro dinámico
     private final Random rnd = new Random();
 
     @FXML
     public void initialize() {
-        colId       .setCellValueFactory(new PropertyValueFactory<>("id"));
-        colNombre   .setCellValueFactory(new PropertyValueFactory<>("nombre"));
+        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colDireccion.setCellValueFactory(new PropertyValueFactory<>("direccion"));
-        colTelefono .setCellValueFactory(new PropertyValueFactory<>("telefono"));
-        colCorreo   .setCellValueFactory(new PropertyValueFactory<>("correo"));
+        colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
+        colCorreo.setCellValueFactory(new PropertyValueFactory<>("correo"));
+        colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
+        // Inicializar ComboBox de Estado
+        cbEstado.setItems(FXCollections.observableArrayList("Todos", "Activo", "Inactivo"));
+        cbEstado.setValue("Todos"); // por defecto mostrar todos
 
         btnEditar.setDisable(true);
-        btnEliminar.setDisable(true);
+        btnEstado.setDisable(true);
 
         tablaClientes.getSelectionModel().selectedItemProperty()
                 .addListener((obs, oldSel, newSel) -> {
                     boolean sel = newSel != null;
-                    btnEditar .setDisable(!sel);
-                    btnEliminar.setDisable(!sel);
+                    btnEditar.setDisable(!sel);
+                    btnEstado.setDisable(!sel);
                 });
 
         cargarDatosPrototipo();
+
+        // Envuelve el ObservableList en FilteredList para filtro dinámico
+        filteredData = new FilteredList<>(data, p -> true);
+        tablaClientes.setItems(filteredData);
+
+        // Listener combinado para texto y estado
+        txtBuscar.textProperty().addListener((obs, oldVal, newVal) -> aplicarFiltro());
+        cbEstado.valueProperty().addListener((obs, oldVal, newVal) -> aplicarFiltro());
+
+    }
+
+    private void aplicarFiltro() {
+        String filtroTexto = txtBuscar.getText().toLowerCase().trim();
+        String estadoSeleccionado = cbEstado.getValue();
+
+        filteredData.setPredicate(cliente -> {
+            boolean coincideTexto = filtroTexto.isEmpty()
+                    || String.valueOf(cliente.getId()).contains(filtroTexto)
+                    || cliente.getNombre().toLowerCase().contains(filtroTexto)
+                    || cliente.getDireccion().toLowerCase().contains(filtroTexto)
+                    || cliente.getTelefono().toLowerCase().contains(filtroTexto)
+                    || cliente.getCorreo().toLowerCase().contains(filtroTexto);
+
+            boolean coincideEstado = estadoSeleccionado.equals("Todos")
+                    || cliente.getEstado().equalsIgnoreCase(estadoSeleccionado);
+
+            return coincideTexto && coincideEstado;
+        });
     }
 
     private void cargarDatosPrototipo() {
         data.clear();
         data.addAll(
-                new Cliente(randId(), "RoseFlower INC.",   "Av. Petalos 123, Ecuador",     "+593991234567", "ventas@roseflower.ec"),
-                new Cliente(randId(), "SweetMoment Ltd.",   "123 Tulip St., Netherlands",    "+31205551234",  "contact@sweetmoment.nl"),
-                new Cliente(randId(), "GlobalRoses GmbH",   "Rosengasse 5, Germany",         "+4930123456",   "info@globalroses.de"),
-                new Cliente(randId(), "FlorAmor Co.",       "789 Orchid Ave., Colombia",     "+57123456789",  "ventas@floramor.co"),
-                new Cliente(randId(), "PetalWorld SA",      "456 Blossom Rd., USA",          "+12025550123",  "sales@petalworld.com")
-        );
+                new Cliente(randId(), "RoseFlower INC.", "Av. Petalos 123, Ecuador", "+593991234567",
+                        "ventas@roseflower.ec", "Activo"),
+                new Cliente(randId(), "SweetMoment Ltd.", "123 Tulip St., Netherlands", "+31205551234",
+                        "contact@sweetmoment.nl", "Activo"),
+                new Cliente(randId(), "GlobalRoses GmbH", "Rosengasse 5, Germany", "+4930123456",
+                        "info@globalroses.de", "Activo"),
+                new Cliente(randId(), "FlorAmor Co.", "789 Orchid Ave., Colombia", "+57123456789",
+                        "ventas@floramor.co", "Activo"),
+                new Cliente(randId(), "PetalWorld SA", "456 Blossom Rd., USA", "+12025550123",
+                        "sales@petalworld.com", "Activo"));
         tablaClientes.setItems(data);
     }
 
@@ -131,53 +186,28 @@ public class ClientesController {
     }
 
     @FXML
-    private void onEliminar(ActionEvent event) {
-        Window owner = btnEliminar.getScene().getWindow();
+    private void onEstado(ActionEvent event) {
+        Window owner = btnEstado.getScene().getWindow();
         Cliente sel = tablaClientes.getSelectionModel().getSelectedItem();
+
         if (sel == null) {
             DialogHelper.showWarning(owner, "Selecciona un cliente primero");
             return;
         }
+
+        String nuevoEstado = sel.getEstado().equals("Activo") ? "Inactivo" : "Activo";
+
         Alert confirm = new Alert(AlertType.CONFIRMATION);
         confirm.initOwner(owner);
-        confirm.setTitle("Confirmar eliminación");
+        confirm.setTitle("Confirmar cambio de estado");
         confirm.setHeaderText(null);
-        confirm.setContentText("¿Está seguro que desea Eliminar?");
-        Optional<ButtonType> ok = confirm.showAndWait();
-        if (ok.isPresent() && ok.get().getButtonData() == ButtonData.OK_DONE) {
-            data.remove(sel);
+        confirm.setContentText("¿Está seguro que desea cambiar el estado a '" + nuevoEstado + "'?");
+        Optional<ButtonType> res = confirm.showAndWait();
+
+        if (res.isPresent() && res.get().getButtonData() == ButtonData.OK_DONE) {
+            sel.setEstado(nuevoEstado);
             tablaClientes.refresh();
-            DialogHelper.showSuccess(owner, "eliminado");
-        }
-    }
-
-    @FXML
-    private void onRefrescar(ActionEvent event) {
-        Window owner = btnRefrescar.getScene().getWindow();
-        cargarDatosPrototipo();
-        DialogHelper.showSuccess(owner, "refrescado");
-    }
-
-    @FXML
-    private void onBuscar(ActionEvent event) {
-        Window owner = btnBuscar.getScene().getWindow();
-        TextInputDialog input = new TextInputDialog();
-        input.initOwner(owner);
-        input.setTitle("Buscar cliente");
-        input.setHeaderText(null);
-        input.setContentText("Ingresa nombre o ID:");
-        Optional<String> res = input.showAndWait();
-        if (res.isPresent()) {
-            String q = res.get().trim().toLowerCase();
-            boolean found = data.stream().anyMatch(c ->
-                    String.valueOf(c.getId()).equals(q) ||
-                            c.getNombre().toLowerCase().contains(q)
-            );
-            if (!found) {
-                DialogHelper.showWarning(owner, "Cliente no encontrado");
-            } else {
-                DialogHelper.showSuccess(owner, "encontrado");
-            }
+            DialogHelper.showSuccess(owner, "Estado cambiado a " + nuevoEstado);
         }
     }
 
@@ -190,8 +220,7 @@ public class ClientesController {
         dialog.setTitle(action + " cliente");
         dialog.getDialogPane().getButtonTypes().addAll(
                 new ButtonType("Cancelar", ButtonData.CANCEL_CLOSE),
-                new ButtonType("Aceptar", ButtonData.OK_DONE)
-        );
+                new ButtonType("Aceptar", ButtonData.OK_DONE));
 
         // Formulario
         GridPane grid = new GridPane();
@@ -214,14 +243,14 @@ public class ClientesController {
             txtCorreo.setText(existing.getCorreo());
         }
 
-        grid.add(new Label("Nombre:"),    0, 0);
-        grid.add(txtNombre,               1, 0);
+        grid.add(new Label("Nombre:"), 0, 0);
+        grid.add(txtNombre, 1, 0);
         grid.add(new Label("Dirección:"), 0, 1);
-        grid.add(txtDireccion,            1, 1);
-        grid.add(new Label("Teléfono:"),  0, 2);
-        grid.add(txtTelefono,             1, 2);
-        grid.add(new Label("Correo:"),    0, 3);
-        grid.add(txtCorreo,               1, 3);
+        grid.add(txtDireccion, 1, 1);
+        grid.add(new Label("Teléfono:"), 0, 2);
+        grid.add(txtTelefono, 1, 2);
+        grid.add(new Label("Correo:"), 0, 3);
+        grid.add(txtCorreo, 1, 3);
 
         dialog.getDialogPane().setContent(grid);
 
@@ -229,7 +258,8 @@ public class ClientesController {
         dialog.setResultConverter(btn -> {
             if (btn.getButtonData() == ButtonData.OK_DONE) {
                 Cliente c = new Cliente();
-                if (existing != null) c.setId(existing.getId());
+                if (existing != null)
+                    c.setId(existing.getId());
                 c.setNombre(txtNombre.getText());
                 c.setDireccion(txtDireccion.getText());
                 c.setTelefono(txtTelefono.getText());
@@ -245,29 +275,25 @@ public class ClientesController {
     @FXML
     private void onBack(ActionEvent event) {
         try {
-            Parent mainRoot = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
+            // Carga el FXML del menú principal
+            Parent mainRoot = FXMLLoader.load(
+                    getClass().getResource("/fxml/MainMenu.fxml"));
+            // Obtiene el Stage y reutiliza la Scene actual
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = stage.getScene();
 
+            // Reemplaza la raíz sin crear nueva Scene
             scene.setRoot(mainRoot);
+
+            // Reaplica tu CSS
             scene.getStylesheets().clear();
             scene.getStylesheets().add(
-                    getClass().getResource("/css/styles.css").toExternalForm()
-            );
+                    getClass().getResource("/css/styles.css").toExternalForm());
 
-            try {
-                Thread.sleep(500);
-                stage.setHeight(600);
-                stage.setWidth(1000);
-                System.out.println("Ajustando tamaño...");
-                stage.setMaximized(true);
-                stage.centerOnScreen();
+            // Asegura que siga maximizado
+            // stage.setMaximized(true);
 
-            }
-            catch (InterruptedException e) {
-                e.printStackTrace();
-                Thread.currentThread().interrupt();
-            }
+            // Actualiza el título
             stage.setTitle("Index Blooms – Menú Principal");
         } catch (IOException e) {
             e.printStackTrace();
