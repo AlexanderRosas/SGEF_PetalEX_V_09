@@ -25,25 +25,41 @@ import javafx.beans.value.ObservableValue;
 
 public class VentaDetailController {
 
-    @FXML private Label lblCliente;
-    @FXML private Label lblDireccion;
-    @FXML private Label lblFecha;
-    @FXML private Button btnAddItem;
-    @FXML private TableView<ItemVenta> tableItems;
-    @FXML private TableColumn<ItemVenta, Integer> colItem;
-    @FXML private TableColumn<ItemVenta, String>  colVariedad;
-    @FXML private TableColumn<ItemVenta, String>  colPaquete;
-    @FXML private TableColumn<ItemVenta, Integer> colCantidad;
-    @FXML private TableColumn<ItemVenta, Double>  colPrecioU;
-    @FXML private TableColumn<ItemVenta, Double>  colPrecioT;
-    @FXML private Label lblTotal;
-    @FXML private Button btnCancelVenta;
-    @FXML private Button btnAcceptVenta;
+    @FXML
+    private Label lblCliente;
+    @FXML
+    private Label lblDireccion;
+    @FXML
+    private Label lblFecha;
+    @FXML
+    private Button btnAddItem;
+    @FXML
+    private TableView<ItemVenta> tableItems;
+    @FXML
+    private TableColumn<ItemVenta, Integer> colItem;
+    @FXML
+    private TableColumn<ItemVenta, String> colVariedad;
+    @FXML
+    private TableColumn<ItemVenta, String> colPaquete;
+    @FXML
+    private TableColumn<ItemVenta, Integer> colCantidad;
+    @FXML
+    private TableColumn<ItemVenta, Double> colPrecioU;
+    @FXML
+    private TableColumn<ItemVenta, Double> colPrecioT;
+    @FXML
+    private Label lblTotal;
+    @FXML
+    private Button btnCancelVenta;
+    @FXML
+    private Button btnAcceptVenta;
+    @FXML
+    private Button btnEliminarItem;
 
     private boolean ventaAceptada = false;
     private Venta currentVenta;
     private ObservableList<ItemVenta> items = FXCollections.observableArrayList();
-
+    // private boolean ventaInactiva = false; // Ahora se usa el campo en Venta
 
     /** Para ver venta existente */
     public void initData(Venta v) {
@@ -54,24 +70,43 @@ public class VentaDetailController {
 
     private void setup() {
         lblCliente.setText("Cliente: " + currentVenta.getCliente());
-        lblFecha  .setText("Fecha: " + currentVenta.getFecha());
+        lblFecha.setText("Fecha: " + currentVenta.getFecha());
         lblDireccion.setText("Dirección: " + currentVenta.getDireccion());
 
-        colItem     .setCellValueFactory(i -> i.getValue().itemProperty().asObject());
-        colVariedad .setCellValueFactory(i -> i.getValue().variedadProperty());
-        colPaquete  .setCellValueFactory(i -> i.getValue().paqueteProperty());
-        colCantidad .setCellValueFactory(i -> i.getValue().cantidadProperty().asObject());
-        colPrecioU  .setCellValueFactory(i -> i.getValue().precioUnitProperty().asObject());
-        colPrecioT  .setCellValueFactory(i -> i.getValue().precioTotalProperty().asObject());
+        colItem.setCellValueFactory(i -> i.getValue().itemProperty().asObject());
+        colVariedad.setCellValueFactory(i -> i.getValue().variedadProperty());
+        colPaquete.setCellValueFactory(i -> i.getValue().paqueteProperty());
+        colCantidad.setCellValueFactory(i -> i.getValue().cantidadProperty().asObject());
+        colPrecioU.setCellValueFactory(i -> i.getValue().precioUnitProperty().asObject());
+        colPrecioT.setCellValueFactory(i -> i.getValue().precioTotalProperty().asObject());
 
         tableItems.setItems(items);
         updateTotal();
 
         btnAddItem.setOnAction(this::onAddItem);
-
         btnCancelVenta.setOnAction(this::onCancelVenta);
         btnAcceptVenta.setOnAction(this::onAcceptVenta);
+        // Eliminar Producto: deshabilitado si no hay selección
+        btnEliminarItem.setDisable(true);
+        tableItems.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            btnEliminarItem.setDisable(newSel == null);
+        });
+        btnEliminarItem.setOnAction(this::onEliminarItem);
     }
+
+    @FXML
+    private void onEliminarItem(ActionEvent e) {
+        ItemVenta seleccionado = tableItems.getSelectionModel().getSelectedItem();
+        if (seleccionado == null)
+            return;
+        boolean confirmado = DialogHelper.confirm(lblCliente.getScene().getWindow(),
+                "¿Está seguro que desea eliminar el producto seleccionado?");
+        if (confirmado) {
+            items.remove(seleccionado);
+            updateTotal();
+        }
+    }
+
     private void closeWindow() {
         Stage st = (Stage) lblCliente.getScene().getWindow();
         st.close();
@@ -87,21 +122,23 @@ public class VentaDetailController {
             return Optional.empty();
         }
     }
+
     private void updateTotal() {
         double sum = items.stream().mapToDouble(ItemVenta::getPrecioTotal).sum();
         lblTotal.setText(String.format("$%,.2f", sum));
         currentVenta.setTotal(sum);
     }
+
     @FXML
     private void onCancelVenta(ActionEvent e) {
         ventaAceptada = false;
-        ((Stage)lblCliente.getScene().getWindow()).close();
+        ((Stage) lblCliente.getScene().getWindow()).close();
     }
 
     @FXML
     private void onAcceptVenta(ActionEvent e) {
         ventaAceptada = true;
-        ((Stage)lblCliente.getScene().getWindow()).close();
+        ((Stage) lblCliente.getScene().getWindow()).close();
     }
 
     @FXML
@@ -117,8 +154,9 @@ public class VentaDetailController {
             dlg.setTitle("Elegir variedad");
             dlg.showAndWait();
 
-            String variedad = ((RoseSelectionController)loader.getController()).getSelectedRose();
-            if (variedad == null) return;
+            String variedad = ((RoseSelectionController) loader.getController()).getSelectedRose();
+            if (variedad == null)
+                return;
 
             // Luego diálogo de paquete/cantidad
             ItemVenta newItem = showPaqueteCantidadDialog(variedad);
@@ -137,7 +175,7 @@ public class VentaDetailController {
         dlg.setTitle("Configurar ítem");
 
         ButtonType cancelType = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
-        ButtonType acceptType = new ButtonType("Aceptar",  ButtonBar.ButtonData.OK_DONE);
+        ButtonType acceptType = new ButtonType("Aceptar", ButtonBar.ButtonData.OK_DONE);
         dlg.getDialogPane().getButtonTypes().addAll(cancelType, acceptType);
 
         GridPane grid = new GridPane();
@@ -146,8 +184,7 @@ public class VentaDetailController {
 
         Label lblVar = new Label("Variedad: " + variedad);
         ComboBox<String> cbPack = new ComboBox<>(FXCollections.observableArrayList(
-                "Caja Tabaco", "Caja Full", "Cuartos"
-        ));
+                "Caja Tabaco", "Caja Full", "Cuartos"));
         cbPack.setPromptText("Paquete");
         Spinner<Integer> spQty = new Spinner<>(1, 999, 1);
         spQty.setEditable(true);
@@ -166,7 +203,7 @@ public class VentaDetailController {
 
         javafx.beans.value.ChangeListener<Object> validar = (obs, oldV, newV) -> {
             boolean paqueteSeleccionado = cbPack.getValue() != null;
-            boolean cantidadValida     = spQty.getValue() != null && spQty.getValue() > 0;
+            boolean cantidadValida = spQty.getValue() != null && spQty.getValue() > 0;
             okBtn.setDisable(!(paqueteSeleccionado && cantidadValida));
         };
         cbPack.valueProperty().addListener(validar);
@@ -181,8 +218,8 @@ public class VentaDetailController {
                 // define precios de ejemplo
                 double pu = switch (cbPack.getValue()) {
                     case "Caja Tabaco" -> 50.0;
-                    case "Caja Full"   -> 120.0;
-                    default            -> 30.0;
+                    case "Caja Full" -> 120.0;
+                    default -> 30.0;
                 };
                 it.setPrecioUnit(pu);
                 it.setPrecioTotal(pu * spQty.getValue());
@@ -194,12 +231,10 @@ public class VentaDetailController {
         Optional<ItemVenta> res = dlg.showAndWait();
         if (res.isPresent() && DialogHelper.confirm(
                 lblCliente.getScene().getWindow(),
-                "¿Está seguro que desea agregar este ítem?"
-        )) {
+                "¿Está seguro que desea agregar este ítem?")) {
             return res.get();
         }
         return null;
     }
-
 
 }

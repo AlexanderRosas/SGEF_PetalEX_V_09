@@ -24,14 +24,24 @@ import java.util.Optional;
 
 public class VentasController {
 
-    @FXML private AnchorPane root;
-    @FXML private Button btnBack;
-    @FXML private Button btnAddVenta;
-    @FXML private Button btnViewVenta;
-    @FXML private TableView<Venta> tableVentas;
-    @FXML private TableColumn<Venta, String>  colCliente;
-    @FXML private TableColumn<Venta, String>  colFecha;
-    @FXML private TableColumn<Venta, Number>  colTotal;
+    @FXML
+    private AnchorPane root;
+    @FXML
+    private Button btnBack;
+    @FXML
+    private Button btnAddVenta;
+    @FXML
+    private Button btnViewVenta;
+    @FXML
+    private TableView<Venta> tableVentas;
+    @FXML
+    private TableColumn<Venta, String> colCliente;
+    @FXML
+    private TableColumn<Venta, String> colFecha;
+    @FXML
+    private TableColumn<Venta, Number> colTotal;
+    @FXML
+    private Button btnInactivarVenta;
 
     private final ObservableList<Venta> ventas = FXCollections.observableArrayList();
 
@@ -39,10 +49,32 @@ public class VentasController {
     public void initialize() {
         // Vincula las columnas a las propiedades de Venta
         colCliente.setCellValueFactory(v -> v.getValue().clienteProperty());
-        colFecha  .setCellValueFactory(v -> v.getValue().fechaProperty().asString());
-        colTotal  .setCellValueFactory(v -> v.getValue().totalProperty());
+        colFecha.setCellValueFactory(v -> v.getValue().fechaProperty().asString());
+        colTotal.setCellValueFactory(v -> v.getValue().totalProperty());
 
         tableVentas.setItems(ventas);
+        // Habilita el botón solo si hay selección
+        btnInactivarVenta.setDisable(true);
+        tableVentas.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            btnInactivarVenta.setDisable(newSel == null);
+        });
+    }
+
+    @FXML
+    private void onInactivarVenta(ActionEvent event) {
+        Venta ventaSeleccionada = tableVentas.getSelectionModel().getSelectedItem();
+        if (ventaSeleccionada == null) {
+            DialogHelper.showWarning(btnInactivarVenta.getScene().getWindow(), "Selecciona una venta primero");
+            return;
+        }
+        if (!ventaSeleccionada.isActiva()) {
+            DialogHelper.showWarning(btnInactivarVenta.getScene().getWindow(), "La venta ya está inactiva.");
+            return;
+        }
+        ventaSeleccionada.setActiva(false);
+        DialogHelper.showWarning(btnInactivarVenta.getScene().getWindow(), "La venta ha sido marcada como inactiva.");
+        // Si quieres refrescar la tabla, puedes hacer:
+        tableVentas.refresh();
     }
 
     @FXML
@@ -51,7 +83,7 @@ public class VentasController {
         Stage st = (Stage) btnBack.getScene().getWindow();
         st.getScene().setRoot(main);
         st.setTitle("Index Blooms – Menú Principal");
-        st.setMaximized(true);
+        // st.setMaximized(true); // Eliminado para evitar maximizar siempre la ventana
     }
 
     @FXML
@@ -69,21 +101,23 @@ public class VentasController {
         selStage.showAndWait();
 
         Cliente c = selCtrl.getSelectedCliente();
-
+        if (c == null) {
+            // El usuario canceló la selección
+            return;
+        }
 
         // 2) Confirmar selección
         boolean confirmado = DialogHelper.confirm(
                 btnAddVenta.getScene().getWindow(),
-                "¿Está seguro que desea Seleccionar al " + c.getNombre() + "?"
-        );
-        if (!confirmado) return;
+                "¿Está seguro que desea Seleccionar al " + c.getNombre() + "?");
+        if (!confirmado)
+            return;
 
         // 3) Crear objeto Venta con nombre, dirección, fecha
         Venta nuevaVenta = new Venta(
                 c.getNombre(),
                 c.getDireccion(),
-                LocalDate.now()
-        );
+                LocalDate.now());
 
         // 4) Abrir detalle de venta
         FXMLLoader detLoader = new FXMLLoader(getClass().getResource("/fxml/VentaDetail.fxml"));
@@ -108,8 +142,7 @@ public class VentasController {
         if (ventaSeleccionada == null) {
             DialogHelper.showWarning(
                     btnViewVenta.getScene().getWindow(),
-                    "Selecciona una venta primero"
-            );
+                    "Selecciona una venta primero");
             return;
         }
 

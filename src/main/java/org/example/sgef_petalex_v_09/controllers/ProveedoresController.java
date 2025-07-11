@@ -232,7 +232,7 @@ public class ProveedoresController {
             scene.getStylesheets().add(
                     getClass().getResource("/css/styles.css").toExternalForm()
             );
-            stage.setMaximized(true);
+            // stage.setMaximized(true); // Eliminado para evitar maximizar siempre la ventana
             stage.setTitle("Index Blooms – Menú Principal");
         } catch (IOException e) {
             e.printStackTrace();

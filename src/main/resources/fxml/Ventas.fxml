@@ -38,6 +38,21 @@
             AnchorPane.topAnchor="60"
             AnchorPane.leftAnchor="130"/>
 
+    <Button fx:id="btnActualizarVenta"
+            onAction="#onActualizarVenta"
+            styleClass="toolbar-button"
+            text="Actualizar Venta"
+            AnchorPane.topAnchor="60"
+            AnchorPane.leftAnchor="270"
+            disable="true"/>
+    <Button fx:id="btnInactivarVenta"
+            onAction="#onInactivarVenta"
+            styleClass="toolbar-button"
+            text="Eliminar Venta"
+            AnchorPane.topAnchor="60"
+            AnchorPane.leftAnchor="410"
+            disable="true"/>
+
     <!-- Tabla de Ventas realizadas -->
     <TableView fx:id="tableVentas"
                AnchorPane.topAnchor="120"
