@@ -11,17 +11,12 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.example.sgef_petalex_v_09.models.Cliente;
 import org.example.sgef_petalex_v_09.models.ItemVenta;
 import org.example.sgef_petalex_v_09.models.Venta;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.Optional;
-
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 
 public class VentaDetailController {
 
@@ -33,6 +28,9 @@ public class VentaDetailController {
     private Label lblFecha;
     @FXML
     private Button btnAddItem;
+    @FXML
+    private Button btnRemoveItem;
+
     @FXML
     private TableView<ItemVenta> tableItems;
     @FXML
@@ -53,13 +51,10 @@ public class VentaDetailController {
     private Button btnCancelVenta;
     @FXML
     private Button btnAcceptVenta;
-    @FXML
-    private Button btnEliminarItem;
 
     private boolean ventaAceptada = false;
     private Venta currentVenta;
     private ObservableList<ItemVenta> items = FXCollections.observableArrayList();
-    // private boolean ventaInactiva = false; // Ahora se usa el campo en Venta
 
     /** Para ver venta existente */
     public void initData(Venta v) {
@@ -69,6 +64,13 @@ public class VentaDetailController {
     }
 
     private void setup() {
+        btnAcceptVenta.setDisable(true); // al inicio
+
+        items.addListener((javafx.collections.ListChangeListener.Change<? extends ItemVenta> c) -> {
+            btnAcceptVenta.setDisable(items.isEmpty());
+        });
+        btnRemoveItem.setOnAction(this::onRemoveItem);
+
         lblCliente.setText("Cliente: " + currentVenta.getCliente());
         lblFecha.setText("Fecha: " + currentVenta.getFecha());
         lblDireccion.setText("Dirección: " + currentVenta.getDireccion());
@@ -86,25 +88,6 @@ public class VentaDetailController {
         btnAddItem.setOnAction(this::onAddItem);
         btnCancelVenta.setOnAction(this::onCancelVenta);
         btnAcceptVenta.setOnAction(this::onAcceptVenta);
-        // Eliminar Producto: deshabilitado si no hay selección
-        btnEliminarItem.setDisable(true);
-        tableItems.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
-            btnEliminarItem.setDisable(newSel == null);
-        });
-        btnEliminarItem.setOnAction(this::onEliminarItem);
-    }
-
-    @FXML
-    private void onEliminarItem(ActionEvent e) {
-        ItemVenta seleccionado = tableItems.getSelectionModel().getSelectedItem();
-        if (seleccionado == null)
-            return;
-        boolean confirmado = DialogHelper.confirm(lblCliente.getScene().getWindow(),
-                "¿Está seguro que desea eliminar el producto seleccionado?");
-        if (confirmado) {
-            items.remove(seleccionado);
-            updateTotal();
-        }
     }
 
     private void closeWindow() {
@@ -115,7 +98,7 @@ public class VentaDetailController {
     /** Para VentasController: devuelve Optional.empty() si canceló */
     public Optional<Venta> getVentaCreated() {
         if (ventaAceptada) {
-            // añade todos los ítems al objeto Venta
+            currentVenta.getItems().clear(); // Limpia antes de agregar
             items.forEach(currentVenta::addItem);
             return Optional.of(currentVenta);
         } else {
@@ -144,21 +127,23 @@ public class VentaDetailController {
     @FXML
     private void onAddItem(ActionEvent e) {
         try {
-            // Lanza el diálogo de selección de rosas (usa RoseSelectionController)
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/RoseSelection.fxml"));
-            Parent pop = loader.load();
+            Parent pop = loader.load(); // Carga nuevo nodo raíz cada vez
+
             Stage dlg = new Stage();
             dlg.initOwner(lblCliente.getScene().getWindow());
             dlg.initModality(Modality.APPLICATION_MODAL);
-            dlg.setScene(new Scene(pop));
             dlg.setTitle("Elegir variedad");
+
+            Scene scene = new Scene(pop, 600, 600); // Tamaño más grande
+            dlg.setScene(scene);
+
             dlg.showAndWait();
 
             String variedad = ((RoseSelectionController) loader.getController()).getSelectedRose();
             if (variedad == null)
                 return;
 
-            // Luego diálogo de paquete/cantidad
             ItemVenta newItem = showPaqueteCantidadDialog(variedad);
             if (newItem != null) {
                 newItem.setItem(items.size() + 1);
@@ -167,6 +152,25 @@ public class VentaDetailController {
             }
         } catch (IOException ex) {
             ex.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void onRemoveItem(ActionEvent e) {
+        ItemVenta selected = tableItems.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            DialogHelper.showWarning(lblCliente.getScene().getWindow(), "Debe seleccionar un ítem para eliminar.");
+            return;
+        }
+        boolean confirm = DialogHelper.confirm(lblCliente.getScene().getWindow(),
+                "¿Está seguro que desea eliminar el ítem seleccionado?");
+        if (confirm) {
+            items.remove(selected);
+            // Reasigna números de ítem para mantener orden
+            for (int i = 0; i < items.size(); i++) {
+                items.get(i).setItem(i + 1);
+            }
+            updateTotal();
         }
     }
 

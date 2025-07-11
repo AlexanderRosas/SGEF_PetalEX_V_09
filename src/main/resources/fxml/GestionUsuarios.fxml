@@ -11,11 +11,11 @@
 <?import javafx.scene.layout.VBox?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.example.sgef_petalex_v_09.controllers.GestionUsuariosController"
-            fx:id="root"
-            styleClass="root"
-            prefWidth="800" prefHeight="700">
+    xmlns:fx="http://javafx.com/fxml"
+    fx:controller="org.example.sgef_petalex_v_09.controllers.GestionUsuariosController"
+    fx:id="root"
+    styleClass="root"
+    prefWidth="800" prefHeight="700">
 
     <!-- Toolbar: acciones -->
     <VBox spacing="5" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
@@ -24,61 +24,40 @@
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
-                            <Image url="@../images/icon_new.png"/>
+                            <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_new.png" />
                         </image>
                     </ImageView>
                 </graphic>
             </Button>
-            <Button fx:id="btnEditar" text="Editar" onAction="#onEditar" styleClass="toolbar-button" disable="true">
+            <Button fx:id="btnEditar" text="Editar" onAction="#onEditar" styleClass="toolbar-button"
+                disable="true">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
-                            <Image url="@../images/icon_role.png"/>
+                            <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_role.png" />
                         </image>
                     </ImageView>
                 </graphic>
             </Button>
-            <Button fx:id="btnEliminar" text="Eliminar/Desactivar" onAction="#onEliminar" styleClass="toolbar-button" disable="true">
+
+            <Button fx:id="btnReactivar" text="Activar/Inactivar" onAction="#onReactivar"
+                styleClass="toolbar-button" disable="true">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
-                            <Image url="@../images/icon_delete.png"/>
+                            <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_reactivate.png" />
                         </image>
                     </ImageView>
                 </graphic>
             </Button>
-            <Button fx:id="btnReactivar" text="Reactivar" onAction="#onReactivar" styleClass="toolbar-button" disable="true">
+
+
+            <Button fx:id="btnExportar" text="Exportar" onAction="#onExportar"
+                styleClass="toolbar-button">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
-                            <Image url="@../images/icon_reactivate.png"/>
-                        </image>
-                    </ImageView>
-                </graphic>
-            </Button>
-            <Button fx:id="btnResetPass" text="Restablecer Contraseña" onAction="#onResetPassword" styleClass="toolbar-button" disable="true">
-                <graphic>
-                    <ImageView fitWidth="16" preserveRatio="true">
-                        <image>
-                            <Image url="@../images/icon_reset.png"/>
-                        </image>
-                    </ImageView>
-                </graphic>
-            </Button>
-            <Button fx:id="btnBloquear" text="Bloquear/Desbloquear" onAction="#onBloquear" styleClass="toolbar-button" disable="true">
-                <graphic>
-                    <ImageView fitWidth="16" preserveRatio="true">
-                        <image>
-                            <Image url="@../images/icon_lock.png"/>
-                        </image>
-                    </ImageView>
-                </graphic>
-            </Button>
-            <Button fx:id="btnExportar" text="Exportar" onAction="#onExportar" styleClass="toolbar-button">
-                <graphic>
-                    <ImageView fitWidth="16" preserveRatio="true">
-                        <image>
-                            <Image url="@../images/icon_export.png"/>
+                            <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_export.png" />
                         </image>
                     </ImageView>
                 </graphic>
@@ -92,18 +71,18 @@
 
     <!-- Tabla de Usuarios -->
     <TableView fx:id="tableUsuarios"
-               editable="true"
-               styleClass="table-clientes"
-               AnchorPane.topAnchor="80"
-               AnchorPane.leftAnchor="10"
-               AnchorPane.rightAnchor="10"
-               AnchorPane.bottomAnchor="10">
+        editable="true"
+        styleClass="table-clientes"
+        AnchorPane.topAnchor="80"
+        AnchorPane.leftAnchor="10"
+        AnchorPane.rightAnchor="10"
+        AnchorPane.bottomAnchor="10">
         <columns>
-            <TableColumn fx:id="colNombre"  text="Nombre"    prefWidth="150" />
-            <TableColumn fx:id="colCorreo"  text="Correo"    prefWidth="200" />
-            <TableColumn fx:id="colUsuario" text="Usuario"   prefWidth="150" />
-            <TableColumn fx:id="colRol"     text="Rol"       prefWidth="150" editable="true"/>
-            <TableColumn fx:id="colEstado"  text="Estado"    prefWidth="100" />
+            <TableColumn fx:id="colNombre" text="Nombre" prefWidth="150" />
+            <TableColumn fx:id="colCorreo" text="Correo" prefWidth="200" />
+            <TableColumn fx:id="colUsuario" text="Usuario" prefWidth="150" />
+            <TableColumn fx:id="colRol" text="Rol" prefWidth="150" editable="true" />
+            <TableColumn fx:id="colEstado" text="Estado" prefWidth="100" />
         </columns>
     </TableView>
 

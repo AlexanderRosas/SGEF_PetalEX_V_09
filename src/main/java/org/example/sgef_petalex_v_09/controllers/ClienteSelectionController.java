@@ -11,8 +11,6 @@ import javafx.stage.Window;
 import org.example.sgef_petalex_v_09.models.Cliente;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
 
-import java.util.Optional;
-
 public class ClienteSelectionController {
 
     @FXML private TextField txtFilterNombre;

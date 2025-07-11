@@ -75,8 +75,7 @@
 .sidebar {
     -fx-background-color: #F8F8F8;
     -fx-padding: 20;
-    -fx-pref-width: 250px;
-    -fx-min-width: 200px;
+
 }
 
 /* Botones de la barra lateral */
@@ -122,7 +121,7 @@
 /* ===== Content Pane ===== */
 #contentPane {
     -fx-padding: 20;
-    -fx-background-color: white;
+    -fx-background-color: #a25252;
     -fx-border-color: #E0E0E0;
     -fx-border-width: 1;
     -fx-border-radius: 5;

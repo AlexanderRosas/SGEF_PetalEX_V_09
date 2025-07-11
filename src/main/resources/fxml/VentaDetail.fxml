@@ -33,6 +33,11 @@
     
 
 
+    <Button fx:id="btnRemoveItem"
+            onAction="#onRemoveItem"
+            styleClass="toolbar-button"
+            text="Eliminar Producto"/>
+</HBox>
     <!-- Tabla de Ítems -->
     <TableView fx:id="tableItems"
                AnchorPane.topAnchor="160"
