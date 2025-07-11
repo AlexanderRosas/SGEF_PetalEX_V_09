@@ -209,7 +209,7 @@
 
 .table-clientes .table-row-cell:filled:selected,
 .table-clientes .table-row-cell:filled:selected:focused {
-    -fx-background-color: #FFEBF4;
+    -fx-background-color: #f41b7d;
 }
 
 /* Columnas (alineación opcional) */

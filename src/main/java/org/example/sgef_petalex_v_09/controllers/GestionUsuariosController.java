@@ -2,15 +2,20 @@ package org.example.sgef_petalex_v_09.controllers;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Window;
 import org.example.sgef_petalex_v_09.models.Usuario;
+import org.example.sgef_petalex_v_09.util.DialogHelper;
+
+import java.util.Optional;
 
 public class GestionUsuariosController {
     @FXML private Button btnNuevo;
@@ -19,7 +24,6 @@ public class GestionUsuariosController {
     @FXML private Button btnReactivar;
     @FXML private Button btnResetPass;
     @FXML private Button btnBloquear;
-    @FXML private Button btnAsignarRol;
     @FXML private Button btnExportar;
     @FXML private TextField txtBuscar;
     @FXML private ComboBox<String> cbEstado;
@@ -30,50 +34,254 @@ public class GestionUsuariosController {
     @FXML private TableColumn<Usuario, String> colRol;
     @FXML private TableColumn<Usuario, String> colEstado;
 
-    private ObservableList<Usuario> usuarios = FXCollections.observableArrayList();
+    private final ObservableList<Usuario> masterData = FXCollections.observableArrayList();
+    private FilteredList<Usuario> filteredData;
 
     @FXML
     public void initialize() {
         // Configurar columnas
-        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
-        colCorreo.setCellValueFactory(new PropertyValueFactory<>("correo"));
+        colNombre .setCellValueFactory(new PropertyValueFactory<>("nombre"));
+        colCorreo .setCellValueFactory(new PropertyValueFactory<>("correo"));
         colUsuario.setCellValueFactory(new PropertyValueFactory<>("usuario"));
-        colRol.setCellValueFactory(new PropertyValueFactory<>("rol"));
-        colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
+        colRol    .setCellValueFactory(new PropertyValueFactory<>("rol"));
+        colEstado .setCellValueFactory(new PropertyValueFactory<>("estado"));
 
-        // Datos de ejemplo (reemplazar con datos reales)
-        usuarios.addAll(
-                new Usuario("Laura Gomez", "laura@example.com", "lgomez", "Administrador", "Activo"),
-                new Usuario("Carlos Pérez", "carlos@example.com", "cperez", "Vendedor", "Activo")
+        // Datos de ejemplo
+        masterData.addAll(
+                new Usuario("Laura Gomez",       "laura@example.com",        "lgomez",     "Administrador",      "Activo"),
+                new Usuario("Carlos Pérez",      "carlos@example.com",       "cperez",     "Ventas",             "Activo"),
+                new Usuario("María Rodríguez",   "maria.rod@example.com",    "mrod",       "Gerente",            "Activo"),
+                new Usuario("Jorge Martínez",    "jorge.m@example.com",      "jmart",      "Ventas",            "Activo"),
+                new Usuario("Ana Fernández",     "ana.f@example.com",        "afdez",      "Ventas",             "Activo"),
+                new Usuario("Pedro Sánchez",     "pedro.s@example.com",      "psanchez",   "Administrador",          "Activo"),
+                new Usuario("Lucía Moreno",      "lucia.m@example.com",      "lmoreno",    "Finanzas",          "Inactivo"),
+                new Usuario("Diego Torres",      "diego.t@example.com",      "dtorres",    "Finanzas",           "Activo"),
+                new Usuario("Sofía Herrera",     "sofia.h@example.com",      "sherrera",   "Gerente",   "Inactivo"),
+                new Usuario("Fernando Castillo", "fernando.c@example.com",   "fcastillo",  "Administrador",         "Inactivo")
         );
-        tableUsuarios.setItems(usuarios);
 
-        // Inicializar filtros
-        cbEstado.getItems().addAll("Activo", "Inactivo");
+        // Wrap masterData in FilteredList
+        filteredData = new FilteredList<>(masterData, p -> true);
+        tableUsuarios.setItems(filteredData);
+
+        // Opciones Estado
+        cbEstado.getItems().addAll("Todos", "Activo", "Inactivo");
+        cbEstado.getSelectionModel().selectFirst(); // "Todos"
+
+        // Configurar columna Rol como ComboBox editable
+        ObservableList<String> roles = FXCollections.observableArrayList(
+                "Administrador", "Finanzas", "Gerente", "Ventas"
+        );
+        tableUsuarios.setEditable(true);
+        colRol.setCellFactory(ComboBoxTableCell.forTableColumn(roles));
+        colRol.setOnEditCommit(evt -> {
+            Usuario u = evt.getRowValue();
+            u.setRol(evt.getNewValue());
+            DialogHelper.showSuccess(
+                    tableUsuarios.getScene().getWindow(),
+                    "rol asignado"
+            );
+        });
+
+        // Listener para habilitar botones
+        tableUsuarios.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
+            boolean has = sel != null;
+            btnEditar   .setDisable(!has);
+            btnEliminar .setDisable(!has);
+            btnReactivar.setDisable(!has);
+            btnResetPass.setDisable(!has);
+            btnBloquear .setDisable(!has);
+        });
+
+        // Listener de búsqueda
+        txtBuscar.textProperty().addListener((obs, old, val) -> filtrarUsuarios());
+        cbEstado.getSelectionModel().selectedItemProperty().addListener((obs, old, val) -> filtrarUsuarios());
     }
 
-    @FXML private void onNuevo() {
-        // TODO: abrir diálogo de nuevo usuario
+    /** Filtra la tabla según txtBuscar y cbEstado. */
+    private void filtrarUsuarios() {
+        String texto = txtBuscar.getText().toLowerCase().trim();
+        String estado = cbEstado.getValue();
+        filteredData.setPredicate(u -> {
+            boolean matchesTexto = texto.isEmpty()
+                    || u.getNombre().toLowerCase().contains(texto)
+                    || u.getUsuario().toLowerCase().contains(texto)
+                    || u.getCorreo().toLowerCase().contains(texto);
+            boolean matchesEstado = estado.equals("Todos") || u.getEstado().equals(estado);
+            return matchesTexto && matchesEstado;
+        });
     }
-    @FXML private void onEditar() {
-        // TODO: editar usuario seleccionado
+
+    @FXML
+    private void onNuevo(ActionEvent event) {
+        Window owner = btnNuevo.getScene().getWindow();
+        Optional<Usuario> res = showUserFormDialog("Crear usuario", null);
+        res.ifPresent(u -> {
+            if (confirm(owner, "¿Está seguro que desea Crear un Usuario?")) {
+                masterData.add(u);
+                DialogHelper.showSuccess(owner, "creado");
+            }
+        });
     }
-    @FXML private void onEliminar() {
-        // TODO: desactivar usuario
+
+    @FXML
+    private void onEditar(ActionEvent event) {
+        Window owner = btnEditar.getScene().getWindow();
+        Usuario sel = tableUsuarios.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            DialogHelper.showWarning(owner, "Selecciona un usuario primero");
+            return;
+        }
+        Optional<Usuario> res = showUserFormDialog("Actualizar usuario", sel);
+        res.ifPresent(u -> {
+            if (confirm(owner, "¿Está seguro que desea Actualizar?")) {
+                sel.setNombre(u.getNombre());
+                sel.setCorreo(u.getCorreo());
+                sel.setUsuario(u.getUsuario());
+                sel.setRol(u.getRol());
+                sel.setEstado(u.getEstado());
+                tableUsuarios.refresh();
+                DialogHelper.showSuccess(owner, "actualizado");
+            }
+        });
     }
-    @FXML private void onReactivar() {
-        // TODO: reactivar usuario
+
+    @FXML
+    private void onEliminar(ActionEvent event) {
+        Window owner = btnEliminar.getScene().getWindow();
+        Usuario sel = tableUsuarios.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            DialogHelper.showWarning(owner, "Selecciona un usuario primero");
+            return;
+        }
+        if (confirm(owner, "¿Está seguro que desea Eliminar?")) {
+            masterData.remove(sel);
+            DialogHelper.showSuccess(owner, "eliminado");
+        }
     }
-    @FXML private void onResetPassword() {
-        // TODO: restablecer contraseña
+
+    @FXML
+    private void onReactivar(ActionEvent event) {
+        Window owner = btnReactivar.getScene().getWindow();
+        Usuario sel = tableUsuarios.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            DialogHelper.showWarning(owner, "Selecciona un usuario primero");
+            return;
+        }
+        if (confirm(owner, "¿Está seguro que desea Reactivar?")) {
+            sel.setEstado("Activo");
+            tableUsuarios.refresh();
+            DialogHelper.showSuccess(owner, "actualizado");
+        }
     }
-    @FXML private void onBloquear() {
-        // TODO: bloquear/desbloquear usuario
+
+    @FXML
+    private void onResetPassword(ActionEvent event) {
+        Window owner = btnResetPass.getScene().getWindow();
+        Usuario sel = tableUsuarios.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            DialogHelper.showWarning(owner, "Selecciona un usuario primero");
+            return;
+        }
+        if (confirm(owner, "¿Está seguro que desea Restablecer Contraseña?")) {
+            DialogHelper.showSuccess(owner, "restablecido la contraseña");
+        }
     }
-    @FXML private void onAsignarRol() {
-        // TODO: asignar rol a usuario
+
+    @FXML
+    private void onBloquear(ActionEvent event) {
+        Window owner = btnBloquear.getScene().getWindow();
+        Usuario sel = tableUsuarios.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            DialogHelper.showWarning(owner, "Selecciona un usuario primero");
+            return;
+        }
+        if (confirm(owner, "¿Está seguro que desea Bloquear/Desbloquear?")) {
+            sel.setEstado(sel.getEstado().equals("Activo") ? "Inactivo" : "Activo");
+            tableUsuarios.refresh();
+            DialogHelper.showSuccess(owner, "actualizado");
+        }
     }
-    @FXML private void onExportar() {
-        // TODO: exportar lista a CSV/PDF
+
+    @FXML
+    private void onExportar(ActionEvent event) {
+        Window owner = btnExportar.getScene().getWindow();
+        DialogHelper.showSuccess(owner, "exportado los datos");
+    }
+
+    /** Muestra un diálogo de confirmación con mensaje. */
+    private boolean confirm(Window owner, String msg) {
+        Alert a = new Alert(AlertType.CONFIRMATION);
+        a.initOwner(owner);
+        a.setHeaderText(null);
+        a.setContentText(msg);
+        a.setTitle("Confirmar");
+        Optional<ButtonType> res = a.showAndWait();
+        return res.isPresent() && res.get().getButtonData() == ButtonData.OK_DONE;
+    }
+
+    /** Diálogo genérico para crear/editar un Usuario */
+    private Optional<Usuario> showUserFormDialog(String title, Usuario existing) {
+        Dialog<Usuario> dlg = new Dialog<>();
+        dlg.setTitle(title);
+        dlg.getDialogPane().getButtonTypes()
+                .addAll(new ButtonType("Cancelar", ButtonData.CANCEL_CLOSE),
+                        new ButtonType("Aceptar",   ButtonData.OK_DONE));
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        TextField txtNombre  = new TextField();
+        txtNombre.setPromptText("Nombre");
+        TextField txtCorreo  = new TextField();
+        txtCorreo.setPromptText("Correo");
+        TextField txtUsuario = new TextField();
+        txtUsuario.setPromptText("Usuario");
+        ComboBox<String> cbRol= new ComboBox<>(
+                FXCollections.observableArrayList("Administrador","Finanzas","Gerente","Ventas")
+        );
+        cbRol.setPromptText("Rol");
+        ComboBox<String> cbEst= new ComboBox<>(
+                FXCollections.observableArrayList("Activo","Inactivo")
+        );
+        cbEst.setPromptText("Estado");
+
+        if (existing != null) {
+            txtNombre.setText(existing.getNombre());
+            txtCorreo.setText(existing.getCorreo());
+            txtUsuario.setText(existing.getUsuario());
+            cbRol.setValue(existing.getRol());
+            cbEst.setValue(existing.getEstado());
+        }
+
+        grid.add(new Label("Nombre:"),  0, 0);
+        grid.add(txtNombre,             1, 0);
+        grid.add(new Label("Correo:"),  0, 1);
+        grid.add(txtCorreo,             1, 1);
+        grid.add(new Label("Usuario:"), 0, 2);
+        grid.add(txtUsuario,            1, 2);
+        grid.add(new Label("Rol:"),     0, 3);
+        grid.add(cbRol,                 1, 3);
+        grid.add(new Label("Estado:"),  0, 4);
+        grid.add(cbEst,                 1, 4);
+
+        dlg.getDialogPane().setContent(grid);
+
+        dlg.setResultConverter(bt -> {
+            if (bt.getButtonData() == ButtonData.OK_DONE) {
+                Usuario u = new Usuario();
+                if (existing != null) u.setId(existing.getId());
+                u.setNombre(txtNombre.getText());
+                u.setCorreo(txtCorreo.getText());
+                u.setUsuario(txtUsuario.getText());
+                u.setRol(cbRol.getValue());
+                u.setEstado(cbEst.getValue());
+                return u;
+            }
+            return null;
+        });
+
+        return dlg.showAndWait();
     }
 }

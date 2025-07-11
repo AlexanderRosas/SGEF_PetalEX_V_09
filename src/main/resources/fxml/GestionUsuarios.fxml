@@ -9,11 +9,12 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import java.lang.String?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.example.sgef_petalex_v_09.controllers.GestionUsuariosController"
+            fx:id="root"
+            styleClass="root"
             prefWidth="800" prefHeight="700">
 
     <!-- Toolbar: acciones -->
@@ -28,16 +29,16 @@
                     </ImageView>
                 </graphic>
             </Button>
-            <Button fx:id="btnEditar" text="Editar" onAction="#onEditar" styleClass="toolbar-button">
+            <Button fx:id="btnEditar" text="Editar" onAction="#onEditar" styleClass="toolbar-button" disable="true">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
-                            <Image url="@../images/gestion_usuarios.png"/>
+                            <Image url="@../images/icon_role.png"/>
                         </image>
                     </ImageView>
                 </graphic>
             </Button>
-            <Button fx:id="btnEliminar" text="Eliminar/Desactivar" onAction="#onEliminar" styleClass="toolbar-button">
+            <Button fx:id="btnEliminar" text="Eliminar/Desactivar" onAction="#onEliminar" styleClass="toolbar-button" disable="true">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
@@ -46,7 +47,7 @@
                     </ImageView>
                 </graphic>
             </Button>
-            <Button fx:id="btnReactivar" text="Reactivar" onAction="#onReactivar" styleClass="toolbar-button">
+            <Button fx:id="btnReactivar" text="Reactivar" onAction="#onReactivar" styleClass="toolbar-button" disable="true">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
@@ -55,7 +56,7 @@
                     </ImageView>
                 </graphic>
             </Button>
-            <Button fx:id="btnResetPass" text="Restablecer Contraseña" onAction="#onResetPassword" styleClass="toolbar-button">
+            <Button fx:id="btnResetPass" text="Restablecer Contraseña" onAction="#onResetPassword" styleClass="toolbar-button" disable="true">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
@@ -64,20 +65,11 @@
                     </ImageView>
                 </graphic>
             </Button>
-            <Button fx:id="btnBloquear" text="Bloquear/Desbloquear" onAction="#onBloquear" styleClass="toolbar-button">
+            <Button fx:id="btnBloquear" text="Bloquear/Desbloquear" onAction="#onBloquear" styleClass="toolbar-button" disable="true">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
                             <Image url="@../images/icon_lock.png"/>
-                        </image>
-                    </ImageView>
-                </graphic>
-            </Button>
-            <Button fx:id="btnAsignarRol" text="Asignar Rol" onAction="#onAsignarRol" styleClass="toolbar-button">
-                <graphic>
-                    <ImageView fitWidth="16" preserveRatio="true">
-                        <image>
-                            <Image url="@../images/icon_role.png"/>
                         </image>
                     </ImageView>
                 </graphic>
@@ -92,7 +84,7 @@
                 </graphic>
             </Button>
         </HBox>
-        <HBox spacing="10" alignment="CENTER_LEFT">
+        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar-filters">
             <TextField fx:id="txtBuscar" promptText="Buscar..." styleClass="search-field" />
             <ComboBox fx:id="cbEstado" promptText="Estado" styleClass="filter-combo" />
         </HBox>
@@ -100,16 +92,18 @@
 
     <!-- Tabla de Usuarios -->
     <TableView fx:id="tableUsuarios"
+               editable="true"
+               styleClass="table-clientes"
                AnchorPane.topAnchor="80"
-               AnchorPane.leftAnchor="0"
-               AnchorPane.rightAnchor="0"
-               AnchorPane.bottomAnchor="0">
+               AnchorPane.leftAnchor="10"
+               AnchorPane.rightAnchor="10"
+               AnchorPane.bottomAnchor="10">
         <columns>
-            <TableColumn fx:id="colNombre" text="Nombre" prefWidth="150" />
-            <TableColumn fx:id="colCorreo" text="Correo Electrónico" prefWidth="200" />
-            <TableColumn fx:id="colUsuario" text="Usuario" prefWidth="150" />
-            <TableColumn fx:id="colRol" text="Rol" prefWidth="150" />
-            <TableColumn fx:id="colEstado" text="Estado" prefWidth="100" />
+            <TableColumn fx:id="colNombre"  text="Nombre"    prefWidth="150" />
+            <TableColumn fx:id="colCorreo"  text="Correo"    prefWidth="200" />
+            <TableColumn fx:id="colUsuario" text="Usuario"   prefWidth="150" />
+            <TableColumn fx:id="colRol"     text="Rol"       prefWidth="150" editable="true"/>
+            <TableColumn fx:id="colEstado"  text="Estado"    prefWidth="100" />
         </columns>
     </TableView>
 
