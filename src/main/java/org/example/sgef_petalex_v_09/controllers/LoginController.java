@@ -9,6 +9,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 import java.io.IOException;
 
@@ -19,8 +21,12 @@ public class LoginController {
 
     @FXML
     private void onIngresar(ActionEvent event) {
-        if (authenticate(txtUser.getText(), txtPass.getText())) {
+        // Intentamos autenticar
+        boolean autentico = authenticate(txtUser.getText(), txtPass.getText());
+
+        if (autentico) {
             try {
+                // Carga del menú principal
                 Parent mainRoot = FXMLLoader.load(
                         getClass().getResource("/fxml/MainMenu.fxml")
                 );
@@ -31,16 +37,26 @@ public class LoginController {
                 Stage stage = (Stage) btnIngresar.getScene().getWindow();
                 stage.setScene(mainScene);
                 stage.setTitle("Index Blooms – Menú Principal");
-                stage.centerOnScreen();
+                stage.centerOnScreen(); // Centra la ventana
+                stage.setMaximized(true);
             } catch (IOException e) {
                 e.printStackTrace();
+                // Podrías mostrar otra alerta aquí si falla la carga
             }
         } else {
-            // TODO: mostrar alerta
-            System.out.println("Usuario o contraseña incorrectos");
+            // Credenciales incorrectas: mostramos una alerta de error
+            Stage stage = (Stage) btnIngresar.getScene().getWindow();
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Error de inicio de sesión");
+            alert.setHeaderText(null);
+            alert.setContentText("Usuario o contraseña incorrectos");
+            alert.initOwner(stage);
+            alert.showAndWait();
+            txtUser.clear();
+            txtPass.clear();
+            txtUser.requestFocus();
         }
     }
-
     private boolean authenticate(String user, String pass) {
         return "admin".equals(user) && "admin".equals(pass);
     }

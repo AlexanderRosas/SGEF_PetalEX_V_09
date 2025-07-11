@@ -14,7 +14,7 @@
 <AnchorPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.example.sgef_petalex_v_09.controllers.GestionUsuariosController"
-            prefWidth="600" prefHeight="500">
+            prefWidth="800" prefHeight="700">
 
     <!-- Toolbar: acciones -->
     <VBox spacing="5" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">

@@ -58,6 +58,7 @@ public class MainMenuController {
             stage.setScene(scene);
             stage.setTitle("Index Blooms – Administración del Sistema");
             stage.centerOnScreen();
+            stage.setMaximized(true);
         } catch (IOException e) {
             e.printStackTrace();
         }
