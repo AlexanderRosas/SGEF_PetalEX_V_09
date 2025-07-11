@@ -28,7 +28,7 @@
         <graphic>
             <ImageView fitWidth="16" preserveRatio="true">
                 <image>
-                    <Image url="@../images/icon_back.png"/>
+                    <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_back.png"/>
                 </image>
             </ImageView>
         </graphic>
@@ -51,7 +51,7 @@
         <HBox spacing="10" styleClass="toolbar-buttons">
             <Button fx:id="btnNuevo"      text="Nuevo"      onAction="#onNuevo"      styleClass="toolbar-button"/>
             <Button fx:id="btnEditar"     text="Editar"     onAction="#onEditar"     styleClass="toolbar-button" disable="true"/>
-            <Button fx:id="btnReactivar"  text="Reactivar"  onAction="#onReactivar"  styleClass="toolbar-button" disable="true"/>
+            <Button fx:id="btnReactivar"  text="Cambiar Estado"  onAction="#onReactivar"  styleClass="toolbar-button" disable="true"/>
             <Button fx:id="btnExportar"   text="Exportar"   onAction="#onExportar"   styleClass="toolbar-button"/>
         </HBox>
         <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar-filters">

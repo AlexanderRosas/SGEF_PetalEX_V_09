@@ -18,13 +18,20 @@
     <Label fx:id="lblFecha"      styleClass="title-label" AnchorPane.topAnchor="70"  AnchorPane.leftAnchor="10"/>
 
     <!-- Botón Agregar Producto -->
+<HBox spacing="10"
+      AnchorPane.topAnchor="110"
+      AnchorPane.leftAnchor="10">
+
     <Button fx:id="btnAddItem"
             onAction="#onAddItem"
             styleClass="toolbar-button"
-            text="Agregar Producto"
-            AnchorPane.topAnchor="110"
-            AnchorPane.leftAnchor="10"/>
+            text="Agregar Producto"/>
 
+    <Button fx:id="btnRemoveItem"
+            onAction="#onRemoveItem"
+            styleClass="toolbar-button"
+            text="Eliminar Producto"/>
+</HBox>
     <!-- Tabla de Ítems -->
     <TableView fx:id="tableItems"
                AnchorPane.topAnchor="160"

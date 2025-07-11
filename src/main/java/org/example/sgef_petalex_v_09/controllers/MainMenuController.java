@@ -34,7 +34,7 @@ public class MainMenuController {
 
     @FXML
     private void onCompras(ActionEvent event) {
-        //cargarVista(event, "/fxml/ComprasPedidos.fxml", "Index Blooms – Compras y Pedidos");
+        cargarVista(event, "/fxml/ComprasPedidos.fxml", "Index Blooms – Compras y Pedidos");
     }
 
     @FXML

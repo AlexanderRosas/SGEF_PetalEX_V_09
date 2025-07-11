@@ -12,15 +12,24 @@
 
 <AnchorPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.example.sgef_petalex_v_09.controllers.RolesPermisosController"
+            fx:controller="org.example.sgef_petalex_v_09.controllers.ComprasController"
             fx:id="root"
             styleClass="root"
             prefWidth="800" prefHeight="700">
 
-    <!-- Toolbar: acciones específicas para roles y permisos -->
+    <!-- Toolbar: acciones -->
     <VBox spacing="5" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
         <HBox spacing="10" styleClass="toolbar-buttons">
-            <Button fx:id="btnActualizarRoles" text="Actualizar Roles" onAction="#onActualizarRoles" styleClass="toolbar-button">
+            <Button fx:id="btnNuevo" text="Nuevo" onAction="#onNuevo" styleClass="toolbar-button">
+                <graphic>
+                    <ImageView fitWidth="16" preserveRatio="true">
+                        <image>
+                            <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_new.png"/>
+                        </image>
+                    </ImageView>
+                </graphic>
+            </Button>
+            <Button fx:id="btnEditar" text="Editar" onAction="#onEditar" styleClass="toolbar-button" disable="true">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
@@ -29,11 +38,11 @@
                     </ImageView>
                 </graphic>
             </Button>
-            <Button fx:id="btnActualizarPermisos" text="Actualizar Permisos" onAction="#onActualizarPermisos" styleClass="toolbar-button">
+            <Button fx:id="btnEliminar" text="Eliminar" onAction="#onEliminar" styleClass="toolbar-button" disable="true">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
-                            <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_lock.png"/>
+                            <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_delete.png"/>
                         </image>
                     </ImageView>
                 </graphic>
@@ -49,26 +58,30 @@
             </Button>
         </HBox>
         <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar-filters">
-            <TextField fx:id="txtBuscar" promptText="Buscar usuario..." styleClass="search-field" />
-            <ComboBox fx:id="cbFiltroRol" promptText="Filtrar por Rol" styleClass="filter-combo" />
-            <ComboBox fx:id="cbFiltroEstado" promptText="Filtrar por Estado" styleClass="filter-combo" />
+            <TextField fx:id="txtBuscar" promptText="Buscar por proveedor o tipo" styleClass="search-field" />
+            <ComboBox fx:id="cbEstado" promptText="Estado" styleClass="filter-combo" />
         </HBox>
     </VBox>
 
-    <!-- Tabla de Usuarios con Roles y Permisos -->
-    <TableView fx:id="tableUsuariosRolesPermisos"
-               editable="true"
+    <!-- Tabla de Compras -->
+    <TableView fx:id="tableCompras"
+               editable="false"
                styleClass="table-clientes"
                AnchorPane.topAnchor="80"
                AnchorPane.leftAnchor="10"
                AnchorPane.rightAnchor="10"
                AnchorPane.bottomAnchor="10">
         <columns>
-            <TableColumn fx:id="colNombre"  text="Nombre"    prefWidth="150" />
-            <TableColumn fx:id="colUsuario" text="Usuario"   prefWidth="150" />
-            <TableColumn fx:id="colRol"     text="Rol"       prefWidth="150" editable="true"/>
-            <TableColumn fx:id="colPermisos" text="Permisos" prefWidth="200" editable="true"/>
-            <TableColumn fx:id="colEstado"  text="Estado"    prefWidth="100" />
+            <TableColumn fx:id="colId"           text="ID"              prefWidth="50" />
+            <TableColumn fx:id="colProveedor"    text="Proveedor"       prefWidth="150" />
+            <TableColumn fx:id="colRuc"          text="RUC"             prefWidth="120" />
+            <TableColumn fx:id="colTipoRosa"     text="Tipo Rosa"       prefWidth="120" />
+            <TableColumn fx:id="colTipoCorte"    text="Tipo Corte"      prefWidth="100" />
+            <TableColumn fx:id="colCantidad"     text="Cantidad"        prefWidth="80" />
+            <TableColumn fx:id="colUnidad"       text="Unidad"          prefWidth="80" />
+            <TableColumn fx:id="colCostoUnitario" text="Costo Unitario" prefWidth="100" />
+            <TableColumn fx:id="colFechaCompra"  text="Fecha Compra"    prefWidth="120" />
+            <TableColumn fx:id="colEstado"       text="Estado"          prefWidth="100" />
         </columns>
     </TableView>
 

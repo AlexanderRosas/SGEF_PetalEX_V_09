@@ -23,7 +23,7 @@
         <graphic>
             <ImageView fitWidth="20" preserveRatio="true">
                 <image>
-                    <Image url="@../images/icon_back.png"/>
+                    <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_back.png"/>
                 </image>
             </ImageView>
         </graphic>
@@ -45,7 +45,7 @@
             <graphic>
                 <ImageView fitWidth="16" preserveRatio="true">
                     <image>
-                        <Image url="@../images/icon_new.png"/>
+                        <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_new.png"/>
                     </image>
                 </ImageView>
             </graphic>
@@ -54,7 +54,7 @@
             <graphic>
                 <ImageView fitWidth="16" preserveRatio="true">
                     <image>
-                        <Image url="@../images/gestion_usuarios.png"/>
+                        <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/gestion_usuarios.png"/>
                     </image>
                 </ImageView>
             </graphic>
@@ -63,7 +63,7 @@
             <graphic>
                 <ImageView fitWidth="16" preserveRatio="true">
                     <image>
-                        <Image url="@../images/icon_delete.png"/>
+                        <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_delete.png"/>
                     </image>
                 </ImageView>
             </graphic>
@@ -72,7 +72,7 @@
             <graphic>
                 <ImageView fitWidth="16" preserveRatio="true">
                     <image>
-                        <Image url="@../images/icon_reactivate.png"/>
+                        <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_reactivate.png"/>
                     </image>
                 </ImageView>
             </graphic>

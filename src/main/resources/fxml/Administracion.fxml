@@ -26,7 +26,7 @@
             <graphic>
                 <ImageView fitWidth="24" preserveRatio="true">
                     <image>
-                        <Image url="@../images/gestion_usuarios.png"/>
+                        <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/gestion_usuarios.png"/>
                     </image>
                 </ImageView>
             </graphic>
@@ -41,7 +41,7 @@
             <graphic>
                 <ImageView fitWidth="24" preserveRatio="true">
                     <image>
-                        <Image url="@../images/image_cliente.png"/>
+                        <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/image_cliente.png"/>
                     </image>
                 </ImageView>
             </graphic>
@@ -50,20 +50,22 @@
             </text>
         </Button>
 
+        <!--
         <Button fx:id="btnParametrosNegocio"
-                onAction="#onParametrosNegocio"
-                styleClass="sidebar-button">
+            onAction="#onParametrosNegocio"
+            styleClass="sidebar-button">
             <graphic>
-                <ImageView fitWidth="24" preserveRatio="true">
-                    <image>
-                        <Image url="@../images/parametros_negocio.png"/>
-                    </image>
-                </ImageView>
+            <ImageView fitWidth="24" preserveRatio="true">
+                <image>
+                <Image url="@../images/parametros_negocio.png"/>
+                </image>
+            </ImageView>
             </graphic>
             <text>
-                <String fx:value="Parámetros de Negocio"/>
+            <String fx:value="Parámetros de Negocio"/>
             </text>
         </Button>
+        -->
 
     </VBox>
 
@@ -83,7 +85,7 @@
         <graphic>
             <ImageView fitWidth="20" preserveRatio="true">
                 <image>
-                    <Image url="@../images/icon_back.png"/>
+                    <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_back.png"/>
                 </image>
             </ImageView>
         </graphic>

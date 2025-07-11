@@ -10,7 +10,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -20,7 +19,6 @@ import org.example.sgef_petalex_v_09.util.DialogHelper;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Optional;
 
 public class VentasController {
 
