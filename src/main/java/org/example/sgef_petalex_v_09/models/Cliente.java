@@ -6,6 +6,15 @@ public class Cliente {
     private String direccion;
     private String telefono;
     private String correo;
+    private String estado; // Nuevo campo para el estado del cliente
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
 
     public Cliente() {
         // Constructor por defecto
@@ -17,6 +26,15 @@ public class Cliente {
         this.direccion = direccion;
         this.telefono = telefono;
         this.correo = correo;
+    }
+
+    public Cliente(int id, String nombre, String direccion, String telefono, String correo, String estado) {
+        this.id = id;
+        this.nombre = nombre;
+        this.direccion = direccion;
+        this.telefono = telefono;
+        this.correo = correo;
+        this.estado = estado;
     }
 
     // Getters y setters
@@ -69,6 +87,8 @@ public class Cliente {
                 ", direccion='" + direccion + '\'' +
                 ", telefono='" + telefono + '\'' +
                 ", correo='" + correo + '\'' +
+                ", estado='" + estado + '\'' +
                 '}';
     }
+
 }

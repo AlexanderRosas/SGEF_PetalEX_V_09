@@ -66,7 +66,8 @@ public class GestionUsuariosController {
                 new Usuario("Lucía Moreno", "lucia.m@example.com", "lmoreno", "Finanzas", "Inactivo"),
                 new Usuario("Diego Torres", "diego.t@example.com", "dtorres", "Finanzas", "Activo"),
                 new Usuario("Sofía Herrera", "sofia.h@example.com", "sherrera", "Gerente", "Inactivo"),
-                new Usuario("Fernando Castillo", "fernando.c@example.com", "fcastillo", "Administrador", "Inactivo"));
+                new Usuario("Fernando Castillo", "fernando.c@example.com", "fcastillo", "Administrador", "Inactivo"),
+                new Usuario("Raúl Córdova", "raul.cordova@example.com", "rcordova", "Administrador", "Activo"));
 
         // Wrap masterData in FilteredList
         filteredData = new FilteredList<>(masterData, p -> true);
@@ -148,6 +149,7 @@ public class GestionUsuariosController {
             }
         });
     }
+
     @FXML
     private void onReactivar(ActionEvent event) {
         Window owner = btnReactivar.getScene().getWindow();
@@ -182,77 +184,77 @@ public class GestionUsuariosController {
     }
 
     /** Diálogo genérico para crear/editar un Usuario */
- private Optional<Usuario> showUserFormDialog(String title, Usuario existing) {
-    Dialog<Usuario> dlg = new Dialog<>();
-    dlg.setTitle(title);
-    dlg.getDialogPane().getButtonTypes()
-            .addAll(new ButtonType("Cancelar", ButtonData.CANCEL_CLOSE),
-                    new ButtonType("Aceptar", ButtonData.OK_DONE));
+    private Optional<Usuario> showUserFormDialog(String title, Usuario existing) {
+        Dialog<Usuario> dlg = new Dialog<>();
+        dlg.setTitle(title);
+        dlg.getDialogPane().getButtonTypes()
+                .addAll(new ButtonType("Cancelar", ButtonData.CANCEL_CLOSE),
+                        new ButtonType("Aceptar", ButtonData.OK_DONE));
 
-    GridPane grid = new GridPane();
-    grid.setHgap(10);
-    grid.setVgap(10);
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
 
-    TextField txtNombre = new TextField();
-    txtNombre.setPromptText("Nombre");
-    TextField txtCorreo = new TextField();
-    txtCorreo.setPromptText("Correo");
-    TextField txtUsuario = new TextField();
-    txtUsuario.setPromptText("Usuario");
+        TextField txtNombre = new TextField();
+        txtNombre.setPromptText("Nombre");
+        TextField txtCorreo = new TextField();
+        txtCorreo.setPromptText("Correo");
+        TextField txtUsuario = new TextField();
+        txtUsuario.setPromptText("Usuario");
 
-    ComboBox<String> cbRol = new ComboBox<>(
-            FXCollections.observableArrayList("Administrador", "Finanzas", "Gerente", "Ventas"));
-    cbRol.setPromptText("Rol");
+        ComboBox<String> cbRol = new ComboBox<>(
+                FXCollections.observableArrayList("Administrador", "Finanzas", "Gerente", "Ventas"));
+        cbRol.setPromptText("Rol");
 
-    if (existing != null) {
-        txtNombre.setText(existing.getNombre());
-        txtCorreo.setText(existing.getCorreo());
-        txtUsuario.setText(existing.getUsuario());
-        // NO cargar ni mostrar rol
-    } else {
-        cbRol.setValue("Ventas"); // por defecto
-    }
-
-    // Campos comunes
-    grid.add(new Label("Nombre:"), 0, 0);
-    grid.add(txtNombre, 1, 0);
-    grid.add(new Label("Correo:"), 0, 1);
-    grid.add(txtCorreo, 1, 1);
-    grid.add(new Label("Usuario:"), 0, 2);
-    grid.add(txtUsuario, 1, 2);
-
-    if (existing == null) {
-        // Solo mostrar rol al crear
-        grid.add(new Label("Rol:"), 0, 3);
-        grid.add(cbRol, 1, 3);
-    }
-
-    dlg.getDialogPane().setContent(grid);
-
-    dlg.setResultConverter(bt -> {
-        if (bt.getButtonData() == ButtonData.OK_DONE) {
-            Usuario u = new Usuario();
-            if (existing != null)
-                u.setId(existing.getId());
-            u.setNombre(txtNombre.getText());
-            u.setCorreo(txtCorreo.getText());
-            u.setUsuario(txtUsuario.getText());
-
-            // Solo asignar rol al crear
-            if (existing == null) {
-                u.setRol(cbRol.getValue());
-                u.setEstado("Activo");
-            } else {
-                u.setRol(existing.getRol());
-                u.setEstado(existing.getEstado());
-            }
-
-            return u;
+        if (existing != null) {
+            txtNombre.setText(existing.getNombre());
+            txtCorreo.setText(existing.getCorreo());
+            txtUsuario.setText(existing.getUsuario());
+            // NO cargar ni mostrar rol
+        } else {
+            cbRol.setValue("Ventas"); // por defecto
         }
-        return null;
-    });
 
-    return dlg.showAndWait();
-}
+        // Campos comunes
+        grid.add(new Label("Nombre:"), 0, 0);
+        grid.add(txtNombre, 1, 0);
+        grid.add(new Label("Correo:"), 0, 1);
+        grid.add(txtCorreo, 1, 1);
+        grid.add(new Label("Usuario:"), 0, 2);
+        grid.add(txtUsuario, 1, 2);
+
+        if (existing == null) {
+            // Solo mostrar rol al crear
+            grid.add(new Label("Rol:"), 0, 3);
+            grid.add(cbRol, 1, 3);
+        }
+
+        dlg.getDialogPane().setContent(grid);
+
+        dlg.setResultConverter(bt -> {
+            if (bt.getButtonData() == ButtonData.OK_DONE) {
+                Usuario u = new Usuario();
+                if (existing != null)
+                    u.setId(existing.getId());
+                u.setNombre(txtNombre.getText());
+                u.setCorreo(txtCorreo.getText());
+                u.setUsuario(txtUsuario.getText());
+
+                // Solo asignar rol al crear
+                if (existing == null) {
+                    u.setRol(cbRol.getValue());
+                    u.setEstado("Activo");
+                } else {
+                    u.setRol(existing.getRol());
+                    u.setEstado(existing.getEstado());
+                }
+
+                return u;
+            }
+            return null;
+        });
+
+        return dlg.showAndWait();
+    }
 
 }

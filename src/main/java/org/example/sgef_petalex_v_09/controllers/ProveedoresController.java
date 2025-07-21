@@ -6,7 +6,6 @@ import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -248,13 +247,15 @@ public class ProveedoresController {
     @FXML
     private void onBack(ActionEvent event) {
         try {
-            Parent mainRoot = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Parent mainRoot = FXMLLoader.load(
+                    getClass().getResource("/fxml/MainMenu.fxml")
+            );
+            Stage stage = (Stage) btnBack.getScene().getWindow();
             Scene scene = stage.getScene();
-
             scene.setRoot(mainRoot);
             scene.getStylesheets().clear();
             scene.getStylesheets().add(
+<<<<<<< HEAD
                     getClass().getResource("/css/styles.css").toExternalForm());
 
             try {
@@ -269,6 +270,11 @@ public class ProveedoresController {
                 e.printStackTrace();
                 Thread.currentThread().interrupt();
             }
+=======
+                    getClass().getResource("/css/styles.css").toExternalForm()
+            );
+            stage.setMaximized(true);
+>>>>>>> c83e3e5c64f096d3e9bcd33b21bd6f6bcc86a3e2
             stage.setTitle("Index Blooms – Menú Principal");
         } catch (IOException e) {
             e.printStackTrace();

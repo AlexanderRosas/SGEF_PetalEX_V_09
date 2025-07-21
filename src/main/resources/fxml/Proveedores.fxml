@@ -28,7 +28,7 @@
         <graphic>
             <ImageView fitWidth="16" preserveRatio="true">
                 <image>
-                    <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/icon_back.png"/>
+                    <Image url="@../images/icon_back.png"/>
                 </image>
             </ImageView>
         </graphic>

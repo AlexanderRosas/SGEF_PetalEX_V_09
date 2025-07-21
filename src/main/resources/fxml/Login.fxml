@@ -19,7 +19,7 @@
                     <String fx:value="image-logo"/>
                 </styleClass>
                 <image>
-                    <Image url="@../../../../../../../Users/ASUS/Downloads/SGEF_PetalEX_V_09/SGEF_PetalEX_V_09/src/main/resources/images/index_blooms_logo.png"/>
+                    <Image url="@../images/index_blooms_logo.png"/>
                 </image>
             </ImageView>
 

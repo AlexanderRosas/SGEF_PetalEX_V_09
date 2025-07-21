@@ -35,6 +35,8 @@
             <TableColumn fx:id="colDireccion" text="Dirección" prefWidth="200"/>
             <TableColumn fx:id="colTelefono"  text="Teléfono"  prefWidth="150"/>
             <TableColumn fx:id="colCorreo"    text="Correo"    prefWidth="150"/>
+            <TableColumn fx:id="colEstado" text="Estado" prefWidth="100"/>
+
         </columns>
     </TableView>
 
