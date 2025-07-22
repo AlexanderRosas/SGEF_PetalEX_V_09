@@ -14,23 +14,10 @@ import java.io.IOException;
 
 public class AdministracionController {
 
-<<<<<<< HEAD
-    @FXML
-    private Button btnBack;
-    @FXML
-    private Button btnGestionUsuarios;
-    @FXML
-    private Button btnRolesPermisos;
-    @FXML
-    private Button btnParametrosNegocio;
-    @FXML
-    private AnchorPane contentPane;
-=======
     @FXML private Button btnBack;
     @FXML private Button btnGestionUsuarios;
     @FXML private Button btnRolesPermisos;
     @FXML private AnchorPane contentPane;
->>>>>>> c83e3e5c64f096d3e9bcd33b21bd6f6bcc86a3e2
 
     @FXML
     public void initialize() {
@@ -57,24 +44,10 @@ public class AdministracionController {
             scene.getStylesheets().add(
                     getClass().getResource("/css/styles.css").toExternalForm());
 
-<<<<<<< HEAD
-            try {
-                Thread.sleep(500);
-                stage.setHeight(600);
-                stage.setWidth(1000);
-                System.out.println("Ajustando tamaño...");
-                stage.setMaximized(true);
-                stage.centerOnScreen();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                Thread.currentThread().interrupt();
-            }
-=======
             // Asegura que siga maximizado
             stage.setMaximized(true);
 
             // Actualiza el título
->>>>>>> c83e3e5c64f096d3e9bcd33b21bd6f6bcc86a3e2
             stage.setTitle("Index Blooms – Menú Principal");
         } catch (IOException e) {
             e.printStackTrace();
@@ -114,13 +87,8 @@ public class AdministracionController {
         // Remover la clase active de todos los botones
         btnGestionUsuarios.getStyleClass().remove("active");
         btnRolesPermisos.getStyleClass().remove("active");
-<<<<<<< HEAD
-        // btnParametrosNegocio.getStyleClass().remove("active");
-
-=======
 
         
->>>>>>> c83e3e5c64f096d3e9bcd33b21bd6f6bcc86a3e2
         // Agregar la clase active al botón seleccionado
         activo.getStyleClass().add("active");
     }

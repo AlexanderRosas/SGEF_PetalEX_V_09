@@ -255,26 +255,9 @@ public class ProveedoresController {
             scene.setRoot(mainRoot);
             scene.getStylesheets().clear();
             scene.getStylesheets().add(
-<<<<<<< HEAD
-                    getClass().getResource("/css/styles.css").toExternalForm());
-
-            try {
-                Thread.sleep(500);
-                stage.setHeight(600);
-                stage.setWidth(1000);
-                System.out.println("Ajustando tamaño...");
-                stage.setMaximized(true);
-                stage.centerOnScreen();
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                Thread.currentThread().interrupt();
-            }
-=======
                     getClass().getResource("/css/styles.css").toExternalForm()
             );
             stage.setMaximized(true);
->>>>>>> c83e3e5c64f096d3e9bcd33b21bd6f6bcc86a3e2
             stage.setTitle("Index Blooms – Menú Principal");
         } catch (IOException e) {
             e.printStackTrace();

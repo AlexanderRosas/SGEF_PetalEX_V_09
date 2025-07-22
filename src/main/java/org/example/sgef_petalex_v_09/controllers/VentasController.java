@@ -36,11 +36,7 @@ public class VentasController {
     @FXML
     private Button btnAddVenta;
     @FXML
-<<<<<<< HEAD
-    private Button btnViewVenta;
-=======
     private Button btnAnularVenta;
->>>>>>> c83e3e5c64f096d3e9bcd33b21bd6f6bcc86a3e2
     @FXML
     private TableView<Venta> tableVentas;
     @FXML
@@ -50,81 +46,17 @@ public class VentasController {
     @FXML
     private TableColumn<Venta, Number> colTotal;
     @FXML
-<<<<<<< HEAD
-    private Button btnInactivarVenta;
-=======
     private TableColumn<Venta, String> colEstado;
     @FXML
     private TextField txtBuscar; // <--- Nuevo
     @FXML
     private ComboBox<String> cbEstado; // <--- Nuevo
->>>>>>> c83e3e5c64f096d3e9bcd33b21bd6f6bcc86a3e2
 
     private final ObservableList<Venta> allVentas = FXCollections.observableArrayList();
     private FilteredList<Venta> filteredVentas;
 
     @FXML
     public void initialize() {
-<<<<<<< HEAD
-        // Vincula las columnas a las propiedades de Venta
-        colCliente.setCellValueFactory(v -> v.getValue().clienteProperty());
-        colFecha.setCellValueFactory(v -> v.getValue().fechaProperty().asString());
-        colTotal.setCellValueFactory(v -> v.getValue().totalProperty());
-
-        tableVentas.setItems(ventas);
-        // Habilita el botón solo si hay selección
-        btnInactivarVenta.setDisable(true);
-        tableVentas.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
-            btnInactivarVenta.setDisable(newSel == null);
-        });
-    }
-
-    @FXML
-    private void onInactivarVenta(ActionEvent event) {
-        Venta ventaSeleccionada = tableVentas.getSelectionModel().getSelectedItem();
-        if (ventaSeleccionada == null) {
-            DialogHelper.showWarning(btnInactivarVenta.getScene().getWindow(), "Selecciona una venta primero");
-            return;
-        }
-        if (!ventaSeleccionada.isActiva()) {
-            DialogHelper.showWarning(btnInactivarVenta.getScene().getWindow(), "La venta ya está inactiva.");
-            return;
-        }
-        ventaSeleccionada.setActiva(false);
-        DialogHelper.showWarning(btnInactivarVenta.getScene().getWindow(), "La venta ha sido marcada como inactiva.");
-        // Si quieres refrescar la tabla, puedes hacer:
-        tableVentas.refresh();
-    }
-
-    @FXML
-    private void onBack(ActionEvent event) {
-        try {
-            Parent mainRoot = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene scene = stage.getScene();
-
-            scene.setRoot(mainRoot);
-            scene.getStylesheets().clear();
-            scene.getStylesheets().add(
-                    getClass().getResource("/css/styles.css").toExternalForm());
-
-            try {
-                Thread.sleep(500);
-                stage.setHeight(600);
-                stage.setWidth(1000);
-                System.out.println("Ajustando tamaño...");
-                stage.setMaximized(true);
-                stage.centerOnScreen();
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                Thread.currentThread().interrupt();
-            }
-            stage.setTitle("Index Blooms – Menú Principal");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-=======
         filteredVentas = new FilteredList<>(allVentas, p -> true);
 
         // Columnas
@@ -172,11 +104,10 @@ public class VentasController {
         Stage st = (Stage) btnBack.getScene().getWindow();
         st.getScene().setRoot(main);
         st.setTitle("Index Blooms – Menú Principal");
-        //st.setResizable(false);
-        //st.sizeToScene();
+        // st.setResizable(false);
+        // st.sizeToScene();
         st.setMaximized(true);
         st.centerOnScreen();
->>>>>>> c83e3e5c64f096d3e9bcd33b21bd6f6bcc86a3e2
     }
 
     @FXML
@@ -194,13 +125,6 @@ public class VentasController {
         selStage.showAndWait();
 
         Cliente c = selCtrl.getSelectedCliente();
-<<<<<<< HEAD
-        if (c == null) {
-            // El usuario canceló la selección
-            return;
-        }
-=======
->>>>>>> c83e3e5c64f096d3e9bcd33b21bd6f6bcc86a3e2
 
         // 2) Confirmar selección
         boolean confirmado = DialogHelper.confirm(
@@ -214,10 +138,7 @@ public class VentasController {
                 c.getNombre(),
                 c.getDireccion(),
                 LocalDate.now());
-<<<<<<< HEAD
-=======
-                nuevaVenta.setEstado("Activo");
->>>>>>> c83e3e5c64f096d3e9bcd33b21bd6f6bcc86a3e2
+        nuevaVenta.setEstado("Activo");
 
         // 4) Abrir detalle de venta
         FXMLLoader detLoader = new FXMLLoader(getClass().getResource("/fxml/VentaDetail.fxml"));
@@ -236,55 +157,28 @@ public class VentasController {
         detCtrl.getVentaCreated().ifPresent(v -> allVentas.add(v));
     }
 
-<<<<<<< HEAD
     @FXML
-    private void onViewVenta(ActionEvent event) throws IOException {
+    private void onAnularVenta(ActionEvent event) {
         Venta ventaSeleccionada = tableVentas.getSelectionModel().getSelectedItem();
         if (ventaSeleccionada == null) {
             DialogHelper.showWarning(
-                    btnViewVenta.getScene().getWindow(),
-                    "Selecciona una venta primero");
+                    btnAnularVenta.getScene().getWindow(),
+                    "Seleccione una venta para anular.");
             return;
         }
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/VentaDetail.fxml"));
-        Parent detailRoot = loader.load();
-        VentaDetailController detailCtrl = loader.getController();
-
-        // Inicializa con la venta existente
-        detailCtrl.initData(ventaSeleccionada);
-
-        Stage detailStage = new Stage();
-        detailStage.initOwner(btnViewVenta.getScene().getWindow());
-        detailStage.initModality(Modality.APPLICATION_MODAL);
-        detailStage.setScene(new Scene(detailRoot));
-        detailStage.setTitle("Detalle de Venta");
-        detailStage.showAndWait();
-=======
-   @FXML
-private void onAnularVenta(ActionEvent event) {
-    Venta ventaSeleccionada = tableVentas.getSelectionModel().getSelectedItem();
-    if (ventaSeleccionada == null) {
-        DialogHelper.showWarning(
+        boolean confirmado = DialogHelper.confirm(
                 btnAnularVenta.getScene().getWindow(),
-                "Seleccione una venta para anular.");
-        return;
->>>>>>> c83e3e5c64f096d3e9bcd33b21bd6f6bcc86a3e2
+                "¿Está seguro que desea anular la venta seleccionada?");
+        if (!confirmado)
+            return;
+
+        // Solo cambiamos el estado, no se elimina
+        ventaSeleccionada.setEstado("Anulado");
+
+        DialogHelper.showSuccess(
+                btnAnularVenta.getScene().getWindow(),
+                "anulado la venta");
     }
-
-    boolean confirmado = DialogHelper.confirm(
-            btnAnularVenta.getScene().getWindow(),
-            "¿Está seguro que desea anular la venta seleccionada?");
-    if (!confirmado)
-        return;
-
-    // Solo cambiamos el estado, no se elimina
-    ventaSeleccionada.setEstado("Anulado");
-
-    DialogHelper.showSuccess(
-            btnAnularVenta.getScene().getWindow(),
-            "anulado la venta");
-}
-
 
 }
