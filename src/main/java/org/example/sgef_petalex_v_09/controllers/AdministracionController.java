@@ -14,10 +14,14 @@ import java.io.IOException;
 
 public class AdministracionController {
 
-    @FXML private Button btnBack;
-    @FXML private Button btnGestionUsuarios;
-    @FXML private Button btnRolesPermisos;
-    @FXML private AnchorPane contentPane;
+    @FXML
+    private Button btnBack;
+    @FXML
+    private Button btnGestionUsuarios;
+    @FXML
+    private Button btnRolesPermisos;
+    @FXML
+    private AnchorPane contentPane;
 
     @FXML
     public void initialize() {
@@ -30,8 +34,7 @@ public class AdministracionController {
         try {
             // Carga el FXML del menú principal
             Parent mainRoot = FXMLLoader.load(
-                    getClass().getResource("/fxml/MainMenu.fxml")
-            );
+                    getClass().getResource("/fxml/MainMenu.fxml"));
             // Obtiene el Stage y reutiliza la Scene actual
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = stage.getScene();
@@ -66,7 +69,6 @@ public class AdministracionController {
         resaltarBoton(btnRolesPermisos);
     }
 
-
     private void cargarSeccion(String fxmlFile) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/" + fxmlFile));
@@ -88,7 +90,6 @@ public class AdministracionController {
         btnGestionUsuarios.getStyleClass().remove("active");
         btnRolesPermisos.getStyleClass().remove("active");
 
-        
         // Agregar la clase active al botón seleccionado
         activo.getStyleClass().add("active");
     }

@@ -14,7 +14,7 @@
             fx:controller="org.example.sgef_petalex_v_09.controllers.MainMenuController">
 
     <!-- Usuario estático en esquina superior derecha -->
-    <Label text="Bienvenido: Raúl Córdova"
+    <Label text="Bienvenido: Administrador"
            styleClass="user-label"
            AnchorPane.topAnchor="10.0"
            AnchorPane.rightAnchor="10.0" />
@@ -66,7 +66,7 @@
             </graphic>
         </Button>
 
-        <Button fx:id="btnVentas" text="VENTAS"
+        <Button fx:id="btnVentas" text="VENTAS-FACTURACIÓN"
                 styleClass="menu-button"
                 prefWidth="140" prefHeight="100"
                 onAction="#onVentas">
@@ -85,7 +85,7 @@
             </graphic>
         </Button>
 
-        <Button fx:id="btnCompras" text="COMPRAS-PEDIDOS"
+        <Button fx:id="btnCompras" text="COMPRAS"
                 styleClass="menu-button"
                 prefWidth="140" prefHeight="100"
                 onAction="#onCompras">
@@ -104,7 +104,7 @@
             </graphic>
         </Button>
 
-        <Button fx:id="btnProveedores" text="PROVEEDORES"
+        <Button fx:id="btnProveedores" text="PROVEEDORES-PRODUCTOS"
                 styleClass="menu-button"
                 prefWidth="140" prefHeight="100"
                 onAction="#onProveedores">
