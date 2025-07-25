@@ -185,9 +185,9 @@ public class GestionUsuariosController implements Initializable {
         // Mapa de permisos según rol
         Map<String,String> permisosMap = Map.of(
                 "Administrador", "ALL",
-                "Contador",      "FINANZAS,REPORTES",
+                "Finanzas",      "FINANZAS,REPORTES",
                 "Gerente",       "VENTAS,COMPRAS,REPORTES",
-                "Logistica",     "INVENTARIO,ENTREGAS"
+                "Ventas",     "INVENTARIO,ENTREGAS"
         );
 
         // Si estamos editando, precargar
