@@ -23,6 +23,7 @@ import javafx.stage.Stage;
 import org.example.sgef_petalex_v_09.models.Cliente;
 import org.example.sgef_petalex_v_09.models.Venta;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
+import org.example.sgef_petalex_v_09.util.NavigationHelper;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -131,16 +132,10 @@ public class VentasController {
     }
 
     @FXML
-    private void onBack(ActionEvent e) throws IOException {
-        Parent main = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
-        Stage st = (Stage) btnBack.getScene().getWindow();
-        st.getScene().setRoot(main);
-        st.setTitle("Index Blooms – Menú Principal");
-        // st.setResizable(false);
-        // st.sizeToScene();
-        st.setMaximized(true);
-        st.centerOnScreen();
+    private void onBack(ActionEvent event) {
+        NavigationHelper.volverAlMenuPrincipal(event);
     }
+
 
     @FXML
     private void onAddVenta(ActionEvent event) throws IOException {

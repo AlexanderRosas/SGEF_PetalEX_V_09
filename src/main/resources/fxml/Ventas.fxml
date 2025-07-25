@@ -14,8 +14,7 @@
         xmlns:fx="http://javafx.com/fxml"
         fx:controller="org.example.sgef_petalex_v_09.controllers.VentasController"
         styleClass="root"
-        fx:id="root"
-        prefWidth="1024" prefHeight="768">
+        fx:id="root">
 
         <!-- Volver + Título -->
         <Button fx:id="btnBack"

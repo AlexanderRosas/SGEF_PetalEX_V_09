@@ -4,77 +4,65 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
 
+<?import java.lang.String?>
 <AnchorPane xmlns="http://javafx.com/javafx/17"
-    xmlns:fx="http://javafx.com/fxml"
-    fx:controller="org.example.sgef_petalex_v_09.controllers.ComprasPedidosController">
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.sgef_petalex_v_09.controllers.ComprasPedidosController">
 
-    <!-- Sidebar lateral -->
-    <VBox fx:id="sidebar"
-        prefWidth="280"
-        spacing="10"
-        AnchorPane.leftAnchor="0"
-        AnchorPane.topAnchor="60"
-        AnchorPane.bottomAnchor="0"
-        styleClass="sidebar">
+    <!-- 1) BorderPane anclado 100% -->
+    <BorderPane AnchorPane.topAnchor="0.0"
+                AnchorPane.bottomAnchor="0.0"
+                AnchorPane.leftAnchor="0.0"
+                AnchorPane.rightAnchor="0.0">
 
-        <Button fx:id="btnSubmoduloCompras"
-            onAction="#onSubmoduloCompras"
-            styleClass="sidebar-button"
-            text="Gestión de Compras">
-            <graphic>
-                <ImageView fitWidth="24" preserveRatio="true">
-                    <image>
-                        <Image url="@../images/gestion_usuarios.png" />
-                    </image>
-                </ImageView>
-            </graphic>
-        </Button>
+        <!-- a) Top: Botón volver + título -->
+        <top>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+                <Button fx:id="btnBack"
+                        onAction="#onBack"
+                        styleClass="back-button">
+                    <graphic>
+                        <ImageView fitWidth="20" preserveRatio="true">
+                            <image>
+                                <Image url="@../images/icon_back.png"/>
+                            </image>
+                        </ImageView>
+                    </graphic>
+                    <text>
+                        <String fx:value="Volver"/>
+                    </text>
+                </Button>
+                <Label text="Compras y Pedidos"
+                       styleClass="header-title"/>
+            </HBox>
+        </top>
 
-        <Button fx:id="btnSubmoduloPedidos"
-            onAction="#onSubmoduloPedidos"
-            styleClass="sidebar-button"
-            text="Gestión de Pedidos">
-            <graphic>
-                <ImageView fitWidth="24" preserveRatio="true">
-                    <image>
-                        <Image url="@../images/image_cliente.png" />
-                    </image>
-                </ImageView>
-            </graphic>
-        </Button>
+        <!-- b) Left: Sidebar fijo -->
+        <left>
+            <VBox fx:id="sidebar"
+                  prefWidth="280"
+                  spacing="10">
+                <!-- Aquí van los botones del sidebar… -->
+            </VBox>
+        </left>
 
-    </VBox>
+        <!-- c) Center: Contenido principal -->
+        <center>
+            <VBox spacing="10">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+                <!-- Aquí tu tabla o formulario de Pedidos -->
+            </VBox>
+        </center>
 
-
-    <!-- Área de contenido central -->
-    <AnchorPane fx:id="contentPane"
-        AnchorPane.topAnchor="80"
-        AnchorPane.bottomAnchor="0"
-        AnchorPane.leftAnchor="280"
-        AnchorPane.rightAnchor="0" />
-
-    <!-- Botón volver -->
-    <Button fx:id="btnBack"
-        onAction="#onBack"
-        styleClass="back-button"
-        AnchorPane.topAnchor="10"
-        AnchorPane.leftAnchor="280"
-        text="Volver">
-        <graphic>
-            <ImageView fitWidth="20" preserveRatio="true">
-                <image>
-                    <Image url="@../images/icon_back.png" />
-                </image>
-            </ImageView>
-        </graphic>
-    </Button>
-
-    <!-- Título del módulo -->
-    <Label text="Compras y Pedidos"
-        styleClass="header-title"
-        AnchorPane.topAnchor="10"
-        AnchorPane.leftAnchor="400" />
-
+    </BorderPane>
 </AnchorPane>

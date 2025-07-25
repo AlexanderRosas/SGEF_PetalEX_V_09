@@ -1,59 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.example.sgef_petalex_v_09.controllers.ProductosController"
-            prefWidth="1024" prefHeight="768">
+<AnchorPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.sgef_petalex_v_09.controllers.ProductosController">
 
-    <!-- Barra de herramientas superior -->
-    <HBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10">
-        <Button fx:id="btnNuevo" 
-                onAction="#onNuevo" 
-                styleClass="toolbar-button" 
-                text="Nuevo Producto"/>
-        <Button fx:id="btnActualizar" 
-                onAction="#onActualizar" 
-                styleClass="toolbar-button" 
-                text="Actualizar Producto"/>
-        <Button fx:id="btnCambiarEstado" 
-                onAction="#onCambiarEstado" 
-                styleClass="toolbar-button" 
-                text="Cambiar Estado"/>
-        
-        <!-- Espaciador -->
-        <Region HBox.hgrow="ALWAYS"/>
-        
-        <!-- Filtros -->
-        <TextField fx:id="txtBuscar" 
-                   promptText="Buscar productos..." 
-                   prefWidth="200"/>
-        <ComboBox fx:id="cbEstado" 
-                  promptText="Estado" 
-                  prefWidth="120"/>
-    </HBox>
+    <!-- Contenedor principal responsivo -->
+    <VBox spacing="10"
+          AnchorPane.topAnchor="0.0"
+          AnchorPane.bottomAnchor="0.0"
+          AnchorPane.leftAnchor="0.0"
+          AnchorPane.rightAnchor="0.0">
+        <padding>
+            <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+        </padding>
 
-    <!-- Tabla de productos -->
-    <TableView fx:id="tableProductos"
-               AnchorPane.topAnchor="60"
-               AnchorPane.leftAnchor="10"
-               AnchorPane.rightAnchor="10"
-               AnchorPane.bottomAnchor="10"
-               tableMenuButtonVisible="false">
-        
-        <columns>
-            <TableColumn fx:id="colId" text="ID" prefWidth="80"/>
-            <TableColumn fx:id="colNombre" text="Nombre" prefWidth="150"/>
-            <TableColumn fx:id="colColor" text="Color" prefWidth="100"/>
-            <TableColumn fx:id="colUnidadMedida" text="Unidad" prefWidth="100"/>
-            <TableColumn fx:id="colEstado" text="Estado" prefWidth="80"/>
-            <TableColumn fx:id="colProveedor" text="Proveedor RUC" prefWidth="120"/>
-        </columns>
-        
-        <columnResizePolicy>
-            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-        </columnResizePolicy>
-    </TableView>
+        <!-- Barra de herramientas superior -->
+        <HBox spacing="10">
+            <Button fx:id="btnNuevo"
+                    onAction="#onNuevo"
+                    styleClass="toolbar-button"
+                    text="Nuevo Producto"/>
+            <Button fx:id="btnActualizar"
+                    onAction="#onActualizar"
+                    styleClass="toolbar-button"
+                    text="Actualizar Producto"/>
+            <Button fx:id="btnCambiarEstado"
+                    onAction="#onCambiarEstado"
+                    styleClass="toolbar-button"
+                    text="Cambiar Estado"/>
+            <!-- Espaciador flexible -->
+            <Region HBox.hgrow="ALWAYS"/>
+            <!-- Filtros -->
+            <TextField fx:id="txtBuscar"
+                       promptText="Buscar productos..."
+                       prefWidth="200"/>
+            <ComboBox fx:id="cbEstado"
+                      promptText="Estado"
+                      prefWidth="120"/>
+        </HBox>
+
+        <!-- Tabla de productos expansiva -->
+        <TableView fx:id="tableProductos"
+                   VBox.vgrow="ALWAYS"
+                   tableMenuButtonVisible="false">
+            <columns>
+                <TableColumn fx:id="colId"           text="ID"             prefWidth="80"/>
+                <TableColumn fx:id="colNombre"       text="Nombre"         prefWidth="150"/>
+                <TableColumn fx:id="colColor"        text="Color"          prefWidth="100"/>
+                <TableColumn fx:id="colUnidadMedida" text="Unidad"         prefWidth="100"/>
+                <TableColumn fx:id="colEstado"       text="Estado"         prefWidth="80"/>
+                <TableColumn fx:id="colProveedor"    text="Proveedor RUC" prefWidth="120"/>
+            </columns>
+            <columnResizePolicy>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+        </TableView>
+
+    </VBox>
 
 </AnchorPane>

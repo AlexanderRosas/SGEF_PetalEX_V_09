@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.example.sgef_petalex_v_09.models.Proveedor;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
+import org.example.sgef_petalex_v_09.util.NavigationHelper;
 import org.example.sgef_petalex_v_09.validators.DataValidator;
 import org.example.sgef_petalex_v_09.validators.TextFieldValidator;
 import org.example.sgef_petalex_v_09.validators.ValidationResult;
@@ -238,20 +239,9 @@ public class ProveedoresController {
 
     @FXML
     private void onBack(ActionEvent event) {
-        try {
-            Parent main = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
-            Stage st = (Stage) btnBack.getScene().getWindow();
-            st.getScene().setRoot(main);
-            st.setTitle("Index Blooms – Menú Principal");
-            // st.setResizable(false);
-            // st.sizeToScene();
-            st.setMaximized(true);
-            st.centerOnScreen();
-        } catch (IOException e) {
-            e.printStackTrace();
-            DialogHelper.showError(getWindow(), "Error al volver al menú principal");
-        }
+        NavigationHelper.volverAlMenuPrincipal(event);
     }
+
 
     private Optional<Proveedor> mostrarFormularioProveedor(String titulo, Proveedor proveedorExistente) {
         Dialog<Proveedor> dialog = new Dialog<>();

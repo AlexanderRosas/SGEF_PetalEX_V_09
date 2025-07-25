@@ -6,21 +6,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
-import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.example.sgef_petalex_v_09.models.Cliente;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
+import org.example.sgef_petalex_v_09.util.NavigationHelper;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.Random;
 
@@ -274,29 +269,6 @@ public class ClientesController {
 
     @FXML
     private void onBack(ActionEvent event) {
-        try {
-            // Carga el FXML del menú principal
-            Parent mainRoot = FXMLLoader.load(
-                    getClass().getResource("/fxml/MainMenu.fxml"));
-            // Obtiene el Stage y reutiliza la Scene actual
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene scene = stage.getScene();
-
-            // Reemplaza la raíz sin crear nueva Scene
-            scene.setRoot(mainRoot);
-
-            // Reaplica tu CSS
-            scene.getStylesheets().clear();
-            scene.getStylesheets().add(
-                    getClass().getResource("/css/styles.css").toExternalForm());
-
-            // Asegura que siga maximizado
-            // stage.setMaximized(true);
-
-            // Actualiza el título
-            stage.setTitle("Index Blooms – Menú Principal");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        NavigationHelper.volverAlMenuPrincipal(event);
     }
 }

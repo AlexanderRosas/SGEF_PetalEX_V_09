@@ -11,8 +11,7 @@
 <AnchorPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.example.sgef_petalex_v_09.controllers.ClienteSelectionController"
-            styleClass="root"
-            prefWidth="600" prefHeight="400">
+            styleClass="root">
 
     <Label text="Seleccionar Cliente"
            styleClass="header-title"

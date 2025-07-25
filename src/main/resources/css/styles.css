@@ -276,3 +276,8 @@
     -fx-border-color: #dc3545;
     -fx-effect: dropshadow(gaussian, rgba(220, 53, 69, 0.6), 5, 0.0, 0, 1);
 }
+
+#root {
+    -fx-border-color: red;
+    -fx-border-width: 2px;
+}

@@ -37,7 +37,7 @@ public class LoginController {
                         getClass().getResource("/css/styles.css").toExternalForm());
                 Stage stage = (Stage) btnIngresar.getScene().getWindow();
                 stage.setScene(mainScene);
-                stage.setMaximized(true);
+                //stage.setMaximized(true);
                 stage.centerOnScreen();
                 stage.setTitle("Index Blooms – Menú Principal");
             } catch (IOException e) {
