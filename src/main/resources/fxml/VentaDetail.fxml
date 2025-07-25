@@ -7,7 +7,7 @@
 
 <?import javafx.scene.layout.HBox?>
 <AnchorPane xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml"
+            xmlns:fx="http://javafx.com/fxml" xmlns:fx=""
             fx:controller="org.example.sgef_petalex_v_09.controllers.VentaDetailController"
             styleClass="root"
             prefWidth="800" prefHeight="600">
@@ -37,7 +37,7 @@
             onAction="#onRemoveItem"
             styleClass="toolbar-button"
             text="Eliminar Producto"/>
-</HBox>
+</AnchorPane>
     <!-- Tabla de Ítems -->
     <TableView fx:id="tableItems"
                AnchorPane.topAnchor="160"

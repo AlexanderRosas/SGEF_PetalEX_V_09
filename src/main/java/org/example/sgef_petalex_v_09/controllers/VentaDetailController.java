@@ -256,4 +256,6 @@ public class VentaDetailController {
         return null;
     }
 
+    public void onEliminarItem(ActionEvent actionEvent) {
+    }
 }
