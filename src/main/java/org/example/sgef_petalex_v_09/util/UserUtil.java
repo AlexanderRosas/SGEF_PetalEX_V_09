@@ -90,7 +90,6 @@ public class UserUtil {
     }
 
     public static Usuario buscarUsuario(String usuario, String password) {
-        // Aquí deberías implementar la validación real de contraseña
         return leerUsuarios().stream()
                 .filter(u -> u.getUsuario().equals(usuario) && u.getEstado().equals("Activo"))
                 .findFirst()

@@ -48,7 +48,7 @@ public class AdministracionController {
                     getClass().getResource("/css/styles.css").toExternalForm());
 
             // Asegura que siga maximizado
-            stage.setMaximized(true);
+            //stage.setMaximized(true);
 
             // Actualiza el título
             stage.setTitle("Index Blooms – Menú Principal");

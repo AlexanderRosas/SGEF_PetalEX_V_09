@@ -70,9 +70,8 @@ public class LoginController {
             // Iniciar sesión
             UserSession.iniciarSesion(usuarioEncontrado);
 
-            // Mostrar mensaje de bienvenida
-            DialogHelper.showSuccess(btnIngresar.getScene().getWindow(),
-                "Bienvenido " + usuarioEncontrado.getNombre());
+
+
 
             // Cargar menú principal usando el mismo método que MainMenuController
             try {

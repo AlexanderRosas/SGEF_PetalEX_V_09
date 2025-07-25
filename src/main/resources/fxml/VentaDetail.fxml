@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -9,79 +8,67 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.example.sgef_petalex_v_09.controllers.VentaDetailController">
 
-    <VBox spacing="10" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" 
+    <VBox spacing="10" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <padding>
             <Insets top="10" right="10" bottom="10" left="10"/>
         </padding>
 
         <!-- Información del Cliente -->
-        <GridPane hgap="10" vgap="5" styleClass="info-panel">
-            <Label fx:id="lblCliente" 
-                   styleClass="info-label"
-                   GridPane.columnIndex="0" 
-                   GridPane.rowIndex="0"/>
-           
-            <Label fx:id="lblDireccion" 
-                   styleClass="info-label"
-                   GridPane.columnIndex="0" 
-                   GridPane.rowIndex="1"/>
-           
-            <Label fx:id="lblTelefono" 
-                   styleClass="info-label"
-                   GridPane.columnIndex="0" 
-                   GridPane.rowIndex="2"/>
-           
-            <Label fx:id="lblCorreo" 
-                   styleClass="info-label"
-                   GridPane.columnIndex="0" 
-                   GridPane.rowIndex="3"/>
-           
-            <Label fx:id="lblFecha" 
-                   styleClass="info-label"
-                   GridPane.columnIndex="1" 
-                   GridPane.rowIndex="0"/>
-           
-            <Label fx:id="lblTipoDestino" 
-                   styleClass="info-label"
-                   GridPane.columnIndex="1" 
-                   GridPane.rowIndex="1"/>
-           
-            <Label fx:id="lblEstadoCliente" 
-                   styleClass="estado-label"
-                   GridPane.columnIndex="1" 
-                   GridPane.rowIndex="2"/>
+        <GridPane hgap="20" vgap="5" styleClass="info-panel">
+            <Label fx:id="lblCliente"      styleClass="info-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <Label fx:id="lblDireccion"    styleClass="info-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <Label fx:id="lblTelefono"     styleClass="info-label" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <Label fx:id="lblCorreo"       styleClass="info-label" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+
+            <Label fx:id="lblFecha"        styleClass="info-label" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+            <Label fx:id="lblTipoDestino"  styleClass="info-label" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+            <Label fx:id="lblEstadoCliente" styleClass="estado-label" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
         </GridPane>
 
         <!-- Barra de herramientas -->
         <HBox spacing="10">
-            <Button fx:id="btnAddItem" text="Agregar Producto"/>
-            <Button fx:id="btnRemoveItem" text="Eliminar Producto"/>
+            <Button fx:id="btnAddItem"
+                    text="Agregar Producto"
+                    onAction="#onAddItem"
+                    styleClass="toolbar-button"/>
+            <Button fx:id="btnEliminarItem"
+                    text="Eliminar Producto"
+                    onAction="#onEliminarItem"
+                    styleClass="toolbar-button"
+                    disable="true"/>
         </HBox>
 
-        <!-- Tabla de Items -->
+        <!-- Tabla de Ítems -->
         <TableView fx:id="tableItems" VBox.vgrow="ALWAYS">
             <columns>
-                <TableColumn fx:id="colItem" text="Item" prefWidth="50"/>
-                <TableColumn fx:id="colVariedad" text="Variedad" prefWidth="150"/>
-                <TableColumn fx:id="colPaquete" text="Paquete" prefWidth="150"/>
-                <TableColumn fx:id="colCantidad" text="Cantidad" prefWidth="100"/>
-                <TableColumn fx:id="colPrecioU" text="Precio U." prefWidth="100"/>
-                <TableColumn fx:id="colPrecioT" text="Precio T." prefWidth="100">
-    <cellValueFactory>
-        <PropertyValueFactory property="precioTotal"/>
-    </cellValueFactory>
-</TableColumn>
+                <TableColumn fx:id="colItem"     text="Item"      prefWidth="50"/>
+                <TableColumn fx:id="colVariedad" text="Variedad"  prefWidth="150"/>
+                <TableColumn fx:id="colPaquete"  text="Paquete"   prefWidth="150"/>
+                <TableColumn fx:id="colCantidad" text="Cantidad"  prefWidth="100"/>
+                <TableColumn fx:id="colPrecioU"  text="Precio U." prefWidth="100"/>
+                <TableColumn fx:id="colPrecioT"  text="Precio T." prefWidth="100">
+                    <cellValueFactory>
+                        <PropertyValueFactory property="precioTotal"/>
+                    </cellValueFactory>
+                </TableColumn>
             </columns>
         </TableView>
 
         <!-- Pie: Total y Botones -->
         <HBox spacing="10" alignment="CENTER_RIGHT">
-            <Label text="Total:"/>
-            <Label fx:id="lblTotal" text=" "/>
+            <Label text="Total:" styleClass="title-label"/>
+            <Label fx:id="lblTotal" styleClass="title-label"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="btnCancelVenta" text="Cancelar"/>
-            <Button fx:id="btnAcceptVenta" text="Aceptar Venta"/>
+            <Button fx:id="btnCancelVenta"
+                    text="Cancelar"
+                    onAction="#onCancelVenta"
+                    styleClass="toolbar-button"/>
+            <Button fx:id="btnAcceptVenta"
+                    text="Aceptar Venta"
+                    onAction="#onAcceptVenta"
+                    styleClass="toolbar-button"
+                    disable="true"/>
         </HBox>
     </VBox>
 </AnchorPane>

@@ -11,11 +11,13 @@ import javafx.scene.layout.VBox;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import org.example.sgef_petalex_v_09.models.ItemVenta;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
 
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class RoseSelectionController implements Initializable {
@@ -84,4 +86,6 @@ public class RoseSelectionController implements Initializable {
     public String getSelectedRose() {
         return selectedRose;
     }
+
+
 }

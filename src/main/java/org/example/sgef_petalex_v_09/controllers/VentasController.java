@@ -11,6 +11,8 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -21,6 +23,8 @@ import org.example.sgef_petalex_v_09.util.NavigationHelper;
 import org.example.sgef_petalex_v_09.util.UserSession;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -180,7 +184,26 @@ public class VentasController implements Initializable {
             });
 
         } catch (IOException e) {
-            showError("Error al crear nueva venta", e);
+            // Construir la traza en un String
+            StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            String exceptionText = sw.toString();
+
+            // TextArea para que puedas copiarla
+            TextArea textArea = new TextArea(exceptionText);
+            textArea.setEditable(false);
+            textArea.setWrapText(true);
+            textArea.setMaxWidth(Double.MAX_VALUE);
+            textArea.setMaxHeight(Double.MAX_VALUE);
+            GridPane.setVgrow(textArea, Priority.ALWAYS);
+            GridPane.setHgrow(textArea, Priority.ALWAYS);
+
+            // Mostrarla en un Alert
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error al crear nueva venta");
+            alert.setHeaderText(e.getMessage());
+            alert.getDialogPane().setContent(textArea);
+            alert.showAndWait();
         }
     }
 

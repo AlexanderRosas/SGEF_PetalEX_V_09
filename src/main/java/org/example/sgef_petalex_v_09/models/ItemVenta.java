@@ -13,6 +13,16 @@ public class ItemVenta {
 
     public ItemVenta() {}
 
+
+    public ItemVenta(int nroItem, String variedad, String paquete, int cantidad, double precioUnitario) {
+        this.item.set(nroItem);
+        this.variedad.set(variedad);
+        this.paquete.set(paquete);
+        this.cantidad.set(cantidad);
+        this.precioUnit.set(precioUnitario);
+        this.precioTotal.set(precioUnitario * cantidad);
+    }
+
     public int getItem() { return item.get(); }
     public void setItem(int i) { item.set(i); }
     public IntegerProperty itemProperty() { return item; }
@@ -42,4 +52,8 @@ public class ItemVenta {
     }
 
 
+    public BooleanExpression precioUnitarioProperty() {
+
+        return null;
+    }
 }
