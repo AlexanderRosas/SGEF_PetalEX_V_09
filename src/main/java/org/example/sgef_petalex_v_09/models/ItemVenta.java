@@ -35,4 +35,8 @@ public class ItemVenta {
     public double getPrecioTotal() { return precioTotal.get(); }
     public void setPrecioTotal(double t) { precioTotal.set(t); }
     public DoubleProperty precioTotalProperty() { return precioTotal; }
+
+    public Object getDescripcion() {
+        return "Item: " + item + " - " + variedad + " - " + paquete + " - " + cantidad + " - " + precioUnit + " - " + precioTotal;
+    }
 }

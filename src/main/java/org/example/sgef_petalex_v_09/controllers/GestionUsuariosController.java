@@ -55,20 +55,6 @@ public class GestionUsuariosController {
         colRol.setCellValueFactory(new PropertyValueFactory<>("rol"));
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
 
-        // Datos de ejemplo
-        masterData.addAll(
-                new Usuario("Laura Gomez", "laura@example.com", "lgomez", "Administrador", "Activo"),
-                new Usuario("Carlos Pérez", "carlos@example.com", "cperez", "Ventas", "Activo"),
-                new Usuario("María Rodríguez", "maria.rod@example.com", "mrod", "Gerente", "Activo"),
-                new Usuario("Jorge Martínez", "jorge.m@example.com", "jmart", "Ventas", "Activo"),
-                new Usuario("Ana Fernández", "ana.f@example.com", "afdez", "Ventas", "Activo"),
-                new Usuario("Pedro Sánchez", "pedro.s@example.com", "psanchez", "Administrador", "Activo"),
-                new Usuario("Lucía Moreno", "lucia.m@example.com", "lmoreno", "Finanzas", "Inactivo"),
-                new Usuario("Diego Torres", "diego.t@example.com", "dtorres", "Finanzas", "Activo"),
-                new Usuario("Sofía Herrera", "sofia.h@example.com", "sherrera", "Gerente", "Inactivo"),
-                new Usuario("Fernando Castillo", "fernando.c@example.com", "fcastillo", "Administrador", "Inactivo"),
-                new Usuario("Raúl Córdova", "raul.cordova@example.com", "rcordova", "Administrador", "Activo"));
-
         // Wrap masterData in FilteredList
         filteredData = new FilteredList<>(masterData, p -> true);
         tableUsuarios.setItems(filteredData);

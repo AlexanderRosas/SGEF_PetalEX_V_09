@@ -1,260 +1,232 @@
 package org.example.sgef_petalex_v_09.controllers;
 
-import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
-
-// Agrega imports para escuchar cambios
-
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.example.sgef_petalex_v_09.models.Cliente;
 import org.example.sgef_petalex_v_09.models.Venta;
-import org.example.sgef_petalex_v_09.util.DialogHelper;
+import org.example.sgef_petalex_v_09.util.CSVUtil;
+import org.example.sgef_petalex_v_09.util.NavigationHelper;
+import org.example.sgef_petalex_v_09.util.ScreenManager;
+import org.example.sgef_petalex_v_09.util.UserSession;
 
 import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
-public class VentasController {
+import static org.example.sgef_petalex_v_09.util.CSVUtil.VENTAS_CSV;
 
-    @FXML
-    private AnchorPane root;
-    @FXML
-    private Button btnBack;
-    @FXML
-    private Button btnAddVenta;
-    @FXML
-    private Button btnActualizarVenta;
-    @FXML
-    private Button btnAnularVenta;
-    @FXML
-    private TableView<Venta> tableVentas;
-    @FXML
-    private TableColumn<Venta, String> colCliente;
-    @FXML
-    private TableColumn<Venta, String> colFecha;
-    @FXML
-    private TableColumn<Venta, Number> colTotal;
-    @FXML
-    private TableColumn<Venta, String> colEstado;
-    @FXML
-    private TextField txtBuscar; // <--- Nuevo
-    @FXML
-    private ComboBox<String> cbEstado; // <--- Nuevo
+public class VentasController implements Initializable {
 
-    private final ObservableList<Venta> allVentas = FXCollections.observableArrayList();
-    private FilteredList<Venta> filteredVentas;
+    @FXML private Button btnBack;
+    @FXML private TextField txtPuntoEmision;
+    @FXML private TextField txtFecha;
+    @FXML private TextField txtSucursal;
+    @FXML private Button btnNuevo;
+    @FXML private Button btnRecaudar;
+    @FXML private Button btnEliminar;
+    
+    @FXML private TableView<Venta> tablaVentas;
+    @FXML private TableColumn<Venta, String> colId;
+    @FXML private TableColumn<Venta, String> colDestino;
+    @FXML private TableColumn<Venta, String> colServicio;
+    @FXML private TableColumn<Venta, String> colCliente;
+    @FXML private TableColumn<Venta, String> colDetalle;
+    @FXML private TableColumn<Venta, Double> colPrecio;
+    @FXML private TableColumn<Venta, Double> colIva;
+    @FXML private TableColumn<Venta, Double> colTotal;
 
-    @FXML
-    public void initialize() {
-        filteredVentas = new FilteredList<>(allVentas, p -> true);
+    private ObservableList<Venta> listaVentas = FXCollections.observableArrayList();
 
-        // Columnas
-        colCliente.setCellValueFactory(v -> v.getValue().clienteProperty());
-        colFecha.setCellValueFactory(v -> v.getValue().fechaProperty().asString());
-        colTotal.setCellValueFactory(v -> v.getValue().totalProperty());
-        colEstado.setCellValueFactory(v -> v.getValue().estadoProperty()); // Vinculación
-        // Inicializa ComboBox de estado (ejemplo)
-        cbEstado.getItems().addAll("Todos", "Activo", "Anulado");
-        cbEstado.getSelectionModel().selectFirst(); // seleccionar "Todos" por defecto
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        // Configurar columnas
+        configurarColumnas();
+        
+        // Cargar datos
+        cargarDatos();
+        
+        // Configurar campos fijos
+        configurarCamposFijos();
+        
+        // Configurar listeners
+        configurarListeners();
+    }
 
-        // Inicializa FilteredList con todos los datos
-        filteredVentas = new FilteredList<>(allVentas, p -> true);
+    private void configurarColumnas() {
+        colId.setCellValueFactory(c -> c.getValue().idProperty());
+        colDestino.setCellValueFactory(c -> c.getValue().tipoDestinoProperty());
+        colServicio.setCellValueFactory(c -> c.getValue().servicioProperty());
+        colCliente.setCellValueFactory(c -> c.getValue().clienteProperty());
+        colDetalle.setCellValueFactory(c -> new SimpleStringProperty(
+                String.valueOf(c.getValue().getDetalleResumen())));
+        colPrecio.setCellValueFactory(c -> c.getValue().precioProperty().asObject());
+        colIva.setCellValueFactory(c -> c.getValue().ivaProperty().asObject());
+        colTotal.setCellValueFactory(c -> c.getValue().totalProperty().asObject());
 
-        // Escuchar cambios en txtBuscar y cbEstado para filtrar
-        txtBuscar.textProperty().addListener((obs, oldVal, newVal) -> filtrar());
-        cbEstado.valueProperty().addListener((obs, oldVal, newVal) -> filtrar());
+        // Formato para columnas numéricas
+        configurarFormatoColumnas();
+    }
 
-        // Conecta FilteredList a la tabla con SortedList para ordenar si quieres
-        SortedList<Venta> sortedList = new SortedList<>(filteredVentas);
-        sortedList.comparatorProperty().bind(tableVentas.comparatorProperty());
-        tableVentas.setItems(sortedList);
-
-        // Configurar botones según selección de tabla
-        tableVentas.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
-            btnActualizarVenta.setDisable(newSel == null);
-            btnAnularVenta.setDisable(newSel == null || "Anulado".equals(newSel.getEstado()));
+    private void configurarFormatoColumnas() {
+        colPrecio.setCellFactory(tc -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double precio, boolean empty) {
+                super.updateItem(precio, empty);
+                if (empty || precio == null) {
+                    setText(null);
+                } else {
+                    setText(String.format("$%.2f", precio));
+                }
+            }
         });
 
-        // Inicialmente deshabilitar botones
-        btnActualizarVenta.setDisable(true);
-        btnAnularVenta.setDisable(true);
+        colIva.setCellFactory(tc -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double iva, boolean empty) {
+                super.updateItem(iva, empty);
+                if (empty || iva == null) {
+                    setText(null);
+                } else {
+                    setText(String.format("$%.2f", iva));
+                }
+            }
+        });
 
-        // Agregar datos de prueba
-        cargarDatosPrueba();
-    }
-
-    private void cargarDatosPrueba() {
-        // Datos de ejemplo para testing
-        Venta v1 = new Venta("Juan Pérez", "Calle 123", LocalDate.now().minusDays(2));
-        v1.setEstado("Activo");
-        v1.setTotal(150.50);
-
-        Venta v2 = new Venta("María González", "Av. Principal 456", LocalDate.now().minusDays(1));
-        v2.setEstado("Activo");
-        v2.setTotal(320.75);
-
-        Venta v3 = new Venta("Carlos López", "Plaza Central 789", LocalDate.now());
-        v3.setEstado("Anulado");
-        v3.setTotal(89.25);
-
-        allVentas.addAll(v1, v2, v3);
-    }
-
-    private void filtrar() {
-        String texto = txtBuscar.getText() != null ? txtBuscar.getText().toLowerCase() : "";
-        String estadoSeleccionado = cbEstado.getValue();
-
-        filteredVentas.setPredicate(venta -> {
-            boolean coincideTexto = texto.isEmpty() ||
-                    venta.getCliente().toLowerCase().contains(texto) ||
-                    venta.getFecha().toString().contains(texto) ||
-                    String.valueOf(venta.getTotal()).contains(texto);
-
-            boolean coincideEstado = estadoSeleccionado == null || estadoSeleccionado.equals("Todos") ||
-                    venta.getEstado().equalsIgnoreCase(estadoSeleccionado);
-
-            return coincideTexto && coincideEstado;
+        colTotal.setCellFactory(tc -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double total, boolean empty) {
+                super.updateItem(total, empty);
+                if (empty || total == null) {
+                    setText(null);
+                } else {
+                    setText(String.format("$%.2f", total));
+                }
+            }
         });
     }
 
-    @FXML
-    private void onBack(ActionEvent e) throws IOException {
-        Parent main = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
-        Stage st = (Stage) btnBack.getScene().getWindow();
-        st.getScene().setRoot(main);
-        st.setTitle("Index Blooms – Menú Principal");
-        // st.setResizable(false);
-        // st.sizeToScene();
-        st.setMaximized(true);
-        st.centerOnScreen();
+    private void cargarDatos() {
+        listaVentas.clear();
+        listaVentas.addAll(CSVUtil.leerVentas());
+        tablaVentas.setItems(listaVentas);
+    }
+
+    private void configurarCamposFijos() {
+        txtPuntoEmision.setText(UserSession.getPuntoEmision());
+        txtFecha.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yy")));
+        txtSucursal.setText(UserSession.getSucursal());
+        
+        txtPuntoEmision.setEditable(false);
+        txtFecha.setEditable(false);
+        txtSucursal.setEditable(false);
+    }
+
+    private void configurarListeners() {
+        // Listener para selección en tabla
+        tablaVentas.getSelectionModel().selectedItemProperty().addListener(
+            (obs, oldSel, newSel) -> {
+                boolean haySeleccion = (newSel != null);
+                btnRecaudar.setDisable(!haySeleccion);
+                btnEliminar.setDisable(!haySeleccion);
+            }
+        );
     }
 
     @FXML
-    private void onAddVenta(ActionEvent event) throws IOException {
-        // 1) Selección de cliente
-        FXMLLoader selLoader = new FXMLLoader(getClass().getResource("/fxml/ClienteSelection.fxml"));
-        Parent selRoot = selLoader.load();
-        ClienteSelectionController selCtrl = selLoader.getController();
+    private void onNuevo(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/VentaDetail.fxml"));
+            Parent root = loader.load();
 
-        Stage selStage = new Stage();
-        selStage.initOwner(btnAddVenta.getScene().getWindow());
-        selStage.initModality(Modality.APPLICATION_MODAL);
-        selStage.setScene(new Scene(selRoot));
-        selStage.setTitle("Seleccionar Cliente");
-        selStage.showAndWait();
+            Stage ventaDetailStage = new Stage();
+            ventaDetailStage.initModality(Modality.WINDOW_MODAL);
+            ventaDetailStage.initOwner(((Node)event.getSource()).getScene().getWindow());
+            ventaDetailStage.setTitle("Nueva Venta");
+            ventaDetailStage.setScene(new Scene(root));
 
-        Cliente c = selCtrl.getSelectedCliente();
-
-        // Validar que se seleccionó un cliente
-        if (c == null) {
-            DialogHelper.showWarning(
-                    btnAddVenta.getScene().getWindow(),
-                    "Debe seleccionar un cliente para continuar.");
-            return;
+            VentaDetailController controller = loader.getController();
+            
+            ventaDetailStage.showAndWait();
+            
+            controller.getVentaCreated().ifPresent(venta -> {
+                String id = String.format("V%03d", listaVentas.size() + 1);
+                venta.setId(id);
+                venta.setFecha(LocalDate.now());
+                
+                listaVentas.add(venta);
+                CSVUtil.guardarVentas(listaVentas);
+            });
+            
+        } catch (IOException e) {
+            mostrarError("Error al crear nueva venta", e);
         }
-
-        // 2) Confirmar selección
-        boolean confirmado = DialogHelper.confirm(
-                btnAddVenta.getScene().getWindow(),
-                "¿Está seguro que desea Seleccionar al " + c.getNombre() + "?");
-        if (!confirmado)
-            return;
-
-        // 3) Crear objeto Venta con nombre, dirección, fecha
-        Venta nuevaVenta = new Venta(
-                c.getNombre(),
-                c.getDireccion(),
-                LocalDate.now());
-        nuevaVenta.setEstado("Activo");
-
-        // 4) Abrir detalle de venta
-        FXMLLoader detLoader = new FXMLLoader(getClass().getResource("/fxml/VentaDetail.fxml"));
-        Parent detRoot = detLoader.load();
-        VentaDetailController detCtrl = detLoader.getController();
-        detCtrl.initData(nuevaVenta);
-
-        Stage detStage = new Stage();
-        detStage.initOwner(btnAddVenta.getScene().getWindow());
-        detStage.initModality(Modality.APPLICATION_MODAL);
-        detStage.setScene(new Scene(detRoot));
-        detStage.setTitle("Nueva Venta");
-        detStage.showAndWait();
-
-        // 5) Recuperar venta si fue aceptada
-        detCtrl.getVentaCreated().ifPresent(v -> allVentas.add(v));
     }
 
     @FXML
-    private void onActualizarVenta(ActionEvent event) throws IOException {
-        Venta ventaSeleccionada = tableVentas.getSelectionModel().getSelectedItem();
-        if (ventaSeleccionada == null) {
-            DialogHelper.showWarning(
-                    btnActualizarVenta.getScene().getWindow(),
-                    "Seleccione una venta para actualizar.");
-            return;
+    private void onRecaudar(ActionEvent event) {
+        Venta seleccionada = tablaVentas.getSelectionModel().getSelectedItem();
+        if (seleccionada != null) {
+            UserSession.setVentaSeleccionada(seleccionada);
+            ScreenManager.loadScreen(event, "/fxml/Recaudacion.fxml", "Recaudación");
         }
-
-        if ("Anulado".equals(ventaSeleccionada.getEstado())) {
-            DialogHelper.showWarning(
-                    btnActualizarVenta.getScene().getWindow(),
-                    "No se puede actualizar una venta anulada.");
-            return;
-        }
-
-        // Abrir VentaDetail para editar
-        FXMLLoader detLoader = new FXMLLoader(getClass().getResource("/fxml/VentaDetail.fxml"));
-        Parent detRoot = detLoader.load();
-        VentaDetailController detCtrl = detLoader.getController();
-        detCtrl.initData(ventaSeleccionada);
-
-        Stage detStage = new Stage();
-        detStage.initOwner(btnActualizarVenta.getScene().getWindow());
-        detStage.initModality(Modality.APPLICATION_MODAL);
-        detStage.setScene(new Scene(detRoot));
-        detStage.setTitle("Actualizar Venta");
-        detStage.showAndWait();
-
-        // La tabla se actualiza automáticamente por las properties
-        DialogHelper.showSuccess(
-                btnActualizarVenta.getScene().getWindow(),
-                "Venta actualizada correctamente.");
     }
 
     @FXML
-    private void onAnularVenta(ActionEvent event) {
-        Venta ventaSeleccionada = tableVentas.getSelectionModel().getSelectedItem();
-        if (ventaSeleccionada == null) {
-            DialogHelper.showWarning(
-                    btnAnularVenta.getScene().getWindow(),
-                    "Seleccione una venta para anular.");
+    private void onEliminar(ActionEvent event) {
+        Venta seleccionada = tablaVentas.getSelectionModel().getSelectedItem();
+        if (seleccionada == null) {
+            mostrarAdvertencia("Seleccione una venta para eliminar.");
             return;
         }
 
-        boolean confirmado = DialogHelper.confirm(
-                btnAnularVenta.getScene().getWindow(),
-                "¿Está seguro que desea anular la venta seleccionada?");
-        if (!confirmado)
-            return;
-
-        // Solo cambiamos el estado, no se elimina
-        ventaSeleccionada.setEstado("Anulado");
-
-        DialogHelper.showSuccess(
-                btnAnularVenta.getScene().getWindow(),
-                "anulado la venta");
+        if (confirmarEliminacion(seleccionada)) {
+            listaVentas.remove(seleccionada);
+            CSVUtil.guardarVentas(listaVentas);
+        }
     }
 
+    @FXML
+    private void onBack(ActionEvent event) {
+        NavigationHelper.volverAlMenuPrincipal(event);
+    }
+
+    private boolean confirmarEliminacion(Venta venta) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirmar eliminación");
+        confirm.setHeaderText(null);
+        confirm.setContentText("¿Está seguro que desea eliminar la venta " + venta.getId() + "?");
+        return confirm.showAndWait().filter(bt -> bt == ButtonType.OK).isPresent();
+    }
+
+    private void mostrarError(String mensaje, Exception e) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje + "\n" + e.getMessage());
+        alert.showAndWait();
+    }
+
+    private void mostrarAdvertencia(String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Advertencia");
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
 }

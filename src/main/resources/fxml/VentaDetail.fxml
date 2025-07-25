@@ -1,78 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.AnchorPane?>
 
-<?import javafx.scene.layout.HBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.control.cell.PropertyValueFactory?>
 <AnchorPane xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.example.sgef_petalex_v_09.controllers.VentaDetailController"
-            styleClass="root"
-            prefWidth="800" prefHeight="600">
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.sgef_petalex_v_09.controllers.VentaDetailController">
 
-    <!-- Cabecera Cliente + Fecha -->
-    <Label fx:id="lblCliente"    styleClass="title-label" AnchorPane.topAnchor="10"  AnchorPane.leftAnchor="10"/>
-    <Label fx:id="lblDireccion"  styleClass="title-label" AnchorPane.topAnchor="40"  AnchorPane.leftAnchor="10"/>
-    <Label fx:id="lblFecha"      styleClass="title-label" AnchorPane.topAnchor="70"  AnchorPane.leftAnchor="10"/>
+    <VBox spacing="10" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" 
+          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <padding>
+            <Insets top="10" right="10" bottom="10" left="10"/>
+        </padding>
 
+        <!-- Información de Venta -->
+        <HBox spacing="20">
+            <Label fx:id="lblCliente" text="Cliente: No especificado"/>
+            <Label fx:id="lblDireccion" text="Dirección: No especificada"/>
+            <Label fx:id="lblFecha" text="Fecha: No especificada"/>
+        </HBox>
 
-    <!-- Botones Agregar y Eliminar Producto en la parte superior -->
-    <HBox spacing="10" AnchorPane.topAnchor="110" AnchorPane.leftAnchor="10">
-        <Button fx:id="btnAddItem"
-                onAction="#onAddItem"
-                styleClass="toolbar-button"
-                text="Agregar Producto"/>
-        <Button fx:id="btnEliminarItem"
-                text="Eliminar Producto"
-                onAction="#onEliminarItem"
-                styleClass="toolbar-button"
-                disable="true"/>
-    </HBox>
-    
+        <!-- Barra de herramientas -->
+        <HBox spacing="10">
+            <Button fx:id="btnAddItem" text="Agregar Producto"/>
+            <Button fx:id="btnRemoveItem" text="Eliminar Producto"/>
+        </HBox>
 
+        <!-- Tabla de Items -->
+        <TableView fx:id="tableItems" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="colItem" text="Item" prefWidth="50"/>
+                <TableColumn fx:id="colVariedad" text="Variedad" prefWidth="150"/>
+                <TableColumn fx:id="colPaquete" text="Paquete" prefWidth="150"/>
+                <TableColumn fx:id="colCantidad" text="Cantidad" prefWidth="100"/>
+                <TableColumn fx:id="colPrecioU" text="Precio U." prefWidth="100"/>
+                <TableColumn fx:id="colPrecioT" text="Precio T." prefWidth="100">
+    <cellValueFactory>
+        <PropertyValueFactory property="precioTotal"/>
+    </cellValueFactory>
+</TableColumn>
+            </columns>
+        </TableView>
 
-    <Button fx:id="btnRemoveItem"
-            onAction="#onRemoveItem"
-            styleClass="toolbar-button"
-            text="Eliminar Producto"/>
-</HBox>
-    <!-- Tabla de Ítems -->
-    <TableView fx:id="tableItems"
-               AnchorPane.topAnchor="160"
-               AnchorPane.leftAnchor="10"
-               AnchorPane.rightAnchor="10"
-               AnchorPane.bottomAnchor="50">
-        <columns>
-            <TableColumn fx:id="colItem"      text="Item"        prefWidth="50"/>
-            <TableColumn fx:id="colVariedad"  text="Variedad"    prefWidth="150"/>
-            <TableColumn fx:id="colPaquete"   text="Paquete"     prefWidth="150"/>
-            <TableColumn fx:id="colCantidad"  text="Cantidad"    prefWidth="100"/>
-            <TableColumn fx:id="colPrecioU"   text="Precio U."   prefWidth="100"/>
-            <TableColumn fx:id="colPrecioT"   text="Precio T."   prefWidth="100"/>
-        </columns>
-    </TableView>
-
-    <!-- Total -->
-    <Label text="Total:" styleClass="title-label"
-           AnchorPane.bottomAnchor="10"
-           AnchorPane.leftAnchor="10"/>
-    <Label fx:id="lblTotal" styleClass="title-label"
-           AnchorPane.bottomAnchor="10"
-           AnchorPane.leftAnchor="80"/>
-
-    <HBox spacing="10"
-          AnchorPane.bottomAnchor="10"
-          AnchorPane.rightAnchor="10">
-        <Button fx:id="btnCancelVenta"
-                text="Cancelar"
-                onAction="#onCancelVenta"
-                styleClass="toolbar-button"/>
-        <Button fx:id="btnAcceptVenta"
-                text="Aceptar Venta"
-                onAction="#onAcceptVenta"
-                styleClass="toolbar-button"/>
-        
-    </HBox>
+        <!-- Pie: Total y Botones -->
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Label text="Total:"/>
+            <Label fx:id="lblTotal" text=" "/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnCancelVenta" text="Cancelar"/>
+            <Button fx:id="btnAcceptVenta" text="Aceptar Venta"/>
+        </HBox>
+    </VBox>
 </AnchorPane>

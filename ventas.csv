@@ -1,0 +1,4 @@
+ID,TipoDestino,Servicio,Cliente,Direccion,Fecha,Precio,IVA,Total,Estado,Items
+V001,null,Ventas,"null","null",2025-07-25,0,00,0,00,3,00,60,""
+V002,null,Ventas,"null","null",2025-07-25,0,00,0,00,117,00,60,""
+V003,null,Ventas,"null","null",2025-07-25,250,00,30,00,280,00,Activo,"QUEEN_SAND - $250,00"

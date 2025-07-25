@@ -1,6 +1,8 @@
 package org.example.sgef_petalex_v_09.controllers;
 
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -14,9 +16,13 @@ import javafx.stage.Stage;
 import org.example.sgef_petalex_v_09.models.ItemVenta;
 import org.example.sgef_petalex_v_09.models.Venta;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
+import org.example.sgef_petalex_v_09.util.NavigationHelper;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.time.format.DateTimeFormatter;
 
 public class VentaDetailController {
 
@@ -57,23 +63,59 @@ public class VentaDetailController {
     private ObservableList<ItemVenta> items = FXCollections.observableArrayList();
 
     @FXML
+    private void onNuevo(ActionEvent event) {
+        // 1) Define las opciones
+        List<String> opciones = Arrays.asList("Nacional", "Internacional");
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(null, opciones);
+        dialog.setTitle("Nuevo – Tipo de Destino");
+        dialog.setHeaderText(null);
+        dialog.setContentText("Selecciona el Tipo de Destino:");
+
+        // 2) Obtén referencia al botón OK y deshabilítalo si no hay selección
+        Button okButton = (Button) dialog.getDialogPane()
+                .lookupButton(ButtonType.OK);
+        // Bind al valor de selectedItem: si es null, OK está deshabilitado
+        okButton.disableProperty()
+                .bind(dialog.selectedItemProperty().isNull());
+
+        // 3) Muestra el diálogo y procesa el resultado
+        Optional<String> resultado = dialog.showAndWait();
+        resultado.ifPresent(tipoDestino -> {
+            try {
+                NavigationHelper.cargarVista(event,
+                        "/fxml/VentaDetail.fxml",
+                        "Nueva Venta – " + tipoDestino);
+            } catch (Exception e) {
+                e.printStackTrace();
+                new Alert(Alert.AlertType.ERROR,
+                        "Error al abrir el detalle de venta:\n" + e.getMessage())
+                        .showAndWait();
+            }
+        });
+    }
+    @FXML
     public void initialize() {
-        // Configuración básica que no depende de currentVenta
+        // Inicializar venta si es nueva
+        if (currentVenta == null) {
+            currentVenta = new Venta();
+        }
+        
         setupTableColumns();
         setupEventHandlers();
         tableItems.setItems(items);
         
-        // Listener para habilitar/deshabilitar botones
-        items.addListener((javafx.collections.ListChangeListener.Change<? extends ItemVenta> c) -> {
+        // Listener para cambios en items
+        items.addListener((ListChangeListener<ItemVenta>) c -> {
             btnAcceptVenta.setDisable(items.isEmpty());
+            updateTotal();
         });
         
-        // Configurar selección de tabla
-        tableItems.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
-            btnRemoveItem.setDisable(newSel == null);
-        });
+        // Listener para selección
+        tableItems.getSelectionModel().selectedItemProperty().addListener(
+            (obs, oldSel, newSel) -> btnRemoveItem.setDisable(newSel == null)
+        );
         
-        // Inicialmente deshabilitar botones
+        // Estado inicial de botones
         btnAcceptVenta.setDisable(true);
         btnRemoveItem.setDisable(true);
     }
@@ -93,6 +135,31 @@ public class VentaDetailController {
         colCantidad.setCellValueFactory(i -> i.getValue().cantidadProperty().asObject());
         colPrecioU.setCellValueFactory(i -> i.getValue().precioUnitProperty().asObject());
         colPrecioT.setCellValueFactory(i -> i.getValue().precioTotalProperty().asObject());
+        
+        // Formato para las columnas de precio
+        colPrecioU.setCellFactory(tc -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double precio, boolean empty) {
+                super.updateItem(precio, empty);
+                if (empty || precio == null) {
+                    setText(null);
+                } else {
+                    setText(String.format("$%.2f", precio));
+                }
+            }
+        });
+        
+        colPrecioT.setCellFactory(tc -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double precio, boolean empty) {
+                super.updateItem(precio, empty);
+                if (empty || precio == null) {
+                    setText(null);
+                } else {
+                    setText(String.format("$%.2f", precio));
+                }
+            }
+        });
     }
 
     private void setupEventHandlers() {
@@ -104,9 +171,15 @@ public class VentaDetailController {
 
     private void setupVentaInfo() {
         if (currentVenta != null) {
-            lblCliente.setText("Cliente: " + currentVenta.getCliente());
-            lblFecha.setText("Fecha: " + currentVenta.getFecha());
-            lblDireccion.setText("Dirección: " + currentVenta.getDireccion());
+            lblCliente.setText("Cliente: " + 
+                (currentVenta.getCliente() != null ? currentVenta.getCliente() : "No especificado"));
+            
+            lblFecha.setText("Fecha: " + 
+                (currentVenta.getFecha() != null ? currentVenta.getFecha().format(
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "No especificada"));
+            
+            lblDireccion.setText("Dirección: " + 
+                (currentVenta.getDireccion() != null ? currentVenta.getDireccion() : "No especificada"));
         }
     }
 
@@ -122,8 +195,10 @@ public class VentaDetailController {
     }
 
     private void updateTotal() {
-        double sum = items.stream().mapToDouble(ItemVenta::getPrecioTotal).sum();
-        lblTotal.setText(String.format("$%,.2f", sum));
+        double sum = items.stream()
+            .mapToDouble(ItemVenta::getPrecioTotal)
+            .sum();
+        lblTotal.setText(String.format("$%.2f", sum));
         currentVenta.setTotal(sum);
     }
 
@@ -220,7 +295,7 @@ public class VentaDetailController {
         Button okBtn = (Button) dlg.getDialogPane().lookupButton(acceptType);
         okBtn.setDisable(true);
 
-        javafx.beans.value.ChangeListener<Object> validar = (obs, oldV, newV) -> {
+        ChangeListener<Object> validar = (obs, oldV, newV) -> {
             boolean paqueteSeleccionado = cbPack.getValue() != null;
             boolean cantidadValida = spQty.getValue() != null && spQty.getValue() > 0;
             okBtn.setDisable(!(paqueteSeleccionado && cantidadValida));
@@ -248,12 +323,25 @@ public class VentaDetailController {
         });
 
         Optional<ItemVenta> res = dlg.showAndWait();
-        if (res.isPresent() && DialogHelper.confirm(
-                lblCliente.getScene().getWindow(),
-                "¿Está seguro que desea agregar este ítem?")) {
-            return res.get();
+        return res.orElse(null);
+    }
+
+    public void onBack(ActionEvent e) {
+        ((Stage) lblCliente.getScene().getWindow()).close();
+
+    }
+
+    public void onEliminarItem(ActionEvent e) {
+        ItemVenta selected = tableItems.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            DialogHelper.showWarning(lblCliente.getScene().getWindow(), "Debe seleccionar un ítem para eliminar.");
+            return;
         }
-        return null;
+        boolean confirm = DialogHelper.confirm(lblCliente.getScene().getWindow(),
+                "¿Está seguro que desea eliminar el ítem seleccionado?");
+        if (confirm) {
+            items.remove(selected);
+        }
     }
 
 }

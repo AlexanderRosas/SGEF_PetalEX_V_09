@@ -1,0 +1,2 @@
+ID,Nombre,Correo,Usuario,Rol,Estado,Sucursal,RUC
+U001,Administrador,admin@example.com,admin,Administrador,Activo,Principal,0123456789001

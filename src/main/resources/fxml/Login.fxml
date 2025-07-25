@@ -1,40 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.*?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.*?>
-<?import java.lang.String?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.example.sgef_petalex_v_09.controllers.LoginController"
-            prefWidth="400" prefHeight="450">
-
-    <children>
-        <VBox alignment="CENTER" spacing="10" layoutX="50" layoutY="30" prefWidth="300">
-            <ImageView fx:id="logo"
-                       fitWidth="300"
-                       preserveRatio="true">
-                <styleClass>
-                    <String fx:value="image-logo"/>
-                </styleClass>
-                <image>
-                    <Image url="@../images/index_blooms_logo.png"/>
-                </image>
-            </ImageView>
-
-            <!-- Título -->
-            <Label text="Bienvenido" styleClass="title-label"/>
-
-            <!-- Inputs estilo pill -->
-            <TextField fx:id="txtUser" promptText="Ingrese su Usuario"
-                       styleClass="input-field"/>
-            <PasswordField fx:id="txtPass" promptText="Ingrese su contraseña"
-                           styleClass="input-field"/>
-
-            <!-- Botón -->
-            <Button fx:id="btnIngresar" text="INGRESAR"
-                    onAction="#onIngresar" styleClass="login-button"/>
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="org.example.sgef_petalex_v_09.controllers.LoginController"
+           stylesheets="@../css/styles.css">
+    
+    <VBox spacing="20" alignment="CENTER" styleClass="login-panel">
+        <!-- Logo -->
+        <ImageView fitWidth="200" preserveRatio="true">
+            <Image url="@../images/index_blooms_logo.png"/>
+        </ImageView>
+        
+        <!-- Título -->
+        <Label text="Iniciar Sesión" styleClass="login-title"/>
+        
+        <!-- Campos -->
+        <VBox spacing="10" alignment="CENTER">
+            <!-- Usuario -->
+            <HBox spacing="10" alignment="CENTER">
+                <TextField fx:id="txtUsuario" 
+                          promptText="Usuario"
+                          styleClass="login-field"
+                          prefWidth="250"/>
+            </HBox>
+            
+            <!-- Contraseña -->
+            <HBox spacing="10" alignment="CENTER">
+                <PasswordField fx:id="txtPassword" 
+                             promptText="Contraseña"
+                             styleClass="login-field"
+                             prefWidth="250"/>
+            </HBox>
         </VBox>
-    </children>
-</AnchorPane>
+        
+        <!-- Botones -->
+        <HBox spacing="20" alignment="CENTER">
+            <Button fx:id="btnIngresar" 
+                    text="Ingresar" 
+                    onAction="#onIngresar"
+                    styleClass="login-button"/>
+            <Button fx:id="btnSalir" 
+                    text="Salir" 
+                    onAction="#onSalir"
+                    styleClass="login-button-secondary"/>
+        </HBox>
+        
+        <padding>
+            <Insets top="20" right="40" bottom="20" left="40"/>
+        </padding>
+    </VBox>
+</StackPane>
