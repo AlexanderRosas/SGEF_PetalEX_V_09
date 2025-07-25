@@ -12,7 +12,7 @@ public class DialogHelper {
         alert.initOwner(owner);
         alert.setTitle("Éxito");
         alert.setHeaderText(null);
-        alert.setContentText("Se ha " + action + " correctamente.");
+        alert.setContentText( action + " correctamente.");
         alert.showAndWait();
     }
 
@@ -58,4 +58,11 @@ public class DialogHelper {
         alert.showAndWait();
     }
 
+    public static void showInformation(Window window, String exportar, String s) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.initOwner(window);
+        alert.setTitle("Información");
+        alert.setHeaderText(null);
+        alert.setContentText(exportar + " " + s);
+    }
 }

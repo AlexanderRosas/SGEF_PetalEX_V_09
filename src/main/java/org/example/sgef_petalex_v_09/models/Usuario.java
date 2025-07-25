@@ -1,7 +1,9 @@
 package org.example.sgef_petalex_v_09.models;
 
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 
 public class Usuario {
     private final StringProperty nombre = new SimpleStringProperty();
@@ -63,4 +65,8 @@ private final StringProperty permisos = new SimpleStringProperty("");
 public String getPermisos() { return permisos.get(); }
 public void setPermisos(String value) { permisos.set(value); }
 public StringProperty permisosProperty() { return permisos; }
+
+    public ObservableValue<String> idProperty() {
+        return new ReadOnlyStringWrapper(getId());
+    }
 }

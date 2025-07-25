@@ -156,5 +156,15 @@ public class RolesPermisosController {
                         tableUsuariosRolesPermisos.refresh();
                 });
         }
+        @FXML
+        private void onExportar(ActionEvent event) {
+                // Aquí podrías abrir un FileChooser y volcar la tabla a CSV/Excel.
+                // Ejemplo mínimo: un simple mensaje de “no implementado aún”.
+                DialogHelper.showInformation(
+                        btnExportar.getScene().getWindow(),
+                        "Exportar",
+                        "La funcionalidad de exportar se implementará próximamente."
+                );
+        }
 }
 

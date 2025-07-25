@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserUtil {
-    public static final String USERS_CSV = "users.csv";
+    public static final String USERS_CSV = "data/user.csv";
 
     private static void crearArchivoSiNoExiste() throws IOException {
         Path path = Paths.get(USERS_CSV);

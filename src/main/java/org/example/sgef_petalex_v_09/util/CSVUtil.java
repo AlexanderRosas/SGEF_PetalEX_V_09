@@ -1,9 +1,11 @@
 package org.example.sgef_petalex_v_09.util;
 
 import org.example.sgef_petalex_v_09.models.Cliente;
+import org.example.sgef_petalex_v_09.models.Usuario;
 import org.example.sgef_petalex_v_09.models.Venta;
 import org.example.sgef_petalex_v_09.models.ItemVenta;
 import java.io.*;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -17,6 +19,9 @@ public class CSVUtil {
     public static final String VENTAS_CSV = "data/ventas.csv";
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     public static final String CLIENTES_CSV = "data/clientes.csv";
+    public static final String USUARIOS_CSV = "data/usuarios.csv";
+
+
 
 
     private static void crearArchivoSiNoExiste(String rutaArchivo) throws IOException {
@@ -116,7 +121,74 @@ public class CSVUtil {
         }
     }
 
+    public static List<Usuario> leerUsuarios() {
+        List<Usuario> list = new ArrayList<>();
+        Path path = Paths.get(USUARIOS_CSV);
+        try {
+            // Crear carpeta / archivo si no existen
+            Files.createDirectories(path.getParent());
+            if (!Files.exists(path)) {
+                Files.write(path,
+                        List.of("ID,Nombre,Correo,Usuario,Rol,Estado,Sucursal,RUC,Permisos"),
+                        StandardOpenOption.CREATE);
+            }
+            // Leer
+            try (BufferedReader br = Files.newBufferedReader(path)) {
+                String line;
+                boolean primera = true;
+                while ((line = br.readLine()) != null) {
+                    if (primera) { primera = false; continue; }
+                    String[] f = line.split(",", -1);
+                    if (f.length < 9) continue;
+                    Usuario u = new Usuario();
+                    u.setId      (f[0].trim());
+                    u.setNombre  (f[1].trim());
+                    u.setCorreo  (f[2].trim());
+                    u.setUsuario (f[3].trim());
+                    u.setRol     (f[4].trim());
+                    u.setEstado  (f[5].trim());
+                    u.setSucursal(f[6].trim());
+                    u.setRuc     (f[7].trim());
+                    u.setPermisos(f[8].trim());
+                    list.add(u);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
+    public static void guardarUsuarios(List<Usuario> usuarios) {
+        Path path = Paths.get(USUARIOS_CSV);
+        try {
+            Files.createDirectories(path.getParent());
+            try (BufferedWriter bw = Files.newBufferedWriter(
+                    path,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING)) {
+                // cabecera
+                bw.write("ID,Nombre,Correo,Usuario,Rol,Estado,Sucursal,RUC,Permisos\n");
+                // líneas
+                for (Usuario u : usuarios) {
+                    bw.write(String.join(",",
+                            u.getId(),
+                            u.getNombre(),
+                            u.getCorreo(),
+                            u.getUsuario(),
+                            u.getRol(),
+                            u.getEstado(),
+                            u.getSucursal(),
+                            u.getRuc(),
+                            u.getPermisos()
+                    ));
+                    bw.newLine();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 

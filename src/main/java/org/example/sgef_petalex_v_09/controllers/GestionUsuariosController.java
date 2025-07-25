@@ -1,240 +1,236 @@
 package org.example.sgef_petalex_v_09.controllers;
 
+import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonBar.ButtonData;
-import javafx.scene.control.cell.ComboBoxTableCell;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Window;
 import org.example.sgef_petalex_v_09.models.Usuario;
+import org.example.sgef_petalex_v_09.util.CSVUtil;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
 
-import java.util.Optional;
+import java.net.URL;
+import java.util.*;
 
-public class GestionUsuariosController {
-    @FXML
-    private Button btnNuevo;
-    @FXML
-    private Button btnEditar;
-    @FXML
-    private Button btnReactivar;
-    @FXML
-    private Button btnExportar;
-    @FXML
-    private TextField txtBuscar;
-    @FXML
-    private ComboBox<String> cbEstado;
-    @FXML
-    private TableView<Usuario> tableUsuarios;
-    @FXML
-    private TableColumn<Usuario, String> colNombre;
-    @FXML
-    private TableColumn<Usuario, String> colCorreo;
-    @FXML
-    private TableColumn<Usuario, String> colUsuario;
-    @FXML
-    private TableColumn<Usuario, String> colRol;
-    @FXML
-    private TableColumn<Usuario, String> colEstado;
+public class GestionUsuariosController implements Initializable {
 
-    private final ObservableList<Usuario> masterData = FXCollections.observableArrayList();
+    @FXML private TableView<Usuario> tablaUsuarios;
+    @FXML private TableColumn<Usuario, String> colId;
+    @FXML private TableColumn<Usuario, String> colNombre;
+    @FXML private TableColumn<Usuario, String> colCorreo;
+    @FXML private TableColumn<Usuario, String> colUsuario;
+    @FXML private TableColumn<Usuario, String> colRol;
+    @FXML private TableColumn<Usuario, String> colEstado;
+    @FXML private TableColumn<Usuario, String> colSucursal;
+    @FXML private TableColumn<Usuario, String> colRuc;
+    @FXML private TableColumn<Usuario, String> colPermisos;
+
+    @FXML private Button btnNuevo;
+    @FXML private Button btnEditar;
+    @FXML private Button btnEstado;
+    @FXML private TextField txtBuscar;
+
+    private final ObservableList<Usuario> data = FXCollections.observableArrayList();
     private FilteredList<Usuario> filteredData;
-
-    @FXML
-    public void initialize() {
-        // Configurar columnas
-        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
-        colCorreo.setCellValueFactory(new PropertyValueFactory<>("correo"));
-        colUsuario.setCellValueFactory(new PropertyValueFactory<>("usuario"));
-        colRol.setCellValueFactory(new PropertyValueFactory<>("rol"));
-        colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
-
-        // Wrap masterData in FilteredList
-        filteredData = new FilteredList<>(masterData, p -> true);
-        tableUsuarios.setItems(filteredData);
-
-        // Opciones Estado
-        cbEstado.getItems().addAll("Todos", "Activo", "Inactivo");
-        cbEstado.getSelectionModel().selectFirst(); // "Todos"
-
-        // Configurar columna Rol como ComboBox editable
-        ObservableList<String> roles = FXCollections.observableArrayList(
-                "Administrador", "Finanzas", "Gerente", "Ventas");
-        tableUsuarios.setEditable(true);
-        colRol.setCellFactory(ComboBoxTableCell.forTableColumn(roles));
-        colRol.setOnEditCommit(evt -> {
-            Usuario u = evt.getRowValue();
-            u.setRol(evt.getNewValue());
-            DialogHelper.showSuccess(
-                    tableUsuarios.getScene().getWindow(),
-                    "rol asignado");
-        });
-
-        // Listener para habilitar botones
-        tableUsuarios.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
-            boolean has = sel != null;
-            btnEditar.setDisable(!has);
-            btnReactivar.setDisable(!has);
-        });
-
-        // Listener de búsqueda
-        txtBuscar.textProperty().addListener((obs, old, val) -> filtrarUsuarios());
-        cbEstado.getSelectionModel().selectedItemProperty().addListener((obs, old, val) -> filtrarUsuarios());
-    }
-
-    /** Filtra la tabla según txtBuscar y cbEstado. */
-    private void filtrarUsuarios() {
-        String texto = txtBuscar.getText().toLowerCase().trim();
-        String estado = cbEstado.getValue();
-        filteredData.setPredicate(u -> {
-            boolean matchesTexto = texto.isEmpty()
-                    || u.getNombre().toLowerCase().contains(texto)
-                    || u.getUsuario().toLowerCase().contains(texto)
-                    || u.getCorreo().toLowerCase().contains(texto);
-            boolean matchesEstado = estado.equals("Todos") || u.getEstado().equals(estado);
-            return matchesTexto && matchesEstado;
-        });
-    }
-
-    @FXML
-    private void onNuevo(ActionEvent event) {
-        Window owner = btnNuevo.getScene().getWindow();
-        Optional<Usuario> res = showUserFormDialog("Crear usuario", null);
-        res.ifPresent(u -> {
-            if (confirm(owner, "¿Está seguro que desea Crear un Usuario?")) {
-                masterData.add(u);
-                DialogHelper.showSuccess(owner, "creado");
-            }
-        });
-    }
-
-    @FXML
-    private void onEditar(ActionEvent event) {
-        Window owner = btnEditar.getScene().getWindow();
-        Usuario sel = tableUsuarios.getSelectionModel().getSelectedItem();
-        if (sel == null) {
-            DialogHelper.showWarning(owner, "Selecciona un usuario primero");
-            return;
-        }
-        Optional<Usuario> res = showUserFormDialog("Actualizar usuario", sel);
-        res.ifPresent(u -> {
-            if (confirm(owner, "¿Está seguro que desea Actualizar?")) {
-                sel.setNombre(u.getNombre());
-                sel.setCorreo(u.getCorreo());
-                sel.setUsuario(u.getUsuario());
-                sel.setRol(u.getRol());
-                sel.setEstado(u.getEstado());
-                tableUsuarios.refresh();
-                DialogHelper.showSuccess(owner, "actualizado");
-            }
-        });
-    }
+    private final Random rnd = new Random();
 
     @FXML
     private void onReactivar(ActionEvent event) {
-        Window owner = btnReactivar.getScene().getWindow();
-        Usuario sel = tableUsuarios.getSelectionModel().getSelectedItem();
+        Usuario sel = tablaUsuarios.getSelectionModel().getSelectedItem();
         if (sel == null) {
-            DialogHelper.showWarning(owner, "Selecciona un usuario primero");
+            DialogHelper.showWarning(getWindow(), "Selecciona un usuario inactivo para reactivar.");
             return;
         }
-        if (confirm(owner, "¿Está seguro que desea cambiar el estado del usuario?")) {
-            // Alterna entre Activo e Inactivo
-            sel.setEstado(sel.getEstado().equals("Activo") ? "Inactivo" : "Activo");
-            tableUsuarios.refresh();
-            DialogHelper.showSuccess(owner, "estado actualizado");
+        // Solo reactivamos si está inactivo
+        if (!"Inactivo".equalsIgnoreCase(sel.getEstado())) {
+            DialogHelper.showWarning(getWindow(), "El usuario ya está activo.");
+            return;
         }
+        sel.setEstado("Activo");
+        CSVUtil.guardarUsuarios(data);
+        tablaUsuarios.refresh();
+        DialogHelper.showSuccess(getWindow(), "Usuario reactivado correctamente.");
+    }
+
+    private Window getWindow() {
+        return tablaUsuarios.getScene().getWindow();
+    }
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        // 1) Configurar columnas
+        colId      .setCellValueFactory(c -> c.getValue().idProperty());
+        colNombre  .setCellValueFactory(c -> c.getValue().nombreProperty());
+        colCorreo  .setCellValueFactory(c -> c.getValue().correoProperty());
+        colUsuario .setCellValueFactory(c -> c.getValue().usuarioProperty());
+        colRol     .setCellValueFactory(c -> c.getValue().rolProperty());
+        colEstado  .setCellValueFactory(c -> c.getValue().estadoProperty());
+        colSucursal.setCellValueFactory(c -> c.getValue().sucursalProperty());
+        colRuc     .setCellValueFactory(c -> c.getValue().rucProperty());
+        colPermisos.setCellValueFactory(c -> c.getValue().permisosProperty());
+
+        // 2) Control de selección
+        btnEditar.setDisable(true);
+        btnEstado.setDisable(true);
+        tablaUsuarios.getSelectionModel().selectedItemProperty()
+                .addListener((obs, oldV, newV) -> {
+                    boolean sel = newV != null;
+                    btnEditar.setDisable(!sel);
+                    btnEstado.setDisable(!sel);
+                });
+
+        // 3) Cargar datos del CSV
+        List<Usuario> list = CSVUtil.leerUsuarios();
+        data.setAll(list);
+
+        // 4) Filtro dinámico
+        filteredData = new FilteredList<>(data, u -> true);
+        tablaUsuarios.setItems(filteredData);
+        txtBuscar.textProperty().addListener((obs, o, n) -> {
+            String f = n.toLowerCase().trim();
+            filteredData.setPredicate(u ->
+                    f.isEmpty()
+                            || u.getNombre().toLowerCase().contains(f)
+                            || u.getUsuario().toLowerCase().contains(f)
+            );
+        });
     }
 
     @FXML
-    private void onExportar(ActionEvent event) {
-        Window owner = btnExportar.getScene().getWindow();
-        DialogHelper.showSuccess(owner, "exportado los datos");
+    private void onNuevo(ActionEvent ev) {
+        Window w = ((Node)ev.getSource()).getScene().getWindow();
+        showUserForm("Crear usuario", null).ifPresent(u -> {
+            if (!DialogHelper.confirm(w, "¿Crear usuario?")) return;
+            u.setId("U" + String.format("%03d", rnd.nextInt(1000)));
+            u.setEstado("Activo");
+            data.add(u);
+            CSVUtil.guardarUsuarios(data);
+            DialogHelper.showSuccess(w, "Usuario creado");
+        });
     }
 
-    /** Muestra un diálogo de confirmación con mensaje. */
-    private boolean confirm(Window owner, String msg) {
-        Alert a = new Alert(AlertType.CONFIRMATION);
-        a.initOwner(owner);
-        a.setHeaderText(null);
-        a.setContentText(msg);
-        a.setTitle("Confirmar");
-        Optional<ButtonType> res = a.showAndWait();
-        return res.isPresent() && res.get().getButtonData() == ButtonData.OK_DONE;
+    @FXML
+    private void onEditar(ActionEvent ev) {
+        Window w = ((Node)ev.getSource()).getScene().getWindow();
+        Usuario sel = tablaUsuarios.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            DialogHelper.showWarning(w, "Seleccione un usuario");
+            return;
+        }
+        showUserForm("Editar usuario", sel).ifPresent(u -> {
+            if (!DialogHelper.confirm(w, "¿Actualizar usuario?")) return;
+            sel.setNombre(u.getNombre());
+            sel.setCorreo(u.getCorreo());
+            sel.setUsuario(u.getUsuario());
+            sel.setRol(u.getRol());
+            sel.setSucursal(u.getSucursal());
+            sel.setRuc(u.getRuc());
+            sel.setPermisos(u.getPermisos());
+            CSVUtil.guardarUsuarios(data);
+            DialogHelper.showSuccess(w, "Usuario actualizado");
+        });
     }
 
-    /** Diálogo genérico para crear/editar un Usuario */
-    private Optional<Usuario> showUserFormDialog(String title, Usuario existing) {
+    @FXML
+    private void onEstado(ActionEvent ev) {
+        Window w = ((Node)ev.getSource()).getScene().getWindow();
+        Usuario sel = tablaUsuarios.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            DialogHelper.showWarning(w, "Seleccione un usuario");
+            return;
+        }
+        String nuevo = sel.getEstado().equals("Activo") ? "Inactivo" : "Activo";
+        if (!DialogHelper.confirm(w, "¿Cambiar estado a " + nuevo + "?")) return;
+        sel.setEstado(nuevo);
+        CSVUtil.guardarUsuarios(data);
+        DialogHelper.showSuccess(w, "Estado cambiado a " + nuevo);
+    }
+
+    /**
+     * Muestra un diálogo para crear/editar usuario.
+     */
+    private Optional<Usuario> showUserForm(String title, Usuario existing) {
         Dialog<Usuario> dlg = new Dialog<>();
         dlg.setTitle(title);
-        dlg.getDialogPane().getButtonTypes()
-                .addAll(new ButtonType("Cancelar", ButtonData.CANCEL_CLOSE),
-                        new ButtonType("Aceptar", ButtonData.OK_DONE));
+        ButtonType cancelType = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType okType     = new ButtonType("Aceptar",  ButtonBar.ButtonData.OK_DONE);
+        dlg.getDialogPane().getButtonTypes().setAll(cancelType, okType);
 
+        // 1) Construir formulario con ComboBox para rol
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
 
-        TextField txtNombre = new TextField();
-        txtNombre.setPromptText("Nombre");
-        TextField txtCorreo = new TextField();
-        txtCorreo.setPromptText("Correo");
-        TextField txtUsuario = new TextField();
-        txtUsuario.setPromptText("Usuario");
+        TextField txtNombre   = new TextField();
+        TextField txtCorreo   = new TextField();
+        TextField txtUsuario  = new TextField();
+        ComboBox<String> cbRol = new ComboBox<>();
+        Label lblPermisos     = new Label(); // Sólo para mostrar
 
-        ComboBox<String> cbRol = new ComboBox<>(
-                FXCollections.observableArrayList("Administrador", "Finanzas", "Gerente", "Ventas"));
-        cbRol.setPromptText("Rol");
+        txtNombre .setPromptText("Nombre completo");
+        txtCorreo .setPromptText("correo@dominio.com");
+        txtUsuario.setPromptText("login");
 
+        // Roles fijos
+        cbRol.setItems(FXCollections.observableArrayList(
+                "Administrador", "Contador", "Gerente", "Logistica"
+        ));
+        cbRol.setPromptText("Selecciona rol");
+
+        // Mapa de permisos según rol
+        Map<String,String> permisosMap = Map.of(
+                "Administrador", "ALL",
+                "Contador",      "FINANZAS,REPORTES",
+                "Gerente",       "VENTAS,COMPRAS,REPORTES",
+                "Logistica",     "INVENTARIO,ENTREGAS"
+        );
+
+        // Si estamos editando, precargar
         if (existing != null) {
             txtNombre.setText(existing.getNombre());
             txtCorreo.setText(existing.getCorreo());
             txtUsuario.setText(existing.getUsuario());
-            // NO cargar ni mostrar rol
-        } else {
-            cbRol.setValue("Ventas"); // por defecto
+            cbRol.setValue(existing.getRol());
+            lblPermisos.setText(existing.getPermisos());
         }
 
-        // Campos comunes
-        grid.add(new Label("Nombre:"), 0, 0);
-        grid.add(txtNombre, 1, 0);
-        grid.add(new Label("Correo:"), 0, 1);
-        grid.add(txtCorreo, 1, 1);
-        grid.add(new Label("Usuario:"), 0, 2);
-        grid.add(txtUsuario, 1, 2);
+        // Al cambiar el rol, actualizamos permisos automáticos
+        cbRol.valueProperty().addListener((obs, oldR, newR) -> {
+            lblPermisos.setText(permisosMap.getOrDefault(newR, ""));
+        });
 
-        if (existing == null) {
-            // Solo mostrar rol al crear
-            grid.add(new Label("Rol:"), 0, 3);
-            grid.add(cbRol, 1, 3);
-        }
+        // Layout
+        grid.addRow(0, new Label("Nombre:"),   txtNombre);
+        grid.addRow(1, new Label("Correo:"),   txtCorreo);
+        grid.addRow(2, new Label("Usuario:"),  txtUsuario);
+        grid.addRow(3, new Label("Rol:"),      cbRol);
+        grid.addRow(4, new Label("Permisos:"), lblPermisos);
 
         dlg.getDialogPane().setContent(grid);
 
-        dlg.setResultConverter(bt -> {
-            if (bt.getButtonData() == ButtonData.OK_DONE) {
-                Usuario u = new Usuario();
-                if (existing != null)
-                    u.setId(existing.getId());
-                u.setNombre(txtNombre.getText());
-                u.setCorreo(txtCorreo.getText());
-                u.setUsuario(txtUsuario.getText());
+        // 2) Habilitar OK solo si todo está lleno
+        Node okButton = dlg.getDialogPane().lookupButton(okType);
+        BooleanBinding invalid = txtNombre.textProperty().isEmpty()
+                .or(txtCorreo.textProperty().isEmpty())
+                .or(txtUsuario.textProperty().isEmpty())
+                .or(cbRol.valueProperty().isNull());
+        okButton.disableProperty().bind(invalid);
 
-                // Solo asignar rol al crear
-                if (existing == null) {
-                    u.setRol(cbRol.getValue());
-                    u.setEstado("Activo");
-                } else {
-                    u.setRol(existing.getRol());
-                    u.setEstado(existing.getEstado());
-                }
-
+        // 3) Resultado usa permisosMap
+        dlg.setResultConverter(btn -> {
+            if (btn == okType) {
+                Usuario u = existing == null ? new Usuario() : existing;
+                u.setNombre(txtNombre.getText().trim());
+                u.setCorreo(txtCorreo.getText().trim());
+                u.setUsuario(txtUsuario.getText().trim());
+                String rol = cbRol.getValue();
+                u.setRol(rol);
+                u.setPermisos(permisosMap.getOrDefault(rol, ""));
                 return u;
             }
             return null;
@@ -242,5 +238,4 @@ public class GestionUsuariosController {
 
         return dlg.showAndWait();
     }
-
 }

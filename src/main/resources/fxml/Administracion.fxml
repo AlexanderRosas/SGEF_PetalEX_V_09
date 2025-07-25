@@ -34,38 +34,38 @@
                 <String fx:value="Gestión de Usuarios"/>
             </text>
         </Button>
-
-        <Button fx:id="btnRolesPermisos"
-                onAction="#onRolesPermisos"
-                styleClass="sidebar-button">
-            <graphic>
-                <ImageView fitWidth="24" preserveRatio="true">
-                    <image>
-                        <Image url="@../images/image_cliente.png"/>
-                    </image>
-                </ImageView>
-            </graphic>
-            <text>
-                <String fx:value="Roles y Permisos"/>
-            </text>
-        </Button>
-
         <!--
-        <Button fx:id="btnParametrosNegocio"
-            onAction="#onParametrosNegocio"
-            styleClass="sidebar-button">
-            <graphic>
-            <ImageView fitWidth="24" preserveRatio="true">
-                <image>
-                <Image url="@../images/parametros_negocio.png"/>
-                </image>
-            </ImageView>
-            </graphic>
-            <text>
-            <String fx:value="Parámetros de Negocio"/>
-            </text>
-        </Button>
+                <Button fx:id="btnRolesPermisos"
+                        onAction="#onRolesPermisos"
+                        styleClass="sidebar-button">
+                    <graphic>
+                        <ImageView fitWidth="24" preserveRatio="true">
+                            <image>
+                                <Image url="@../images/image_cliente.png"/>
+                            </image>
+                        </ImageView>
+                    </graphic>
+                    <text>
+                        <String fx:value="Roles y Permisos"/>
+                    </text>
+                </Button>
         -->
+                <!--
+                <Button fx:id="btnParametrosNegocio"
+                    onAction="#onParametrosNegocio"
+                    styleClass="sidebar-button">
+                    <graphic>
+                    <ImageView fitWidth="24" preserveRatio="true">
+                        <image>
+                        <Image url="@../images/parametros_negocio.png"/>
+                        </image>
+                    </ImageView>
+                    </graphic>
+                    <text>
+                    <String fx:value="Parámetros de Negocio"/>
+                    </text>
+                </Button>
+                -->
 
     </VBox>
 
