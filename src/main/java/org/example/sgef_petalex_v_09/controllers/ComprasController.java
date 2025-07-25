@@ -3,208 +3,387 @@ package org.example.sgef_petalex_v_09.controllers;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Window;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import org.example.sgef_petalex_v_09.models.Compra;
+import org.example.sgef_petalex_v_09.models.Estados;
+import org.example.sgef_petalex_v_09.models.Proveedor;
+import org.example.sgef_petalex_v_09.models.Rosa;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public class ComprasController {
 
-    @FXML private Button btnNuevo, btnEditar, btnEliminar, btnExportar;
-    @FXML private TextField txtBuscar;
-    @FXML private ComboBox<String> cbEstado;
-    @FXML private TableView<Compra> tableCompras;
-    @FXML private TableColumn<Compra, Integer> colId;
-    @FXML private TableColumn<Compra, String> colProveedor, colRuc, colTipoRosa, colTipoCorte, colUnidad, colEstado;
-    @FXML private TableColumn<Compra, Integer> colCantidad;
-    @FXML private TableColumn<Compra, Double> colCostoUnitario;
-    @FXML private TableColumn<Compra, LocalDate> colFechaCompra;
-
-    private final ObservableList<Compra> masterData = FXCollections.observableArrayList();
+    @FXML
+    private Button btnNuevo, btnActualizar, btnInactivar, btnExportar;
+    @FXML
+    private TextField txtBuscar;
+    @FXML
+    private ComboBox<String> cbEstado;
+    @FXML
+    private TableView<Compra> tableCompras;
+    @FXML
+    private TableColumn<Compra, Integer> colId;
+    @FXML
+    private TableColumn<Compra, String> colProveedor, colRuc, colTipoRosa, colTipoCorte, colEstado;
+    @FXML
+    private TableColumn<Compra, Integer> colCantidad;
+    @FXML
+    private TableColumn<Compra, Double> colCostoUnitario, colTotal;
+    @FXML
+    private TableColumn<Compra, LocalDate> colFechaCompra;
+    @FXML
+    private DatePicker dpFechaDesde, dpFechaHasta;
+    private ObservableList<Compra> masterData;
     private FilteredList<Compra> filteredData;
 
     @FXML
     public void initialize() {
-        // Configurar columnas
         colId.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getId()));
         colProveedor.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getProveedor()));
         colRuc.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getRuc()));
         colTipoRosa.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getTipoRosa()));
         colTipoCorte.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getTipoCorte()));
         colCantidad.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getCantidad()));
-        colUnidad.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getUnidad()));
         colCostoUnitario.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getCostoUnitario()));
         colFechaCompra.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getFechaCompra()));
         colEstado.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getEstadoActual()));
-
-        cbEstado.getItems().addAll("Todos", "Recibido", "Hidratado", "En Cuarto Frío", "Empacado", "Exportado");
-        cbEstado.getSelectionModel().selectFirst(); // "Todos"
-
-        // Datos de prueba
-        masterData.addAll(
-                new Compra(1, "Rosas del Azuay", "1791512345001", "Mondial", "Americano", 60.0, 100, "Tallos", 0.45, LocalDate.now(), "Recibido"),
-                new Compra(2, "Florícolas Galápagos", "1791512345002", "Freedom", "Ruso", 55.0, 80, "Tallos", 0.5, LocalDate.now().minusDays(1), "Hidratado")
-        );
-
-        filteredData = new FilteredList<>(masterData, p -> true);
-        tableCompras.setItems(filteredData);
-
-        // Activar botones si hay selección
-        tableCompras.getSelectionModel().selectedItemProperty().addListener((obs, old, sel) -> {
-            boolean has = sel != null;
-            btnEditar.setDisable(!has);
-            btnEliminar.setDisable(!has);
+        colTotal.setCellValueFactory(c -> {
+            Compra compra = c.getValue();
+            return new ReadOnlyObjectWrapper<>(compra.getCantidad() * compra.getCostoUnitario());
         });
 
-        // Filtros
+        colTotal.setCellFactory(tc -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double total, boolean empty) {
+                super.updateItem(total, empty);
+                setText((empty || total == null) ? null : String.format("$ %.2f", total));
+            }
+        });
+
+        cbEstado.getItems().add("Todos");
+        cbEstado.getItems().addAll(Estados.ESTADOS_COMPRA);
+        cbEstado.getSelectionModel().selectFirst();
+
+        dpFechaDesde.valueProperty().addListener((obs, old, val) -> filtrar());
+        dpFechaHasta.valueProperty().addListener((obs, old, val) -> filtrar());
+        masterData = FXCollections.observableArrayList(
+                new Compra(1, "FlorAndina", "1791512345009", "MONDIAL", "RUSO", 70.0, 120, 0.80, LocalDate.now(),
+                        "Recibida"));
+
+        filteredData = new FilteredList<>(masterData, p -> true);
+
+        tableCompras.setItems(filteredData);
+        btnExportar.disableProperty().bind(
+                Bindings.isEmpty(filteredData));
+
+        tableCompras.getSelectionModel().selectedItemProperty()
+                .addListener((obs, old, sel) -> actualizarEstadoBotones(sel));
+        btnActualizar.setDisable(true);
+        btnInactivar.setDisable(true);
+
         txtBuscar.textProperty().addListener((obs, old, val) -> filtrar());
         cbEstado.getSelectionModel().selectedItemProperty().addListener((obs, old, val) -> filtrar());
+
+        filtrar();
+    }
+
+    private void actualizarEstadoBotones(Compra compra) {
+        if (compra == null) {
+            btnActualizar.setDisable(true);
+            btnInactivar.setDisable(true);
+            return;
+        }
+        String estado = compra.getEstadoActual() != null ? compra.getEstadoActual().trim() : "";
+        btnActualizar.setDisable(estado.equalsIgnoreCase("Inactiva") || estado.equalsIgnoreCase("En Cuarto Frío"));
+        btnInactivar.setDisable(estado.equalsIgnoreCase("Inactiva"));
     }
 
     private void filtrar() {
         String texto = txtBuscar.getText().toLowerCase().trim();
-        String estado = cbEstado.getValue();
+        String estadoFiltro = cbEstado.getValue();
+        LocalDate desde = dpFechaDesde.getValue();
+        LocalDate hasta = dpFechaHasta.getValue();
+
         filteredData.setPredicate(c -> {
-            boolean matchTexto = texto.isEmpty()
-                    || c.getProveedor().toLowerCase().contains(texto)
+            boolean matchTexto = texto.isEmpty() || c.getProveedor().toLowerCase().contains(texto)
                     || c.getTipoRosa().toLowerCase().contains(texto);
-            boolean matchEstado = estado.equals("Todos") || c.getEstadoActual().equals(estado);
-            return matchTexto && matchEstado;
+            boolean matchEstado = estadoFiltro.equals("Todos") || c.getEstadoActual().equals(estadoFiltro);
+            boolean matchFecha = true;
+            if (desde != null && hasta != null) {
+                matchFecha = (!c.getFechaCompra().isBefore(desde)) && (!c.getFechaCompra().isAfter(hasta));
+            } else if (desde != null) {
+                matchFecha = !c.getFechaCompra().isBefore(desde);
+            } else if (hasta != null) {
+                matchFecha = !c.getFechaCompra().isAfter(hasta);
+            }
+            return matchTexto && matchEstado && matchFecha;
+        });
+
+        tableCompras.setRowFactory(tv -> new TableRow<>() {
+            @Override
+            protected void updateItem(Compra item, boolean empty) {
+                super.updateItem(item, empty);
+                setStyle((item != null && "Inactiva".equalsIgnoreCase(item.getEstadoActual()))
+                        ? "-fx-background-color: lightgray;"
+                        : "");
+            }
         });
     }
 
     @FXML
     private void onNuevo() {
         Window owner = btnNuevo.getScene().getWindow();
-        Optional<Compra> res = showCompraFormDialog("Registrar Compra", null);
-        res.ifPresent(c -> {
+        Optional<Compra> resultado = showCompraFormDialog("Registrar Compra", null);
+        resultado.ifPresent(c -> {
+            if (c.getCostoUnitario() <= 0) {
+                DialogHelper.showWarning(owner, "El costo unitario debe ser mayor que cero.");
+                return;
+            }
             if (confirm(owner, "¿Deseas registrar esta compra?")) {
-                c.setId(generarId());
+                c.setId(masterData.stream().mapToInt(Compra::getId).max().orElse(0) + 1);
+                c.setEstadoActual("Recibida");
                 masterData.add(c);
-                DialogHelper.showSuccess(owner, "registrado");
+                DialogHelper.showSuccess(owner, "registrado la compra");
             }
         });
     }
 
     @FXML
-    private void onEditar() {
-        Window owner = btnEditar.getScene().getWindow();
-        Compra sel = tableCompras.getSelectionModel().getSelectedItem();
-        if (sel == null) return;
-        Optional<Compra> res = showCompraFormDialog("Editar Compra", sel);
-        res.ifPresent(c -> {
-            if (confirm(owner, "¿Deseas guardar los cambios?")) {
-                sel.setProveedor(c.getProveedor());
-                sel.setRuc(c.getRuc());
-                sel.setTipoRosa(c.getTipoRosa());
-                sel.setTipoCorte(c.getTipoCorte());
-                sel.setLargoTallo(c.getLargoTallo());
-                sel.setCantidad(c.getCantidad());
-                sel.setUnidad(c.getUnidad());
-                sel.setCostoUnitario(c.getCostoUnitario());
-                sel.setFechaCompra(c.getFechaCompra());
-                sel.setEstadoActual(c.getEstadoActual());
-                tableCompras.refresh();
-                DialogHelper.showSuccess(owner, "actualizado");
-            }
-        });
+    private void onActualizar() {
+        Window owner = btnActualizar.getScene().getWindow();
+        Compra seleccionado = tableCompras.getSelectionModel().getSelectedItem();
+        if (seleccionado == null)
+            return;
+        String estado = seleccionado.getEstadoActual().trim();
+        if (estado.equalsIgnoreCase("Inactiva") || estado.equalsIgnoreCase("En Cuarto Frío"))
+            return;
+
+        ObservableList<String> estados = Estados.ESTADOS_COMPRA;
+        int index = estados.indexOf(estado);
+        if (index >= 0 && index < estados.size() - 1) {
+            String nuevoEstado = estados.get(index + 1);
+            seleccionado.setEstadoActual(nuevoEstado);
+            tableCompras.refresh();
+            DialogHelper.showSuccess(owner, "actualizado el estado de la compra a \"" + nuevoEstado + "\"");
+            actualizarEstadoBotones(seleccionado);
+        }
     }
 
     @FXML
-    private void onEliminar() {
-        Window owner = btnEliminar.getScene().getWindow();
-        Compra sel = tableCompras.getSelectionModel().getSelectedItem();
-        if (sel == null) return;
-        if (confirm(owner, "¿Deseas eliminar esta compra?")) {
-            masterData.remove(sel);
-            DialogHelper.showSuccess(owner, "eliminado");
+    private void onInactivar() {
+        Window owner = btnInactivar.getScene().getWindow();
+        Compra seleccionado = tableCompras.getSelectionModel().getSelectedItem();
+        if (seleccionado != null && confirm(owner, "¿Está seguro/a de inactivar esta compra?")) {
+            seleccionado.setEstadoActual("Inactiva");
+            tableCompras.refresh();
+            DialogHelper.showSuccess(owner, "inactivado la compra");
+            actualizarEstadoBotones(seleccionado);
+            tableCompras.getSelectionModel().clearSelection();
+            tableCompras.getSelectionModel().select(seleccionado);
         }
     }
 
     @FXML
     private void onExportar() {
         Window owner = btnExportar.getScene().getWindow();
-        DialogHelper.showSuccess(owner, "exportado los datos");
+        DialogHelper.showSuccess(owner, "exportado la lista de compras");
     }
 
     private boolean confirm(Window owner, String msg) {
-        Alert a = new Alert(AlertType.CONFIRMATION);
-        a.initOwner(owner);
-        a.setHeaderText(null);
-        a.setContentText(msg);
-        a.setTitle("Confirmación");
-        Optional<ButtonType> res = a.showAndWait();
-        return res.isPresent() && res.get().getButtonData() == ButtonData.OK_DONE;
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.initOwner(owner);
+        alert.setHeaderText(null);
+        alert.setContentText(msg);
+        alert.setTitle("Confirmación");
+        Optional<ButtonType> respuesta = alert.showAndWait();
+        return respuesta.isPresent() && respuesta.get().getButtonData() == ButtonData.OK_DONE;
     }
 
-    /** Dialog para registrar o editar compra */
+    // Lista simulada de proveedores globales
+    private static final ObservableList<Proveedor> PROVEEDORES_GLOBALES = FXCollections.observableArrayList(
+            new Proveedor("1791512345001", "Rosas del Azuay", "Exportadora Rosas del Azuay S.A.",
+                    "+593998112233", "Cuenca, Azuay", "1234567890001", "contacto@azuayrosas.ec",
+                    LocalDate.of(2022, 3, 1), "Activo"),
+
+            new Proveedor("1791512345002", "Florícolas Galápagos", "Floricultores del Pacífico",
+                    "+593998223344", "Puerto Ayora, Galápagos", "1234567890002", "info@floragalapagos.ec",
+                    LocalDate.of(2021, 9, 15), "Activo"));
+
     private Optional<Compra> showCompraFormDialog(String title, Compra existing) {
+        boolean esEdicion = existing != null;
+
         Dialog<Compra> dlg = new Dialog<>();
         dlg.setTitle(title);
-        dlg.getDialogPane().getButtonTypes().addAll(
-                new ButtonType("Cancelar", ButtonData.CANCEL_CLOSE),
-                new ButtonType("Aceptar", ButtonData.OK_DONE)
-        );
+        dlg.setHeaderText(null);
+
+        ButtonType btnCancelar = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType btnAceptar = new ButtonType("Aceptar", ButtonBar.ButtonData.OK_DONE);
+        dlg.getDialogPane().getButtonTypes().addAll(btnCancelar, btnAceptar);
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
+        grid.setPadding(new Insets(20));
 
-        TextField txtProveedor = new TextField();
-        TextField txtRuc = new TextField();
-        TextField txtRosa = new TextField();
-        TextField txtCorte = new TextField();
-        Spinner<Integer> spCantidad = new Spinner<>(1, 9999, 100);
-        TextField txtUnidad = new TextField("Tallos");
-        Spinner<Double> spCosto = new Spinner<>(0.01, 100, 0.5, 0.01);
+        ObservableList<Proveedor> proveedoresActivos = PROVEEDORES_GLOBALES
+                .filtered(p -> "Activo".equals(p.getEstado()));
+        ComboBox<Proveedor> cbProveedor = new ComboBox<>(proveedoresActivos);
+        cbProveedor.setCellFactory(lv -> new ListCell<Proveedor>() {
+            @Override
+            protected void updateItem(Proveedor item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getNombre());
+            }
+        });
+        cbProveedor.setButtonCell(new ListCell<Proveedor>() {
+            @Override
+            protected void updateItem(Proveedor item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getNombre());
+            }
+        });
+        cbProveedor.setPromptText("Selecciona proveedor");
+
+        ComboBox<Rosa.TipoRosa> cbTipoRosa = new ComboBox<>(FXCollections.observableArrayList(Rosa.TipoRosa.values()));
+        cbTipoRosa.setPromptText("Selecciona tipo rosa");
+
+        TextField tfPrecioUnitario = new TextField();
+        tfPrecioUnitario.setPromptText("Precio unitario (c/IVA)");
+        tfPrecioUnitario.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (!newVal.matches("\\d*(\\.\\d{0,2})?")) {
+                tfPrecioUnitario.setText(oldVal);
+            }
+        });
+
+        ComboBox<Rosa.TipoCorte> cbTipoCorte = new ComboBox<>(
+                FXCollections.observableArrayList(Rosa.TipoCorte.values()));
+        cbTipoCorte.setPromptText("Selecciona tipo corte");
+
+        TextField tfCantidad = new TextField();
+        tfCantidad.setPromptText("Cantidad");
+        tfCantidad.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (!newVal.matches("\\d*")) {
+                tfCantidad.setText(oldVal);
+            }
+        });
+
         DatePicker dpFecha = new DatePicker(LocalDate.now());
-        ComboBox<String> cbEstado = new ComboBox<>(FXCollections.observableArrayList("Recibido", "Hidratado", "En Cuarto Frío", "Empacado", "Exportado"));
 
-        if (existing != null) {
-            txtProveedor.setText(existing.getProveedor());
-            txtRuc.setText(existing.getRuc());
-            txtRosa.setText(existing.getTipoRosa());
-            txtCorte.setText(existing.getTipoCorte());
-            spCantidad.getValueFactory().setValue(existing.getCantidad());
-            txtUnidad.setText(existing.getUnidad());
-            spCosto.getValueFactory().setValue(existing.getCostoUnitario());
+        // Campos que se vuelven visibles solo cuando se selecciona tipo rosa
+        List<Node> camposDependientes = List.of(
+                new Label("Precio Unitario (c/IVA):"), tfPrecioUnitario,
+                new Label("Tipo Corte:"), cbTipoCorte,
+                new Label("Cantidad:"), tfCantidad,
+                new Label("Fecha Compra:"), dpFecha);
+
+        camposDependientes.forEach(n -> n.setVisible(false));
+
+        Runnable actualizarPrecioPorProveedorYTipoRosa = () -> {
+            Proveedor proveedor = cbProveedor.getValue();
+            Rosa.TipoRosa tipoRosa = cbTipoRosa.getValue();
+            if (proveedor != null && tipoRosa != null) {
+                Double precioBase = proveedor.getPrecioTipoRosa(tipoRosa);
+                if (precioBase != null) {
+                    double precioConIVA = Math.round(precioBase * 1.15 * 100.0) / 100.0;
+                    tfPrecioUnitario.setText(String.valueOf(precioConIVA));
+                } else {
+                    tfPrecioUnitario.setText("0.00");
+                }
+            } else {
+                tfPrecioUnitario.setText("0.00");
+            }
+        };
+
+        cbTipoRosa.valueProperty().addListener((obs, oldVal, newVal) -> {
+            boolean mostrar = newVal != null;
+            camposDependientes.forEach(n -> n.setVisible(mostrar));
+            actualizarPrecioPorProveedorYTipoRosa.run();
+        });
+
+        cbProveedor.valueProperty().addListener((obs, oldVal, newVal) -> actualizarPrecioPorProveedorYTipoRosa.run());
+
+        if (esEdicion) {
+            proveedoresActivos.stream()
+                    .filter(p -> p.getNombre().equals(existing.getProveedor()))
+                    .findFirst()
+                    .ifPresent(cbProveedor::setValue);
+            cbTipoRosa.setValue(Rosa.TipoRosa.valueOf(existing.getTipoRosa().toUpperCase()));
+            cbTipoCorte.setValue(Rosa.TipoCorte.valueOf(existing.getTipoCorte().toUpperCase()));
+            tfCantidad.setText(String.valueOf(existing.getCantidad()));
+            tfPrecioUnitario.setText(String.valueOf(existing.getCostoUnitario()));
             dpFecha.setValue(existing.getFechaCompra());
-            cbEstado.setValue(existing.getEstadoActual());
+            camposDependientes.forEach(n -> n.setVisible(true));
         }
 
-        grid.addRow(0, new Label("Proveedor:"), txtProveedor);
-        grid.addRow(1, new Label("RUC:"), txtRuc);
-        grid.addRow(2, new Label("Tipo Rosa:"), txtRosa);
-        grid.addRow(3, new Label("Tipo Corte:"), txtCorte);
-        grid.addRow(4, new Label("Cantidad:"), spCantidad);
-        grid.addRow(5, new Label("Unidad:"), txtUnidad);
-        grid.addRow(6, new Label("Costo Unitario:"), spCosto);
-        grid.addRow(7, new Label("Fecha Compra:"), dpFecha);
-        grid.addRow(8, new Label("Estado:"), cbEstado);
-
+        grid.addRow(0, new Label("Proveedor:"), cbProveedor);
+        grid.addRow(1, new Label("Tipo Rosa:"), cbTipoRosa);
+        grid.addRow(2, new Label("Precio Unitario (c/IVA):"), tfPrecioUnitario);
+        grid.addRow(3, new Label("Tipo Corte:"), cbTipoCorte);
+        grid.addRow(4, new Label("Cantidad:"), tfCantidad);
+        grid.addRow(5, new Label("Fecha Compra:"), dpFecha);
         dlg.getDialogPane().setContent(grid);
 
-        dlg.setResultConverter(bt -> {
-            if (bt.getButtonData() == ButtonData.OK_DONE) {
+        // Obtener botones
+        Button btnAceptarButton = (Button) dlg.getDialogPane().lookupButton(btnAceptar);
+        Button btnCancelarButton = (Button) dlg.getDialogPane().lookupButton(btnCancelar);
+
+        // Binding para habilitar/deshabilitar el botón Aceptar según campos
+        // obligatorios
+        btnAceptarButton.disableProperty().bind(
+                cbProveedor.valueProperty().isNull());
+         btnAceptarButton.addEventFilter(ActionEvent.ACTION, event -> {
+            if (cbProveedor.getValue() == null ||
+                    cbTipoRosa.getValue() == null ||
+                    cbTipoCorte.getValue() == null ||
+                    tfCantidad.getText().isEmpty() ||
+                    tfPrecioUnitario.getText().isEmpty() ||
+                    dpFecha.getValue() == null) {
+
+                DialogHelper.showWarning(dlg.getOwner(), "Por favor, complete todos los campos obligatorios.");
+                event.consume();
+            }
+        });
+        // Listener para mostrar confirmación al cancelar
+        btnCancelarButton.addEventFilter(ActionEvent.ACTION, event -> {
+            event.consume(); // Cancelamos el cierre para mostrar confirmación primero
+
+            Window owner = dlg.getDialogPane().getScene().getWindow();
+            boolean confirmar = DialogHelper.confirm(owner,
+                    "¿Está seguro/a de cancelar el registro de esta compra?");
+
+            if (confirmar) {
+                dlg.setResult(null); // Cierra el diálogo sin resultado (equivale a cancelar)
+                dlg.close();
+            }
+            // si no confirma, no se cierra el diálogo y se queda abierto
+        });
+
+        dlg.setResultConverter(button -> {
+            if (button == btnAceptar) {
                 Compra c = new Compra();
-                c.setProveedor(txtProveedor.getText());
-                c.setRuc(txtRuc.getText());
-                c.setTipoRosa(txtRosa.getText());
-                c.setTipoCorte(txtCorte.getText());
-                c.setCantidad(spCantidad.getValue());
-                c.setUnidad(txtUnidad.getText());
-                c.setCostoUnitario(spCosto.getValue());
+                c.setId(0);
+                c.setProveedor(cbProveedor.getValue().getNombre());
+                c.setRuc(cbProveedor.getValue().getRuc());
+                c.setTipoRosa(cbTipoRosa.getValue().name());
+                c.setTipoCorte(cbTipoCorte.getValue().name());
+                c.setCantidad(Integer.parseInt(tfCantidad.getText()));
+                c.setCostoUnitario(Double.parseDouble(tfPrecioUnitario.getText()));
                 c.setFechaCompra(dpFecha.getValue());
-                c.setEstadoActual(cbEstado.getValue());
+                c.setEstadoActual("Recibida"); // Estado fijo al crear
                 return c;
             }
             return null;
@@ -213,7 +392,4 @@ public class ComprasController {
         return dlg.showAndWait();
     }
 
-    private int generarId() {
-        return masterData.stream().mapToInt(Compra::getId).max().orElse(0) + 1;
-    }
 }

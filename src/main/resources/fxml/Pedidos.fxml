@@ -4,75 +4,99 @@
 <?import javafx.scene.layout.*?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.example.sgef_petalex_v_09.controllers.PedidosController"
-            fx:id="root"
-            styleClass="root"
-            prefWidth="800" prefHeight="700">
+    xmlns:fx="http://javafx.com/fxml"
+    fx:controller="org.example.sgef_petalex_v_09.controllers.PedidosController"
+    fx:id="root"
+    styleClass="root"
+    prefWidth="800" prefHeight="700">
 
     <!-- Toolbar: acciones -->
     <VBox spacing="5" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
         <HBox spacing="10" styleClass="toolbar-buttons">
-            <Button fx:id="btnNuevo" text="Nuevo Pedido" onAction="#onNuevo" styleClass="toolbar-button">
+            <Button fx:id="btnNuevo" text="Nuevo Pedido" onAction="#onNuevo"
+                styleClass="toolbar-button">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
-                            <Image url="@../images/icon_new.png"/>
+                            <Image url="@../images/icon_new.png" />
                         </image>
                     </ImageView>
                 </graphic>
             </Button>
-            <Button fx:id="btnEditar" text="Editar" onAction="#onEditar" styleClass="toolbar-button" disable="true">
+
+            <!-- NUEVO BOTÓN: Actualizar Estado -->
+            <Button fx:id="btnActualizarEstado" text="Actualizar Estado"
+                onAction="#onActualizarEstado"
+                styleClass="toolbar-button" disable="true">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
-                            <Image url="@../images/icon_role.png"/>
+                            <Image url="@../images/icon_role.png" />
                         </image>
                     </ImageView>
                 </graphic>
             </Button>
-            <Button fx:id="btnEliminar" text="Eliminar" onAction="#onEliminar" styleClass="toolbar-button" disable="true">
+
+            <Button fx:id="btnAnular" text="Anular" onAction="#onAnular"
+                styleClass="toolbar-button" disable="true">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
-                            <Image url="@../images/icon_delete.png"/>
+                            <Image url="@../images/icon_delete.png" />
                         </image>
                     </ImageView>
                 </graphic>
             </Button>
-            <Button fx:id="btnExportar" text="Exportar" onAction="#onExportar" styleClass="toolbar-button">
+
+            <Button fx:id="btnEditar" text="Editar Pedido" onAction="#onEditar"
+                styleClass="toolbar-button"
+                disable="true">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
-                            <Image url="@../images/icon_export.png"/>
+                            <Image url="@../images/icon_role.png" />
+                        </image>
+                    </ImageView>
+                </graphic>
+            </Button>
+            <Button fx:id="btnExportar" text="Facturar" onAction="#onExportar"
+                styleClass="toolbar-button">
+                <graphic>
+                    <ImageView fitWidth="16" preserveRatio="true">
+                        <image>
+                            <Image url="@../images/icon_export.png" />
                         </image>
                     </ImageView>
                 </graphic>
             </Button>
         </HBox>
         <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar-filters">
-            <TextField fx:id="txtBuscar" promptText="Buscar por cliente o guía aérea" styleClass="search-field" />
-            <ComboBox fx:id="cbEstado" promptText="Estado del pedido" styleClass="filter-combo" />
+            <TextField fx:id="txtBuscar" promptText="Buscar por cliente o guía aérea"
+                styleClass="search-field" />
+            <DatePicker fx:id="dpFechaDesde" promptText="Fecha desde" />
+            <DatePicker fx:id="dpFechaHasta" promptText="Fecha hasta" />
+            <ComboBox fx:id="cbEstado" promptText="Estado" styleClass="filter-combo" />
         </HBox>
     </VBox>
 
     <!-- Tabla de Pedidos -->
     <TableView fx:id="tablePedidos"
-               editable="false"
-               styleClass="table-clientes"
-               AnchorPane.topAnchor="80"
-               AnchorPane.leftAnchor="10"
-               AnchorPane.rightAnchor="10"
-               AnchorPane.bottomAnchor="10">
+        editable="false"
+        styleClass="table-clientes"
+        AnchorPane.topAnchor="80"
+        AnchorPane.leftAnchor="10"
+        AnchorPane.rightAnchor="10"
+        AnchorPane.bottomAnchor="10">
         <columns>
-            <TableColumn fx:id="colId"                text="ID"               prefWidth="50" />
-            <TableColumn fx:id="colCliente"           text="Cliente"          prefWidth="150" />
-            <TableColumn fx:id="colFechaPedido"       text="Fecha Pedido"     prefWidth="120" />
-            <TableColumn fx:id="colFechaExportacion"  text="Fecha Exportación" prefWidth="130" />
-            <TableColumn fx:id="colEstado"            text="Estado"           prefWidth="100" />
-            <TableColumn fx:id="colTotalProductos"    text="Productos"        prefWidth="80" />
-            <TableColumn fx:id="colPrecioUnitario"    text="Precio Unitario"  prefWidth="100" />
-            <TableColumn fx:id="colGuiaAerea"         text="Guía Aérea"       prefWidth="120" />
+            <TableColumn fx:id="colId" text="ID" prefWidth="50" />
+            <TableColumn fx:id="colCliente" text="Cliente" prefWidth="150" />
+            <TableColumn fx:id="colFechaPedido" text="Fecha Pedido" prefWidth="120" />
+            <TableColumn fx:id="colFechaExportacion" text="Fecha Exportación" prefWidth="130" />
+            <TableColumn fx:id="colEstado" text="Estado" prefWidth="100" />
+            <TableColumn fx:id="colTotalProductos" text="Productos" prefWidth="80" />
+            <TableColumn fx:id="colPrecioTotal" text="Total" prefWidth="100" />
+            <TableColumn fx:id="colGuiaAerea" text="Guía Aérea" prefWidth="120" />
+
         </columns>
     </TableView>
 

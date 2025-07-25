@@ -1,6 +1,10 @@
 package org.example.sgef_petalex_v_09.models;
 
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.example.sgef_petalex_v_09.models.Rosa.TipoRosa;
 
 public class Proveedor {
     private String ruc;
@@ -12,6 +16,7 @@ public class Proveedor {
     private String correo;
     private LocalDate fecha_registro;
     private String estado;
+    private Map<TipoRosa, Double> preciosPorTipoRosa = new HashMap<>();
 
     // Constructor vacío
     public Proveedor() {
@@ -143,6 +148,25 @@ public class Proveedor {
                 ", razon_social='" + razon_social + '\'' +
                 ", estado='" + estado + '\'' +
                 '}';
+    }
+
+    public void setPrecioTipoRosa(TipoRosa tipo, double precioUnitarioSinIVA) {
+        preciosPorTipoRosa.put(tipo, precioUnitarioSinIVA);
+    }
+
+    /**
+     * Obtiene el precio unitario SIN IVA para un tipo de rosa dado.
+     * Devuelve null si no está definido.
+     */
+    public Double getPrecioTipoRosa(TipoRosa tipo) {
+        return preciosPorTipoRosa.get(tipo);
+    }
+
+    /**
+     * Obtiene el mapa completo de precios por tipo de rosa.
+     */
+    public Map<TipoRosa, Double> getPreciosPorTipoRosa() {
+        return preciosPorTipoRosa;
     }
 
 }

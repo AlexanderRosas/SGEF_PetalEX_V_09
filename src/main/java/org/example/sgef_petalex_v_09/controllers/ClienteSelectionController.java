@@ -7,7 +7,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import org.example.sgef_petalex_v_09.models.Cliente;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
 
@@ -45,36 +44,26 @@ public class ClienteSelectionController {
         colCorreo.setCellValueFactory(new PropertyValueFactory<>("correo"));
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
 
-        // ejemplo de clientes (puedes cargar real)
+        // Datos de prueba con ID corregido (int en lugar de String)
         master.addAll(
-                new Cliente(101, "RoseFlower INC.", "Av. Petalos 123", "0991234567", "rosa@rose.com", "Activo"),
-                new Cliente(102, "SweetMoment Ltd.", "Calle Tulipán 45", "0987654321", "sm@moment.com", "Inactivo"));
+                new Cliente(1234567890, "RoseFlower INC.", "Av. Pétalos 123", "0991234567", "rosa@rose.com", "Activo"),
+                new Cliente(987654321, "SweetMoment Ltd.", "Calle Tulipán 45", "0987654321", "sm@moment.com", "Inactivo")
+        );
 
         filtered = new FilteredList<>(master, c -> true);
         tableClientes.setItems(filtered);
 
-        // filtros
-        txtFilterNombre.textProperty().addListener((obs, o, v) -> filtered
-                .setPredicate(c -> v.isEmpty() || c.getNombre().toLowerCase().contains(v.toLowerCase())));
+        txtFilterNombre.textProperty().addListener((obs, oldVal, newVal) -> {
+            String filtro = newVal.toLowerCase().trim();
+            filtered.setPredicate(cliente ->
+                    filtro.isEmpty() || cliente.getNombre().toLowerCase().contains(filtro));
+        });
 
-        // selección
-        tableClientes.getSelectionModel().selectedItemProperty().addListener((obs, o, s) -> {
-            btnAceptar.setDisable(s == null);
+        tableClientes.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            btnAceptar.setDisable(newSel == null);
         });
 
         btnAceptar.setDisable(true);
-        btnAceptar.setOnAction(e -> {
-            Window w = btnAceptar.getScene().getWindow();
-            Cliente c = tableClientes.getSelectionModel().getSelectedItem();
-            boolean ok = DialogHelper.confirm(w,
-                    "¿Está seguro que desea Seleccionar al " + c.getNombre() + "?");
-            if (ok) {
-                selectedCliente = c;
-                w.hide();
-            }
-        });
-
-        btnCancel.setOnAction(e -> btnCancel.getScene().getWindow().hide());
     }
 
     @FXML
@@ -86,7 +75,7 @@ public class ClienteSelectionController {
         Stage stage = (Stage) btnAceptar.getScene().getWindow();
         boolean ok = DialogHelper.confirm(
                 stage,
-                "¿Está seguro que desea Seleccionar al " + c.getNombre() + "?");
+                "¿Está seguro que desea seleccionar al cliente " + c.getNombre() + "?");
         if (ok) {
             selectedCliente = c;
             stage.close();
@@ -95,10 +84,16 @@ public class ClienteSelectionController {
 
     @FXML
     private void onCancel() {
-        ((Stage) btnCancel.getScene().getWindow()).close();
+        Stage stage = (Stage) btnCancel.getScene().getWindow();
+        boolean ok = DialogHelper.confirm(
+                stage,
+                "¿Está seguro/a de cancelar la selección del cliente?");
+        if (ok) {
+            selectedCliente = null;
+            stage.close();
+        }
     }
 
-    /** Devuelve el cliente seleccionado, o null. */
     public Cliente getSelectedCliente() {
         return selectedCliente;
     }

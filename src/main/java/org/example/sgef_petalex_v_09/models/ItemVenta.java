@@ -5,6 +5,7 @@ import javafx.beans.property.*;
 public class ItemVenta {
     private final IntegerProperty item        = new SimpleIntegerProperty();
     private final StringProperty variedad     = new SimpleStringProperty();
+    private final StringProperty largo        = new SimpleStringProperty(); // Nuevo campo
     private final StringProperty paquete      = new SimpleStringProperty();
     private final IntegerProperty cantidad    = new SimpleIntegerProperty();
     private final DoubleProperty precioUnit   = new SimpleDoubleProperty();
@@ -19,6 +20,10 @@ public class ItemVenta {
     public String getVariedad() { return variedad.get(); }
     public void setVariedad(String v) { variedad.set(v); }
     public StringProperty variedadProperty() { return variedad; }
+
+    public String getLargo() { return largo.get(); }                          // GET
+    public void setLargo(String l) { largo.set(l); }                          // SET
+    public StringProperty largoProperty() { return largo; }                  // PROPERTY
 
     public String getPaquete() { return paquete.get(); }
     public void setPaquete(String p) { paquete.set(p); }

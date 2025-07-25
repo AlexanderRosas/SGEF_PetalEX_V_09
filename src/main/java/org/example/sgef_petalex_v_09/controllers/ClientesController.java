@@ -1,7 +1,6 @@
 package org.example.sgef_petalex_v_09.controllers;
 
 import javafx.collections.transformation.FilteredList;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -22,7 +21,6 @@ import org.example.sgef_petalex_v_09.util.DialogHelper;
 
 import java.io.IOException;
 import java.util.Optional;
-import java.util.Random;
 
 public class ClientesController {
 
@@ -47,7 +45,6 @@ public class ClientesController {
     private Button btnNuevo;
     @FXML
     private Button btnEditar;
-
     @FXML
     private Button btnBuscar;
     @FXML
@@ -55,9 +52,9 @@ public class ClientesController {
 
     @FXML
     private TextField txtBuscar;
+
     private final ObservableList<Cliente> data = FXCollections.observableArrayList();
-    private FilteredList<Cliente> filteredData; // <-- NUEVO filtered list para filtro dinámico
-    private final Random rnd = new Random();
+    private FilteredList<Cliente> filteredData;
 
     @FXML
     public void initialize() {
@@ -67,30 +64,26 @@ public class ClientesController {
         colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
         colCorreo.setCellValueFactory(new PropertyValueFactory<>("correo"));
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
-        // Inicializar ComboBox de Estado
+
         cbEstado.setItems(FXCollections.observableArrayList("Todos", "Activo", "Inactivo"));
-        cbEstado.setValue("Todos"); // por defecto mostrar todos
+        cbEstado.setValue("Todos");
 
         btnEditar.setDisable(true);
         btnEstado.setDisable(true);
 
-        tablaClientes.getSelectionModel().selectedItemProperty()
-                .addListener((obs, oldSel, newSel) -> {
-                    boolean sel = newSel != null;
-                    btnEditar.setDisable(!sel);
-                    btnEstado.setDisable(!sel);
-                });
+        tablaClientes.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            boolean sel = newSel != null;
+            btnEditar.setDisable(!sel);
+            btnEstado.setDisable(!sel);
+        });
 
         cargarDatosPrototipo();
 
-        // Envuelve el ObservableList en FilteredList para filtro dinámico
         filteredData = new FilteredList<>(data, p -> true);
         tablaClientes.setItems(filteredData);
 
-        // Listener combinado para texto y estado
         txtBuscar.textProperty().addListener((obs, oldVal, newVal) -> aplicarFiltro());
         cbEstado.valueProperty().addListener((obs, oldVal, newVal) -> aplicarFiltro());
-
     }
 
     private void aplicarFiltro() {
@@ -115,31 +108,20 @@ public class ClientesController {
     private void cargarDatosPrototipo() {
         data.clear();
         data.addAll(
-                new Cliente(randId(), "RoseFlower INC.", "Av. Petalos 123, Ecuador", "+593991234567",
-                        "ventas@roseflower.ec", "Activo"),
-                new Cliente(randId(), "SweetMoment Ltd.", "123 Tulip St., Netherlands", "+31205551234",
-                        "contact@sweetmoment.nl", "Activo"),
-                new Cliente(randId(), "GlobalRoses GmbH", "Rosengasse 5, Germany", "+4930123456",
-                        "info@globalroses.de", "Activo"),
-                new Cliente(randId(), "FlorAmor Co.", "789 Orchid Ave., Colombia", "+57123456789",
-                        "ventas@floramor.co", "Activo"),
-                new Cliente(randId(), "PetalWorld SA", "456 Blossom Rd., USA", "+12025550123",
-                        "sales@petalworld.com", "Activo"));
-        tablaClientes.setItems(data);
-    }
-
-    private int randId() {
-        return 100000 + rnd.nextInt(900000);
+                new Cliente(1234567890, "RoseFlower INC.", "Av. Petalos 123, Ecuador", "+593991234567", "ventas@roseflower.ec", "Activo"),
+                new Cliente(987654321, "SweetMoment Ltd.", "123 Tulip St., Netherlands", "+31205551234", "contact@sweetmoment.nl", "Activo"),
+                new Cliente(567890123, "GlobalRoses GmbH", "Rosengasse 5, Germany", "+4930123456", "info@globalroses.de", "Activo"),
+                new Cliente(432109876, "FlorAmor Co.", "789 Orchid Ave., Colombia", "+57123456789", "ventas@floramor.co", "Activo"),
+                new Cliente(246801357, "PetalWorld SA", "456 Blossom Rd., USA", "+12025550123", "sales@petalworld.com", "Activo")
+        );
     }
 
     @FXML
     private void onNuevo(ActionEvent event) {
         Window owner = btnNuevo.getScene().getWindow();
 
-        // 1) Form dialog
         Optional<Cliente> formResult = showClientFormDialog("Crear", null);
         formResult.ifPresent(c -> {
-            // 2) Confirmation
             Alert confirm = new Alert(AlertType.CONFIRMATION);
             confirm.initOwner(owner);
             confirm.setTitle("Confirmar creación");
@@ -148,7 +130,6 @@ public class ClientesController {
             Optional<ButtonType> ok = confirm.showAndWait();
 
             if (ok.isPresent() && ok.get().getButtonData() == ButtonData.OK_DONE) {
-                c.setId(randId());
                 data.add(c);
                 tablaClientes.refresh();
                 DialogHelper.showSuccess(owner, "creado");
@@ -211,10 +192,6 @@ public class ClientesController {
         }
     }
 
-    /**
-     * Muestra un Dialog personalizado para Crear/Actualizar un Cliente.
-     * Si 'existing' != null, carga sus datos para edición.
-     */
     private Optional<Cliente> showClientFormDialog(String action, Cliente existing) {
         Dialog<Cliente> dialog = new Dialog<>();
         dialog.setTitle(action + " cliente");
@@ -222,11 +199,12 @@ public class ClientesController {
                 new ButtonType("Cancelar", ButtonData.CANCEL_CLOSE),
                 new ButtonType("Aceptar", ButtonData.OK_DONE));
 
-        // Formulario
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
 
+        TextField txtIdEmpresarial = new TextField();
+        txtIdEmpresarial.setPromptText("Identificador Empresarial");
         TextField txtNombre = new TextField();
         txtNombre.setPromptText("Nombre");
         TextField txtDireccion = new TextField();
@@ -237,34 +215,42 @@ public class ClientesController {
         txtCorreo.setPromptText("Correo");
 
         if (existing != null) {
+            txtIdEmpresarial.setText(String.valueOf(existing.getId()));
+            txtIdEmpresarial.setDisable(true);
             txtNombre.setText(existing.getNombre());
             txtDireccion.setText(existing.getDireccion());
             txtTelefono.setText(existing.getTelefono());
             txtCorreo.setText(existing.getCorreo());
         }
 
-        grid.add(new Label("Nombre:"), 0, 0);
-        grid.add(txtNombre, 1, 0);
-        grid.add(new Label("Dirección:"), 0, 1);
-        grid.add(txtDireccion, 1, 1);
-        grid.add(new Label("Teléfono:"), 0, 2);
-        grid.add(txtTelefono, 1, 2);
-        grid.add(new Label("Correo:"), 0, 3);
-        grid.add(txtCorreo, 1, 3);
+        grid.add(new Label("Identificador Empresarial:"), 0, 0);
+        grid.add(txtIdEmpresarial, 1, 0);
+        grid.add(new Label("Nombre:"), 0, 1);
+        grid.add(txtNombre, 1, 1);
+        grid.add(new Label("Dirección:"), 0, 2);
+        grid.add(txtDireccion, 1, 2);
+        grid.add(new Label("Teléfono:"), 0, 3);
+        grid.add(txtTelefono, 1, 3);
+        grid.add(new Label("Correo:"), 0, 4);
+        grid.add(txtCorreo, 1, 4);
 
         dialog.getDialogPane().setContent(grid);
 
-        // Convertir resultado
         dialog.setResultConverter(btn -> {
             if (btn.getButtonData() == ButtonData.OK_DONE) {
-                Cliente c = new Cliente();
-                if (existing != null)
-                    c.setId(existing.getId());
-                c.setNombre(txtNombre.getText());
-                c.setDireccion(txtDireccion.getText());
-                c.setTelefono(txtTelefono.getText());
-                c.setCorreo(txtCorreo.getText());
-                return c;
+                try {
+                    int id = existing != null ? existing.getId()
+                            : Integer.parseInt(txtIdEmpresarial.getText().trim());
+                    String nombre = txtNombre.getText();
+                    String direccion = txtDireccion.getText();
+                    String telefono = txtTelefono.getText();
+                    String correo = txtCorreo.getText();
+                    String estado = existing != null ? existing.getEstado() : "Activo";
+                    return new Cliente(id, nombre, direccion, telefono, correo, estado);
+                } catch (NumberFormatException e) {
+                    DialogHelper.showError(dialog.getDialogPane().getScene().getWindow(), "ID inválido");
+                    return null;
+                }
             }
             return null;
         });
@@ -275,25 +261,12 @@ public class ClientesController {
     @FXML
     private void onBack(ActionEvent event) {
         try {
-            // Carga el FXML del menú principal
-            Parent mainRoot = FXMLLoader.load(
-                    getClass().getResource("/fxml/MainMenu.fxml"));
-            // Obtiene el Stage y reutiliza la Scene actual
+            Parent mainRoot = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = stage.getScene();
-
-            // Reemplaza la raíz sin crear nueva Scene
             scene.setRoot(mainRoot);
-
-            // Reaplica tu CSS
             scene.getStylesheets().clear();
-            scene.getStylesheets().add(
-                    getClass().getResource("/css/styles.css").toExternalForm());
-
-            // Asegura que siga maximizado
-            // stage.setMaximized(true);
-
-            // Actualiza el título
+            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
             stage.setTitle("Index Blooms – Menú Principal");
         } catch (IOException e) {
             e.printStackTrace();

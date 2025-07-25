@@ -72,7 +72,7 @@
     </Button>
 
     <!-- Título del módulo -->
-    <Label text="Compras y Pedidos"
+    <Label text="Compras"
         styleClass="header-title"
         AnchorPane.topAnchor="10"
         AnchorPane.leftAnchor="400" />

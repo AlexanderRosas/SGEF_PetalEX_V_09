@@ -28,7 +28,7 @@
     <HBox AnchorPane.bottomAnchor="10"
           AnchorPane.rightAnchor="10">
         <spacing>10</spacing>
-        <Button text="Cancelar" onAction="#onCancel" styleClass="toolbar-button"/>
+        <Button text="Cancelar" fx:id="btnCancel" onAction="#onCancel" styleClass="toolbar-button"/>
         <Button text="Aceptar"  fx:id="btnOk" onAction="#onAccept" styleClass="toolbar-button" disable="true"/>
     </HBox>
 </AnchorPane>
