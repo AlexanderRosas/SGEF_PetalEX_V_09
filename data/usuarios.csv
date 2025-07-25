@@ -1,0 +1,3 @@
+ID,Nombre,Correo,Usuario,Rol,Estado,Sucursal,RUC,Permisos
+U924,Administrador,ariel@outlook.com,ariel,Administrador,Activo,Latacunga,1728907567001,Todos
+U980,Angel,administrador@gmail.com,angel,Contador,Activo,null,null,FINANZAS,REPORTES

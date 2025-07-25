@@ -48,7 +48,7 @@ public class AdministracionController {
                     getClass().getResource("/css/styles.css").toExternalForm());
 
             // Asegura que siga maximizado
-            stage.setMaximized(true);
+            //stage.setMaximized(true);
 
             // Actualiza el título
             stage.setTitle("Index Blooms – Menú Principal");
@@ -88,7 +88,7 @@ public class AdministracionController {
     private void resaltarBoton(Button activo) {
         // Remover la clase active de todos los botones
         btnGestionUsuarios.getStyleClass().remove("active");
-        btnRolesPermisos.getStyleClass().remove("active");
+        //btnRolesPermisos.getStyleClass().remove("active");
 
         // Agregar la clase active al botón seleccionado
         activo.getStyleClass().add("active");

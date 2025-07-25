@@ -1,5 +1,6 @@
 package org.example.sgef_petalex_v_09.models;
 
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.*;
 
 public class ItemVenta {
@@ -11,6 +12,16 @@ public class ItemVenta {
     private final DoubleProperty precioTotal  = new SimpleDoubleProperty();
 
     public ItemVenta() {}
+
+
+    public ItemVenta(int nroItem, String variedad, String paquete, int cantidad, double precioUnitario) {
+        this.item.set(nroItem);
+        this.variedad.set(variedad);
+        this.paquete.set(paquete);
+        this.cantidad.set(cantidad);
+        this.precioUnit.set(precioUnitario);
+        this.precioTotal.set(precioUnitario * cantidad);
+    }
 
     public int getItem() { return item.get(); }
     public void setItem(int i) { item.set(i); }
@@ -35,4 +46,14 @@ public class ItemVenta {
     public double getPrecioTotal() { return precioTotal.get(); }
     public void setPrecioTotal(double t) { precioTotal.set(t); }
     public DoubleProperty precioTotalProperty() { return precioTotal; }
+
+    public Object getDescripcion() {
+        return "Item: " + item + " - " + variedad + " - " + paquete + " - " + cantidad + " - " + precioUnit + " - " + precioTotal;
+    }
+
+
+    public BooleanExpression precioUnitarioProperty() {
+
+        return null;
+    }
 }

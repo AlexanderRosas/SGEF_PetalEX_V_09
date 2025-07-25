@@ -2,63 +2,116 @@ package org.example.sgef_petalex_v_09.controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import org.example.sgef_petalex_v_09.models.Usuario;
+import org.example.sgef_petalex_v_09.util.DialogHelper;
+import org.example.sgef_petalex_v_09.util.ScreenManager;
+import org.example.sgef_petalex_v_09.util.UserSession;
+import org.example.sgef_petalex_v_09.util.UserUtil;
 import javafx.stage.Stage;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import java.io.IOException;
+import java.net.URL;
 
 public class LoginController {
+    
+    @FXML private TextField txtUsuario;
+    @FXML private PasswordField txtPassword;
+    @FXML private Button btnIngresar;
+    @FXML private Button btnSalir;
+
+    private static final int MAX_INTENTOS = 3;
+    private int intentos = 0;
+
     @FXML
-    private TextField txtUser;
-    @FXML
-    private PasswordField txtPass;
-    @FXML
-    private Button btnIngresar;
+    private void initialize() {
+        // Limpiar cualquier sesión previa
+        UserSession.cerrarSesion();
+        
+        // Configurar listeners
+        txtUsuario.textProperty().addListener((obs, old, val) -> 
+            validarCampos());
+        txtPassword.textProperty().addListener((obs, old, val) -> 
+            validarCampos());
+    }
+
+    private void validarCampos() {
+        boolean camposVacios = txtUsuario.getText().trim().isEmpty() || 
+                             txtPassword.getText().trim().isEmpty();
+        btnIngresar.setDisable(camposVacios);
+    }
 
     @FXML
     private void onIngresar(ActionEvent event) {
-        // Intentamos autenticar
-        boolean autentico = authenticate(txtUser.getText(), txtPass.getText());
+        String usuario = txtUsuario.getText().trim();
+        String password = txtPassword.getText().trim();
 
-        if (autentico) {
+        if (intentos >= MAX_INTENTOS) {
+            mostrarError("Demasiados intentos fallidos", 
+                "Por favor, contacte al administrador del sistema.");
+            System.exit(0);
+            return;
+        }
+
+        Usuario usuarioEncontrado = UserUtil.buscarUsuario(usuario, password);
+
+        if (usuarioEncontrado != null) {
+            if ("Inactivo".equals(usuarioEncontrado.getEstado())) {
+                mostrarError("Usuario inactivo", 
+                    "Este usuario está desactivado. Contacte al administrador.");
+                return;
+            }
+
+            // Iniciar sesión
+            UserSession.iniciarSesion(usuarioEncontrado);
+
+
+
+
+            // Cargar menú principal usando el mismo método que MainMenuController
             try {
-                // Carga del menú principal
-                Parent mainRoot = FXMLLoader.load(
-                        getClass().getResource("/fxml/MainMenu.fxml"));
-                Scene mainScene = new Scene(mainRoot);
-                mainScene.getStylesheets().add(
-                        getClass().getResource("/css/styles.css").toExternalForm());
                 Stage stage = (Stage) btnIngresar.getScene().getWindow();
-                stage.setScene(mainScene);
-                stage.setMaximized(true);
+                URL resource = getClass().getResource("/fxml/MainMenu.fxml");
+                Parent rootNode = FXMLLoader.load(resource);
+                Scene scene = new Scene(rootNode);
+                scene.getStylesheets().add(
+                    getClass().getResource("/css/styles.css").toExternalForm()
+                );
+                stage.setScene(scene);
+                stage.setTitle("Index Blooms - Menú Principal");
                 stage.centerOnScreen();
-                stage.setTitle("Index Blooms – Menú Principal");
             } catch (IOException e) {
                 e.printStackTrace();
+                mostrarError("Error", "No se pudo cargar el menú principal");
             }
+
         } else {
-            // Credenciales incorrectas: mostramos una alerta de error
-            Stage stage = (Stage) btnIngresar.getScene().getWindow();
-            Alert alert = new Alert(AlertType.ERROR);
-            alert.setTitle("Error de inicio de sesión");
-            alert.setHeaderText(null);
-            alert.setContentText("Usuario o contraseña incorrectos");
-            alert.initOwner(stage);
-            alert.showAndWait();
-            txtUser.clear();
-            txtPass.clear();
-            txtUser.requestFocus();
+            intentos++;
+            int restantes = MAX_INTENTOS - intentos;
+            
+            mostrarError("Credenciales inválidas",
+                "Usuario o contraseña incorrectos.\nIntentos restantes: " + restantes);
+            
+            txtPassword.clear();
+            txtPassword.requestFocus();
         }
     }
 
-    private boolean authenticate(String user, String pass) {
-        return "admin".equals(user) && "admin".equals(pass);
+    @FXML
+    private void onSalir(ActionEvent event) {
+        System.exit(0);
+    }
+
+    private void mostrarError(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
 }

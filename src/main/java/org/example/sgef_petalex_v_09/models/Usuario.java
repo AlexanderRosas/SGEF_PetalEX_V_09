@@ -1,54 +1,72 @@
 package org.example.sgef_petalex_v_09.models;
 
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
+
 public class Usuario {
-    private String nombre;
-    private String correo;
-    private String usuario;
-    private String rol;
-    private String estado;
-    private String permisos;  // Nuevo atributo para permisos
-    private int id;
+    private final StringProperty nombre = new SimpleStringProperty();
+    private final StringProperty correo = new SimpleStringProperty();
+    private final StringProperty usuario = new SimpleStringProperty();
+    private final StringProperty rol = new SimpleStringProperty();
+    private final StringProperty estado = new SimpleStringProperty();
+    private final StringProperty sucursal = new SimpleStringProperty();
+    private final StringProperty ruc = new SimpleStringProperty();
+    private String id;
 
-    // Constructor sin permisos (para compatibilidad)
-    public Usuario(String nombre, String correo, String usuario, String rol, String estado) {
-        this.nombre = nombre;
-        this.correo = correo;
-        this.usuario = usuario;
-        this.rol = rol;
-        this.estado = estado;
-        this.permisos = ""; // valor por defecto vacío
+// Agregar a la clase Usuario existente:
+private final StringProperty permisos = new SimpleStringProperty("");
+
+    public Usuario() {}
+
+    public Usuario(String nombre, String correo, String usuario, String rol, String estado, String sucursal, String ruc) {
+        setNombre(nombre);
+        setCorreo(correo);
+        setUsuario(usuario);
+        setRol(rol);
+        setEstado(estado);
+        setSucursal(sucursal);
+        setRuc(ruc);
     }
 
-    // Constructor con permisos
-    public Usuario(String nombre, String correo, String usuario, String rol, String estado, String permisos) {
-        this.nombre = nombre;
-        this.correo = correo;
-        this.usuario = usuario;
-        this.rol = rol;
-        this.estado = estado;
-        this.permisos = permisos;
+    // Getters y setters con properties
+    public String getNombre() { return nombre.get(); }
+    public void setNombre(String value) { nombre.set(value); }
+    public StringProperty nombreProperty() { return nombre; }
+
+    public String getCorreo() { return correo.get(); }
+    public void setCorreo(String value) { correo.set(value); }
+    public StringProperty correoProperty() { return correo; }
+
+    public String getUsuario() { return usuario.get(); }
+    public void setUsuario(String value) { usuario.set(value); }
+    public StringProperty usuarioProperty() { return usuario; }
+
+    public String getRol() { return rol.get(); }
+    public void setRol(String value) { rol.set(value); }
+    public StringProperty rolProperty() { return rol; }
+
+    public String getEstado() { return estado.get(); }
+    public void setEstado(String value) { estado.set(value); }
+    public StringProperty estadoProperty() { return estado; }
+
+    public String getSucursal() { return sucursal.get(); }
+    public void setSucursal(String value) { sucursal.set(value); }
+    public StringProperty sucursalProperty() { return sucursal; }
+
+    public String getRuc() { return ruc.get(); }
+    public void setRuc(String value) { ruc.set(value); }
+    public StringProperty rucProperty() { return ruc; }
+
+    public String getId() { return id; }
+    public void setId(String value) { this.id = value; }
+
+public String getPermisos() { return permisos.get(); }
+public void setPermisos(String value) { permisos.set(value); }
+public StringProperty permisosProperty() { return permisos; }
+
+    public ObservableValue<String> idProperty() {
+        return new ReadOnlyStringWrapper(getId());
     }
-
-    // Constructor vacío
-    public Usuario() {
-        this.permisos = "";
-    }
-
-    // Getters
-    public String getNombre() { return nombre; }
-    public String getCorreo() { return correo; }
-    public String getUsuario() { return usuario; }
-    public String getRol() { return rol; }
-    public String getEstado() { return estado; }
-    public String getPermisos() { return permisos; }  // Nuevo getter
-    public int getId() { return id; }
-
-    // Setters
-    public void setId(int id) { this.id = id; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-    public void setCorreo(String correo) { this.correo = correo; }
-    public void setUsuario(String usuario) { this.usuario = usuario; }
-    public void setRol(String rol) { this.rol = rol; }
-    public void setEstado(String estado) { this.estado = estado; }
-    public void setPermisos(String permisos) { this.permisos = permisos; }  // Nuevo setter
 }

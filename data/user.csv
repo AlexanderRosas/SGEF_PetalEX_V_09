@@ -1,0 +1,13 @@
+ID,Nombre,Correo,Usuario,Rol,Estado,Sucursal,RUC
+U001,Administrador,admin@petalex.com,admin,Administrador,Activo,Latacunga,1790123456001
+U002,Laura Gomez,laura.gomez@petalex.com,lgomez,Ventas,Activo,Latacunga,1790123456002
+U003,Carlos Pérez,carlos.perez@petalex.com,cperez,Ventas,Activo,Latacunga,1790123456003
+U004,María Rodríguez,maria.rodriguez@petalex.com,mrod,Gerente,Activo,Latacunga,1790123456001
+U005,Jorge Martínez,jorge.martinez@petalex.com,jmart,Ventas,Activo,Latacunga,1790123456004
+U006,Ana Fernández,ana.fernandez@petalex.com,afdez,Ventas,Activo,Latacunga,1790123456002
+U007,Pedro Sánchez,pedro.sanchez@petalex.com,psanchez,Administrador,Activo,Latacunga,1790123456003
+U008,Lucía Moreno,lucia.moreno@petalex.com,lmoreno,Finanzas,Inactivo,Latacunga,1790123456001
+U009,Diego Torres,diego.torres@petalex.com,dtorres,Finanzas,Activo,Latacunga,1790123456004
+U010,Sofía Herrera,sofia.herrera@petalex.com,sherrera,Gerente,Inactivo,Latacunga,1790123456001
+U011,Fernando Castillo,fernando.castillo@petalex.com,fcastillo,Administrador,Inactivo,Latacunga,1790123456003
+U012,Raúl Córdova,raul.cordova@petalex.com,rcordova,Administrador,Activo,Latacunga,1790123456002

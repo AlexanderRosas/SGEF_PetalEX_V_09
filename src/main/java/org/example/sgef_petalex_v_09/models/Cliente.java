@@ -39,8 +39,8 @@ public class Cliente {
 
     // Getters y setters
 
-    public int getId() {
-        return id;
+    public String getId() {
+        return String.valueOf(id);
     }
 
     public void setId(int id) {

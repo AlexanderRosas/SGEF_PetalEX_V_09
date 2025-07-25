@@ -1,105 +1,103 @@
 package org.example.sgef_petalex_v_09.controllers;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import org.example.sgef_petalex_v_09.models.Cliente;
-import org.example.sgef_petalex_v_09.util.DialogHelper;
+import org.example.sgef_petalex_v_09.util.CSVUtil;
 
-public class ClienteSelectionController {
+import java.net.URL;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
-    @FXML
-    private TextField txtFilterNombre;
-    @FXML
-    private TableView<Cliente> tableClientes;
-    @FXML
-    private TableColumn<Cliente, String> colNombre;
-    @FXML
-    private TableColumn<Cliente, String> colDireccion;
-    @FXML
-    private TableColumn<Cliente, String> colTelefono;
-    @FXML
-    private TableColumn<Cliente, String> colCorreo;
-    @FXML
-    private TableColumn<Cliente, String> colEstado;
+public class ClienteSelectionController implements Initializable {
 
-    @FXML
-    private Button btnAceptar;
-    @FXML
-    private Button btnCancel;
+    @FXML private TextField txtFilterNombre;
+    @FXML private TableView<Cliente> tableClientes;
+    @FXML private TableColumn<Cliente, String> colNombre;
+    @FXML private TableColumn<Cliente, String> colDireccion;
+    @FXML private TableColumn<Cliente, String> colTelefono;
+    @FXML private TableColumn<Cliente, String> colCorreo;
+    @FXML private TableColumn<Cliente, String> colEstado;
+    @FXML private Button btnCancel;
+    @FXML private Button btnAceptar;
 
-    private final ObservableList<Cliente> master = FXCollections.observableArrayList();
-    private FilteredList<Cliente> filtered;
-    private Cliente selectedCliente = null;
+    private final ObservableList<Cliente> masterData = FXCollections.observableArrayList();
+    private Cliente clienteSeleccionado;
 
-    @FXML
-    public void initialize() {
-        colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
-        colDireccion.setCellValueFactory(new PropertyValueFactory<>("direccion"));
-        colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
-        colCorreo.setCellValueFactory(new PropertyValueFactory<>("correo"));
-        colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        // 1) Configurar las columnas del TableView
+        colNombre.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getNombre()));
+        colDireccion.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getDireccion()));
+        colTelefono.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getTelefono()));
+        colCorreo.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getCorreo()));
+        colEstado.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getEstado()));
 
-        // ejemplo de clientes (puedes cargar real)
-        master.addAll(
-                new Cliente(101, "RoseFlower INC.", "Av. Petalos 123", "0991234567", "rosa@rose.com", "Activo"),
-                new Cliente(102, "SweetMoment Ltd.", "Calle Tulipán 45", "0987654321", "sm@moment.com", "Inactivo"));
+        // 2) Cargar los clientes desde el CSV
+        List<Cliente> clientes = CSVUtil.leerClientes();
+        masterData.setAll(clientes);
 
-        filtered = new FilteredList<>(master, c -> true);
-        tableClientes.setItems(filtered);
-
-        // filtros
-        txtFilterNombre.textProperty().addListener((obs, o, v) -> filtered
-                .setPredicate(c -> v.isEmpty() || c.getNombre().toLowerCase().contains(v.toLowerCase())));
-
-        // selección
-        tableClientes.getSelectionModel().selectedItemProperty().addListener((obs, o, s) -> {
-            btnAceptar.setDisable(s == null);
-        });
-
-        btnAceptar.setDisable(true);
-        btnAceptar.setOnAction(e -> {
-            Window w = btnAceptar.getScene().getWindow();
-            Cliente c = tableClientes.getSelectionModel().getSelectedItem();
-            boolean ok = DialogHelper.confirm(w,
-                    "¿Está seguro que desea Seleccionar al " + c.getNombre() + "?");
-            if (ok) {
-                selectedCliente = c;
-                w.hide();
+        // 3) Envuelve en un FilteredList para el filtrado
+        FilteredList<Cliente> filteredData = new FilteredList<>(masterData, p -> true);
+        txtFilterNombre.textProperty().addListener((obs, oldVal, newVal) -> {
+            String filtro = newVal.toLowerCase();
+            if (filtro.isEmpty()) {
+                filteredData.setPredicate(c -> true);
+            } else {
+                filteredData.setPredicate(c ->
+                        c.getNombre().toLowerCase().contains(filtro)
+                );
             }
         });
 
-        btnCancel.setOnAction(e -> btnCancel.getScene().getWindow().hide());
-    }
+        // 4) Envuelve en un SortedList para que respete la ordenación de la tabla
+        SortedList<Cliente> sortedData = new SortedList<>(filteredData);
+        sortedData.comparatorProperty().bind(tableClientes.comparatorProperty());
 
-    @FXML
-    private void onAccept() {
-        Cliente c = tableClientes.getSelectionModel().getSelectedItem();
-        if (c == null)
-            return;
+        // 5) Asigna los datos a la tabla
+        tableClientes.setItems(sortedData);
 
-        Stage stage = (Stage) btnAceptar.getScene().getWindow();
-        boolean ok = DialogHelper.confirm(
-                stage,
-                "¿Está seguro que desea Seleccionar al " + c.getNombre() + "?");
-        if (ok) {
-            selectedCliente = c;
-            stage.close();
-        }
+        // 6) Listener de selección para activar el botón Aceptar
+        tableClientes.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            clienteSeleccionado = newSel;
+            btnAceptar.setDisable(newSel == null);
+        });
+
+        // Inicialmente, sin cliente seleccionado
+        btnAceptar.setDisable(true);
     }
 
     @FXML
     private void onCancel() {
-        ((Stage) btnCancel.getScene().getWindow()).close();
+        clienteSeleccionado = null;
+        closeWindow();
     }
 
-    /** Devuelve el cliente seleccionado, o null. */
-    public Cliente getSelectedCliente() {
-        return selectedCliente;
+    @FXML
+    private void onAccept() {
+        if (clienteSeleccionado != null) {
+            closeWindow();
+        }
+    }
+
+    /**
+     * Devuelve null si el usuario canceló, o el Cliente seleccionado.
+     */
+    public Optional<Cliente> getClienteSeleccionado() {
+        return Optional.ofNullable(clienteSeleccionado);
+    }
+
+    /** Cierra esta ventana modal. */
+    private void closeWindow() {
+        Stage stage = (Stage) btnCancel.getScene().getWindow();
+        stage.close();
     }
 }
