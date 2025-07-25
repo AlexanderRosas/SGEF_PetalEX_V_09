@@ -1,5 +1,6 @@
 package org.example.sgef_petalex_v_09.models;
 
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.*;
 
 public class ItemVenta {
@@ -39,4 +40,6 @@ public class ItemVenta {
     public Object getDescripcion() {
         return "Item: " + item + " - " + variedad + " - " + paquete + " - " + cantidad + " - " + precioUnit + " - " + precioTotal;
     }
+
+
 }

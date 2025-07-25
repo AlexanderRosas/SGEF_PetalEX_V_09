@@ -25,14 +25,6 @@ public class DialogHelper {
         alert.showAndWait();
     }
 
-    public static void showWarning(Window owner, String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.initOwner(owner);
-        alert.setTitle("Advertencia");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
 
     public static boolean confirm(Window owner, String message) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -54,4 +46,16 @@ public class DialogHelper {
         alert.setContentText(errorMessage);
         alert.showAndWait();
     }
+
+    public static void showWarning(Window owner, String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        if (owner != null) {
+            alert.initOwner(owner);
+        }
+        alert.setTitle("Advertencia");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
 }

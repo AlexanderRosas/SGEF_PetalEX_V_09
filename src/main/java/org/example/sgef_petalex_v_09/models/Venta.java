@@ -22,7 +22,7 @@ public class Venta {
 
     // Totales calculados
     private final DoubleProperty precio = new SimpleDoubleProperty(0.0);
-    private final DoubleProperty iva = new SimpleDoubleProperty(0.0);
+    private double iva;
     private final DoubleProperty total = new SimpleDoubleProperty(0.0);
 
     // Estado y otros campos
@@ -30,7 +30,8 @@ public class Venta {
     private String direccion;
     private boolean activa = true;
 
-    private static final double IVA_RATE = 0.12;
+    private static final double IVA_RATE = 0.15;
+    private double subtotal;
 
     // Constructors
     public Venta() {
@@ -63,8 +64,7 @@ public class Venta {
                 .mapToDouble(ItemVenta::getPrecioTotal)
                 .sum();
         precio.set(sum);
-        iva.set(sum * IVA_RATE);
-        total.set(sum + iva.get());
+        total.doubleValue();
     }
 
     // Resúmenes
@@ -97,8 +97,8 @@ public class Venta {
     public double getPrecio() { return precio.get(); }
     public DoubleProperty precioProperty() { return precio; }
 
-    public double getIva() { return iva.get(); }
-    public DoubleProperty ivaProperty() { return iva; }
+    public double getIva() { return iva; }
+    public double ivaProperty() { return iva; }
 
     public double getTotal() { return total.get(); }
     public void setTotal(double sum) { this.total.set(sum); }
@@ -120,5 +120,17 @@ public class Venta {
 
     public void setServicio(String trim) {
         this.servicio.set(trim);
+    }
+
+    public void setSubtotal(double subtotal) {
+        this.subtotal = subtotal;
+    }
+
+    public double getSubtotal() {
+        return subtotal;
+    }
+
+    public void setIva(double iva) {
+        this.iva = iva;
     }
 }

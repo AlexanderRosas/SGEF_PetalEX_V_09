@@ -15,12 +15,43 @@
             <Insets top="10" right="10" bottom="10" left="10"/>
         </padding>
 
-        <!-- Información de Venta -->
-        <HBox spacing="20">
-            <Label fx:id="lblCliente" text="Cliente: No especificado"/>
-            <Label fx:id="lblDireccion" text="Dirección: No especificada"/>
-            <Label fx:id="lblFecha" text="Fecha: No especificada"/>
-        </HBox>
+        <!-- Información del Cliente -->
+        <GridPane hgap="10" vgap="5" styleClass="info-panel">
+            <Label fx:id="lblCliente" 
+                   styleClass="info-label"
+                   GridPane.columnIndex="0" 
+                   GridPane.rowIndex="0"/>
+           
+            <Label fx:id="lblDireccion" 
+                   styleClass="info-label"
+                   GridPane.columnIndex="0" 
+                   GridPane.rowIndex="1"/>
+           
+            <Label fx:id="lblTelefono" 
+                   styleClass="info-label"
+                   GridPane.columnIndex="0" 
+                   GridPane.rowIndex="2"/>
+           
+            <Label fx:id="lblCorreo" 
+                   styleClass="info-label"
+                   GridPane.columnIndex="0" 
+                   GridPane.rowIndex="3"/>
+           
+            <Label fx:id="lblFecha" 
+                   styleClass="info-label"
+                   GridPane.columnIndex="1" 
+                   GridPane.rowIndex="0"/>
+           
+            <Label fx:id="lblTipoDestino" 
+                   styleClass="info-label"
+                   GridPane.columnIndex="1" 
+                   GridPane.rowIndex="1"/>
+           
+            <Label fx:id="lblEstadoCliente" 
+                   styleClass="estado-label"
+                   GridPane.columnIndex="1" 
+                   GridPane.rowIndex="2"/>
+        </GridPane>
 
         <!-- Barra de herramientas -->
         <HBox spacing="10">

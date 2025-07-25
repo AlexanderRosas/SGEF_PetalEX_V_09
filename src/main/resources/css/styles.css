@@ -329,3 +329,30 @@
 .login-button-secondary:hover {
     -fx-background-color: #7f8c8d;
 }
+.info-panel {
+    -fx-padding: 10;
+    -fx-background-color: #f5f5f5;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.info-label {
+    -fx-font-size: 14px;
+}
+
+.estado-label {
+    -fx-font-weight: bold;
+    -fx-padding: 5;
+    -fx-background-radius: 3;
+}
+
+.estado-activo {
+    -fx-text-fill: white;
+    -fx-background-color: #28a745;
+}
+
+.estado-inactivo {
+    -fx-text-fill: white;
+    -fx-background-color: #dc3545;
+}

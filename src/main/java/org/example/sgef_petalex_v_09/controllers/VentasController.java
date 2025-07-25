@@ -76,7 +76,7 @@ public class VentasController implements Initializable {
         colDetalle.setCellValueFactory(c -> new SimpleStringProperty(
                 String.valueOf(c.getValue().getDetalleResumen())));
         colPrecio.setCellValueFactory(c -> c.getValue().precioProperty().asObject());
-        colIva.setCellValueFactory(c -> c.getValue().ivaProperty().asObject());
+        //colIva.setCellValueFactory(c -> c.getValue().ivaProperty());
         colTotal.setCellValueFactory(c -> c.getValue().totalProperty().asObject());
 
         // Formato para columnas numéricas
@@ -150,32 +150,64 @@ public class VentasController implements Initializable {
 
     @FXML
     private void onNuevo(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/VentaDetail.fxml"));
-            Parent root = loader.load();
+        // 1) Diálogo de tipo de destino
+        List<String> opciones = Arrays.asList("Nacional", "Internacional");
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(null, opciones);
+        dialog.setTitle("Nuevo – Tipo de Destino");
+        dialog.setHeaderText(null);
+        dialog.setContentText("Selecciona el Tipo de Destino:");
 
-            Stage ventaDetailStage = new Stage();
-            ventaDetailStage.initModality(Modality.WINDOW_MODAL);
-            ventaDetailStage.initOwner(((Node)event.getSource()).getScene().getWindow());
-            ventaDetailStage.setTitle("Nueva Venta");
-            ventaDetailStage.setScene(new Scene(root));
+        Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+        okButton.disableProperty().bind(dialog.selectedItemProperty().isNull());
 
-            VentaDetailController controller = loader.getController();
+        Optional<String> tipoDestino = dialog.showAndWait();
+        
+        tipoDestino.ifPresent(tipo -> {
+            try {
+                // 2) Abrir selección de cliente en ventana modal
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ClienteSelection.fxml"));
+                Parent root = loader.load();
             
-            ventaDetailStage.showAndWait();
+                Stage clienteStage = new Stage();
+                clienteStage.initModality(Modality.APPLICATION_MODAL);
+                clienteStage.initOwner(((Node)event.getSource()).getScene().getWindow());
+                clienteStage.setTitle("Seleccionar Cliente");
+                clienteStage.setScene(new Scene(root));
             
-            controller.getVentaCreated().ifPresent(venta -> {
-                String id = String.format("V%03d", listaVentas.size() + 1);
-                venta.setId(id);
-                venta.setFecha(LocalDate.now());
+                ClienteSelectionController controller = loader.getController();
+                clienteStage.showAndWait();
+
+                // 3) Si se seleccionó un cliente, abrir VentaDetail en nueva ventana
+                if (controller.getClienteSeleccionado() != null) {
+                    FXMLLoader ventaLoader = new FXMLLoader(getClass().getResource("/fxml/VentaDetail.fxml"));
+                    Parent ventaRoot = ventaLoader.load();
                 
-                listaVentas.add(venta);
-                CSVUtil.guardarVentas(listaVentas);
-            });
+                    Stage ventaStage = new Stage();
+                    ventaStage.initModality(Modality.WINDOW_MODAL);
+                    ventaStage.initOwner(((Node)event.getSource()).getScene().getWindow());
+                    ventaStage.setTitle("Nueva Venta – " + tipo);
+                
+                    Scene scene = new Scene(ventaRoot);
+                    scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+                    ventaStage.setScene(scene);
+                
+                    VentaDetailController ventaController = ventaLoader.getController();
+                    // Inicializar la venta con el cliente seleccionado
+                    Venta nuevaVenta = new Venta();
+                    nuevaVenta.setCliente(String.valueOf(controller.getClienteSeleccionado()));
+                    nuevaVenta.setTipoDestino(tipo);
+                    ventaController.initData(nuevaVenta);
+                
+                    ventaStage.show();
+                }
             
-        } catch (IOException e) {
-            mostrarError("Error al crear nueva venta", e);
-        }
+            } catch (IOException e) {
+                e.printStackTrace();
+                new Alert(Alert.AlertType.ERROR,
+                    "Error al abrir la ventana:\n" + e.getMessage())
+                    .showAndWait();
+            }
+        });
     }
 
     @FXML

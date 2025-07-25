@@ -1,347 +1,212 @@
 package org.example.sgef_petalex_v_09.controllers;
 
-import javafx.beans.value.ChangeListener;
+import javafx.beans.property.DoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.Window;
+import org.example.sgef_petalex_v_09.models.Cliente;
 import org.example.sgef_petalex_v_09.models.ItemVenta;
 import org.example.sgef_petalex_v_09.models.Venta;
+import org.example.sgef_petalex_v_09.util.CSVUtil;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
-import org.example.sgef_petalex_v_09.util.NavigationHelper;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 public class VentaDetailController {
-
-    @FXML
-    private Label lblCliente;
-    @FXML
-    private Label lblDireccion;
-    @FXML
-    private Label lblFecha;
-    @FXML
-    private Button btnAddItem;
-    @FXML
-    private Button btnRemoveItem;
-
-    @FXML
-    private TableView<ItemVenta> tableItems;
-    @FXML
-    private TableColumn<ItemVenta, Integer> colItem;
-    @FXML
-    private TableColumn<ItemVenta, String> colVariedad;
-    @FXML
-    private TableColumn<ItemVenta, String> colPaquete;
-    @FXML
-    private TableColumn<ItemVenta, Integer> colCantidad;
-    @FXML
-    private TableColumn<ItemVenta, Double> colPrecioU;
-    @FXML
-    private TableColumn<ItemVenta, Double> colPrecioT;
-    @FXML
-    private Label lblTotal;
-    @FXML
-    private Button btnCancelVenta;
-    @FXML
-    private Button btnAcceptVenta;
-
-    private boolean ventaAceptada = false;
     private Venta currentVenta;
-    private ObservableList<ItemVenta> items = FXCollections.observableArrayList();
+    private boolean ventaAceptada = false;
+    private final ObservableList<ItemVenta> items = FXCollections.observableArrayList();
 
-    @FXML
-    private void onNuevo(ActionEvent event) {
-        // 1) Define las opciones
-        List<String> opciones = Arrays.asList("Nacional", "Internacional");
-        ChoiceDialog<String> dialog = new ChoiceDialog<>(null, opciones);
-        dialog.setTitle("Nuevo – Tipo de Destino");
-        dialog.setHeaderText(null);
-        dialog.setContentText("Selecciona el Tipo de Destino:");
+    // Controles de la UI
+    @FXML private Label lblCliente;
+    @FXML private Label lblDireccion;
+    @FXML private Label lblTelefono;
+    @FXML private Label lblCorreo;
+    @FXML private Label lblFecha;
+    @FXML private Label lblTipoDestino;
+    @FXML private Label lblEstadoCliente;
+    @FXML private Label lblTotal;
 
-        // 2) Obtén referencia al botón OK y deshabilítalo si no hay selección
-        Button okButton = (Button) dialog.getDialogPane()
-                .lookupButton(ButtonType.OK);
-        // Bind al valor de selectedItem: si es null, OK está deshabilitado
-        okButton.disableProperty()
-                .bind(dialog.selectedItemProperty().isNull());
+    @FXML private TableView<ItemVenta> tableItems;
+    @FXML private TableColumn<ItemVenta, Integer> colItem;
+    @FXML private TableColumn<ItemVenta, String>  colVariedad;
+    @FXML private TableColumn<ItemVenta, String>  colPaquete;
+    @FXML private TableColumn<ItemVenta, Integer> colCantidad;
+    @FXML private TableColumn<ItemVenta, Double>  colPrecioU;
+    @FXML private TableColumn<ItemVenta, Double>  colPrecioT;
 
-        // 3) Muestra el diálogo y procesa el resultado
-        Optional<String> resultado = dialog.showAndWait();
-        resultado.ifPresent(tipoDestino -> {
-            try {
-                NavigationHelper.cargarVista(event,
-                        "/fxml/VentaDetail.fxml",
-                        "Nueva Venta – " + tipoDestino);
-            } catch (Exception e) {
-                e.printStackTrace();
-                new Alert(Alert.AlertType.ERROR,
-                        "Error al abrir el detalle de venta:\n" + e.getMessage())
-                        .showAndWait();
-            }
-        });
-    }
+    @FXML private Button btnAddItem;
+    @FXML private Button btnEliminarItem;
+    @FXML private Button btnCancelVenta;
+    @FXML private Button btnAcceptVenta;
+
     @FXML
     public void initialize() {
-        // Inicializar venta si es nueva
+        // Inicializa la venta si no se pasó via initData
         if (currentVenta == null) {
             currentVenta = new Venta();
+            currentVenta.setFecha(LocalDate.now());
         }
-        
+
         setupTableColumns();
         setupEventHandlers();
+
         tableItems.setItems(items);
-        
-        // Listener para cambios en items
-        items.addListener((ListChangeListener<ItemVenta>) c -> {
+
+        // Si no hay ítems, no se puede aceptar la venta
+        btnAcceptVenta.setDisable(true);
+        items.addListener((ListChangeListener<ItemVenta>) change -> {
             btnAcceptVenta.setDisable(items.isEmpty());
             updateTotal();
         });
-        
-        // Listener para selección
-        tableItems.getSelectionModel().selectedItemProperty().addListener(
-            (obs, oldSel, newSel) -> btnRemoveItem.setDisable(newSel == null)
-        );
-        
-        // Estado inicial de botones
-        btnAcceptVenta.setDisable(true);
-        btnRemoveItem.setDisable(true);
     }
 
-    /** Para ver venta existente */
-    public void initData(Venta v) {
-        this.currentVenta = v;
+    /**
+     * Llamar DESPUÉS de FXMLLoader.load() para inicializar destino y cliente.
+     */
+    public void initData(String tipoDestino, Cliente cliente) {
+        currentVenta = new Venta();
+        currentVenta.setTipoDestino(tipoDestino);
+        currentVenta.setCliente(cliente.getId());     // asume getId()
+        currentVenta.setDireccion(cliente.getDireccion());
+        currentVenta.setFecha(LocalDate.now());
+
         setupVentaInfo();
-        items.setAll(v.getItems());
-        updateTotal();
     }
 
     private void setupTableColumns() {
-        colItem.setCellValueFactory(i -> i.getValue().itemProperty().asObject());
-        colVariedad.setCellValueFactory(i -> i.getValue().variedadProperty());
-        colPaquete.setCellValueFactory(i -> i.getValue().paqueteProperty());
-        colCantidad.setCellValueFactory(i -> i.getValue().cantidadProperty().asObject());
-        colPrecioU.setCellValueFactory(i -> i.getValue().precioUnitProperty().asObject());
-        colPrecioT.setCellValueFactory(i -> i.getValue().precioTotalProperty().asObject());
-        
-        // Formato para las columnas de precio
-        colPrecioU.setCellFactory(tc -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double precio, boolean empty) {
-                super.updateItem(precio, empty);
-                if (empty || precio == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("$%.2f", precio));
-                }
-            }
-        });
-        
-        colPrecioT.setCellFactory(tc -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double precio, boolean empty) {
-                super.updateItem(precio, empty);
-                if (empty || precio == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("$%.2f", precio));
-                }
-            }
-        });
+        colItem.setCellValueFactory(data -> data.getValue().itemProperty().asObject());
+        colVariedad.setCellValueFactory(data -> data.getValue().variedadProperty());
+        colPaquete.setCellValueFactory(data -> data.getValue().paqueteProperty());
+        colCantidad.setCellValueFactory(data -> data.getValue().cantidadProperty().asObject());
+        colPrecioU.setCellValueFactory(data -> data.getValue().precioUnitProperty().asObject());
+        colPrecioT.setCellValueFactory(data -> data.getValue().precioTotalProperty().asObject());
     }
 
     private void setupEventHandlers() {
-        btnAddItem.setOnAction(this::onAddItem);
-        btnRemoveItem.setOnAction(this::onRemoveItem);
-        btnCancelVenta.setOnAction(this::onCancelVenta);
-        btnAcceptVenta.setOnAction(this::onAcceptVenta);
+        // Añadir item
+        btnAddItem.setOnAction(evt -> {
+            // Lógica para agregar, p.ej. abrir RoseSelection.fxml
+            // Al cerrar, retrieve ItemVenta y hacer items.add(nuevoItem);
+        });
+
+        // Eliminar item
+        btnEliminarItem.setOnAction(evt -> {
+            ItemVenta sel = tableItems.getSelectionModel().getSelectedItem();
+            if (sel != null) {
+                items.remove(sel);
+            }
+        });
+
+        // Al seleccionar fila, habilitar/eliminar botón
+        tableItems.getSelectionModel().selectedItemProperty()
+                .addListener((obs, oldSel, newSel) -> {
+                    btnEliminarItem.setDisable(newSel == null);
+                });
+
+        // Cancelar venta = cerrar ventana
+        btnCancelVenta.setOnAction(evt -> {
+            ventaAceptada = false;
+            closeWindow();
+        });
+
+        // Aceptar venta = validar y cerrar
+        btnAcceptVenta.setOnAction(evt -> {
+            if (validarVenta()) {
+                ventaAceptada = true;
+                closeWindow();
+            }
+        });
     }
 
     private void setupVentaInfo() {
-        if (currentVenta != null) {
-            lblCliente.setText("Cliente: " + 
-                (currentVenta.getCliente() != null ? currentVenta.getCliente() : "No especificado"));
-            
-            lblFecha.setText("Fecha: " + 
-                (currentVenta.getFecha() != null ? currentVenta.getFecha().format(
-                    DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "No especificada"));
-            
-            lblDireccion.setText("Dirección: " + 
-                (currentVenta.getDireccion() != null ? currentVenta.getDireccion() : "No especificada"));
+        // Carga datos del cliente
+        String clienteId = currentVenta.getCliente();
+        Cliente cliente = CSVUtil.buscarClientePorId(clienteId);
+        if (cliente != null) {
+            lblCliente.setText("Cliente: " + cliente.getNombre());
+            lblDireccion.setText("Dirección: " + cliente.getDireccion());
+            lblTelefono.setText("Teléfono: " + cliente.getTelefono());
+            lblCorreo.setText("Correo: " + cliente.getCorreo());
+            lblEstadoCliente.getStyleClass().setAll("estado-label",
+                    "estado-" + cliente.getEstado().toLowerCase());
+            lblEstadoCliente.setText("Estado: " + cliente.getEstado());
         }
-    }
 
-    /** Para VentasController: devuelve Optional.empty() si canceló */
-    public Optional<Venta> getVentaCreated() {
-        if (ventaAceptada) {
-            currentVenta.getItems().clear(); // Limpia antes de agregar
-            items.forEach(currentVenta::addItem);
-            return Optional.of(currentVenta);
-        } else {
-            return Optional.empty();
-        }
+        // Fecha y tipo
+        lblFecha.setText("Fecha: " +
+                currentVenta.getFecha().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        lblTipoDestino.setText("Tipo: " + currentVenta.getTipoDestino());
+
+        updateTotal();
     }
 
     private void updateTotal() {
-        double sum = items.stream()
-            .mapToDouble(ItemVenta::getPrecioTotal)
-            .sum();
-        lblTotal.setText(String.format("$%.2f", sum));
-        currentVenta.setTotal(sum);
+        double subtotal = items.stream()
+                .mapToDouble(ItemVenta::getPrecioTotal)
+                .sum();
+        double iva      = subtotal * 0.12;
+        double total    = subtotal + iva;
+
+        // Guarda en la venta
+        currentVenta.setSubtotal(subtotal);
+        currentVenta.setIva(iva);
+        currentVenta.setTotal(total);
+
+        // Actualiza etiqueta
+        lblTotal.setText(String.format("Subtotal: $%.2f   IVA: $%.2f   Total: $%.2f",
+                subtotal, iva, total));
     }
 
-    @FXML
-    private void onCancelVenta(ActionEvent e) {
+    private boolean validarVenta() {
+        if (items.isEmpty()) {
+            DialogHelper.showWarning(getWindow(), "Debe agregar al menos un ítem.");
+            return false;
+        }
+        if (currentVenta.getCliente() == null || currentVenta.getCliente().isEmpty()) {
+            DialogHelper.showWarning(getWindow(), "Debe seleccionar un cliente.");
+            return false;
+        }
+        Cliente c = CSVUtil.buscarClientePorId(currentVenta.getCliente());
+        if (c == null || "inactivo".equalsIgnoreCase(c.getEstado())) {
+            DialogHelper.showWarning(getWindow(),
+                    "El cliente no existe o está inactivo.");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @return Optional.of(currentVenta) si aceptada, Optional.empty() si cancelada.
+     */
+    public Optional<Venta> getVentaCreated() {
+        return ventaAceptada
+                ? Optional.of(currentVenta)
+                : Optional.empty();
+    }
+
+    private void closeWindow() {
+        Stage stage = (Stage) lblCliente.getScene().getWindow();
+        stage.close();
+    }
+
+    private Window getWindow() {
+        return lblCliente.getScene().getWindow();
+    }
+
+    public void initData(Venta nuevaVenta) {
+        currentVenta = nuevaVenta;
+        setupVentaInfo();
+        items.addAll(currentVenta.getItems());
+        updateTotal();
+        btnAcceptVenta.setDisable(false);
         ventaAceptada = false;
-        ((Stage) lblCliente.getScene().getWindow()).close();
-    }
-
-    @FXML
-    private void onAcceptVenta(ActionEvent e) {
-        ventaAceptada = true;
-        ((Stage) lblCliente.getScene().getWindow()).close();
-    }
-
-    @FXML
-    private void onAddItem(ActionEvent e) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/RoseSelection.fxml"));
-            Parent pop = loader.load(); // Carga nuevo nodo raíz cada vez
-
-            Stage dlg = new Stage();
-            dlg.initOwner(lblCliente.getScene().getWindow());
-            dlg.initModality(Modality.APPLICATION_MODAL);
-            dlg.setTitle("Elegir variedad");
-
-            Scene scene = new Scene(pop, 600, 600); // Tamaño más grande
-            dlg.setScene(scene);
-
-            dlg.showAndWait();
-
-            String variedad = ((RoseSelectionController) loader.getController()).getSelectedRose();
-            if (variedad == null)
-                return;
-
-            ItemVenta newItem = showPaqueteCantidadDialog(variedad);
-            if (newItem != null) {
-                newItem.setItem(items.size() + 1);
-                items.add(newItem);
-                updateTotal();
-            }
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void onRemoveItem(ActionEvent e) {
-        ItemVenta selected = tableItems.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            DialogHelper.showWarning(lblCliente.getScene().getWindow(), "Debe seleccionar un ítem para eliminar.");
-            return;
-        }
-        boolean confirm = DialogHelper.confirm(lblCliente.getScene().getWindow(),
-                "¿Está seguro que desea eliminar el ítem seleccionado?");
-        if (confirm) {
-            items.remove(selected);
-            // Reasigna números de ítem para mantener orden
-            for (int i = 0; i < items.size(); i++) {
-                items.get(i).setItem(i + 1);
-            }
-            updateTotal();
-        }
-    }
-
-    private ItemVenta showPaqueteCantidadDialog(String variedad) {
-        Dialog<ItemVenta> dlg = new Dialog<>();
-        dlg.setTitle("Configurar ítem");
-
-        ButtonType cancelType = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
-        ButtonType acceptType = new ButtonType("Aceptar", ButtonBar.ButtonData.OK_DONE);
-        dlg.getDialogPane().getButtonTypes().addAll(cancelType, acceptType);
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-
-        Label lblVar = new Label("Variedad: " + variedad);
-        ComboBox<String> cbPack = new ComboBox<>(FXCollections.observableArrayList(
-                "Caja Tabaco", "Caja Full", "Cuartos"));
-        cbPack.setPromptText("Paquete");
-        Spinner<Integer> spQty = new Spinner<>(1, 999, 1);
-        spQty.setEditable(true);
-
-        grid.add(lblVar, 0, 0, 2, 1);
-        grid.add(new Label("Paquete:"), 0, 1);
-        grid.add(cbPack, 1, 1);
-        grid.add(new Label("Cantidad:"), 0, 2);
-        grid.add(spQty, 1, 2);
-
-        dlg.getDialogPane().setContent(grid);
-
-        // Después de obtener okBtn:
-        Button okBtn = (Button) dlg.getDialogPane().lookupButton(acceptType);
-        okBtn.setDisable(true);
-
-        ChangeListener<Object> validar = (obs, oldV, newV) -> {
-            boolean paqueteSeleccionado = cbPack.getValue() != null;
-            boolean cantidadValida = spQty.getValue() != null && spQty.getValue() > 0;
-            okBtn.setDisable(!(paqueteSeleccionado && cantidadValida));
-        };
-        cbPack.valueProperty().addListener(validar);
-        spQty.valueProperty().addListener(validar);
-
-        dlg.setResultConverter(btn -> {
-            if (btn == acceptType) {
-                ItemVenta it = new ItemVenta();
-                it.setVariedad(variedad);
-                it.setPaquete(cbPack.getValue());
-                it.setCantidad(spQty.getValue());
-                // define precios de ejemplo
-                double pu = switch (cbPack.getValue()) {
-                    case "Caja Tabaco" -> 50.0;
-                    case "Caja Full" -> 120.0;
-                    default -> 30.0;
-                };
-                it.setPrecioUnit(pu);
-                it.setPrecioTotal(pu * spQty.getValue());
-                return it;
-            }
-            return null;
-        });
-
-        Optional<ItemVenta> res = dlg.showAndWait();
-        return res.orElse(null);
-    }
-
-    public void onBack(ActionEvent e) {
-        ((Stage) lblCliente.getScene().getWindow()).close();
 
     }
-
-    public void onEliminarItem(ActionEvent e) {
-        ItemVenta selected = tableItems.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            DialogHelper.showWarning(lblCliente.getScene().getWindow(), "Debe seleccionar un ítem para eliminar.");
-            return;
-        }
-        boolean confirm = DialogHelper.confirm(lblCliente.getScene().getWindow(),
-                "¿Está seguro que desea eliminar el ítem seleccionado?");
-        if (confirm) {
-            items.remove(selected);
-        }
-    }
-
 }

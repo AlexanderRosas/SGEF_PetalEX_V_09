@@ -1,5 +1,6 @@
 package org.example.sgef_petalex_v_09.util;
 
+import org.example.sgef_petalex_v_09.models.Cliente;
 import org.example.sgef_petalex_v_09.models.Venta;
 import org.example.sgef_petalex_v_09.models.ItemVenta;
 import java.io.*;
@@ -15,6 +16,8 @@ import java.nio.file.Paths;
 public class CSVUtil {
     public static final String VENTAS_CSV = "ventas.csv";
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    public static final String CLIENTES_CSV = "data/clientes.csv";
+
 
     private static void crearArchivoSiNoExiste(String rutaArchivo) throws IOException {
         Path path = Paths.get(rutaArchivo);
@@ -27,9 +30,84 @@ public class CSVUtil {
         }
     }
 
+    public static Cliente buscarClientePorId(String id) {
+        List<Cliente> clientes = leerClientes();
+        return clientes.stream()
+                .filter(c -> id.equals(c.getId()))
+                .findFirst()
+                .orElse(null);
+    }
+
+
     public static List<Venta> leerVentas() {
         return leerVentas(VENTAS_CSV);
     }
+    public static List<Cliente> leerClientes() {
+        List<Cliente> clientes = new ArrayList<>();
+        Path path = Paths.get(CLIENTES_CSV);
+
+        if (!Files.exists(path)) {
+            System.err.println("El archivo de clientes no existe: " + CLIENTES_CSV);
+            return clientes;
+        }
+
+        try (BufferedReader br = Files.newBufferedReader(path)) {
+            // Saltar la primera línea (encabezados)
+            String headers = br.readLine();
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                String[] campos = line.split(",");
+                if (campos.length >= 6) { // ID, Nombre, Direccion, Telefono, Correo, Estado
+                    Cliente cliente = new Cliente(
+                            // ID
+                            // Nombre
+                            // Direccion
+                            // Telefono
+                            // Correo
+                            // Estado
+                    );
+                    clientes.add(cliente);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error leyendo el archivo de clientes: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return clientes;
+    }
+
+    public static void guardarClientes(List<Cliente> clientes) {
+        try {
+            // Asegurar que el directorio existe
+            Files.createDirectories(Paths.get("data"));
+
+            try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(CLIENTES_CSV))) {
+                // Escribir encabezados
+                writer.write("ID,Nombre,Direccion,Telefono,Correo,Estado\n");
+
+                // Escribir cada cliente
+                for (Cliente cliente : clientes) {
+                    writer.write(String.format("%s,%s,%s,%s,%s,%s\n",
+                            cliente.getId(),
+                            cliente.getNombre(),
+                            cliente.getDireccion(),
+                            cliente.getTelefono(),
+                            cliente.getCorreo(),
+                            cliente.getEstado()
+                    ));
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error guardando clientes: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
+
+
 
     public static List<Venta> leerVentas(String rutaArchivo) {
         List<Venta> ventas = new ArrayList<>();

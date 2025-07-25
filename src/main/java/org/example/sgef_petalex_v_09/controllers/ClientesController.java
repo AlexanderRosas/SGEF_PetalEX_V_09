@@ -259,7 +259,7 @@ public class ClientesController {
             if (btn.getButtonData() == ButtonData.OK_DONE) {
                 Cliente c = new Cliente();
                 if (existing != null)
-                    c.setId(existing.getId());
+                    c.setId(Integer.parseInt(existing.getId()));
                 c.setNombre(txtNombre.getText());
                 c.setDireccion(txtDireccion.getText());
                 c.setTelefono(txtTelefono.getText());
