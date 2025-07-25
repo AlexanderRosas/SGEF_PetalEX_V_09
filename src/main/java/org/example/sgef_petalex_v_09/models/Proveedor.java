@@ -145,19 +145,4 @@ public class Proveedor {
                 '}';
     }
 
-    // Método para validación de correo
-    public boolean isValidEmail() {
-        if (correo == null || correo.trim().isEmpty()) {
-            return false;
-        }
-        return correo.matches("^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})$");
-    }
-
-    // Método para validación de RUC ecuatoriano
-    public boolean isValidRuc() {
-        if (ruc == null || ruc.length() != 13) {
-            return false;
-        }
-        return ruc.matches("\\d{13}") && (ruc.endsWith("001") || ruc.endsWith("002"));
-    }
 }

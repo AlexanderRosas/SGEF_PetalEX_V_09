@@ -7,14 +7,18 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.example.sgef_petalex_v_09.models.Proveedor;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
-import org.example.sgef_petalex_v_09.models.NavigationManager; // ✅ CORREGIDO: Movido a util
+import org.example.sgef_petalex_v_09.validators.DataValidator;
+import org.example.sgef_petalex_v_09.validators.TextFieldValidator;
+import org.example.sgef_petalex_v_09.validators.ValidationResult;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -67,6 +71,7 @@ public class ProveedoresController {
 
     @FXML
     public void initialize() {
+
         initializeProveedoresTab();
         initializeProductosTab();
     }
@@ -234,7 +239,14 @@ public class ProveedoresController {
     @FXML
     private void onBack(ActionEvent event) {
         try {
-            NavigationManager.showMainMenu(btnBack.getScene());
+            Parent main = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
+            Stage st = (Stage) btnBack.getScene().getWindow();
+            st.getScene().setRoot(main);
+            st.setTitle("Index Blooms – Menú Principal");
+            // st.setResizable(false);
+            // st.sizeToScene();
+            st.setMaximized(true);
+            st.centerOnScreen();
         } catch (IOException e) {
             e.printStackTrace();
             DialogHelper.showError(getWindow(), "Error al volver al menú principal");
@@ -261,7 +273,7 @@ public class ProveedoresController {
         TextField txtRazonSocial = new TextField();
         txtRazonSocial.setPromptText("Razón social");
         TextField txtTelefono = new TextField();
-        txtTelefono.setPromptText("02-1234567");
+        txtTelefono.setPromptText("0987654321");
         TextField txtDireccion = new TextField();
         txtDireccion.setPromptText("Dirección completa");
         TextField txtCuentaBancaria = new TextField();
@@ -270,6 +282,28 @@ public class ProveedoresController {
         txtCorreo.setPromptText("empresa@email.com");
         DatePicker dpFechaRegistro = new DatePicker();
 
+        // ✅ APLICAR VALIDACIONES EN TIEMPO REAL
+        TextFieldValidator.setupValidation(txtRuc, TextFieldValidator.ValidationType.RUC);
+        TextFieldValidator.setupValidation(txtNombre, TextFieldValidator.ValidationType.NAME_ONLY);
+        TextFieldValidator.setupValidation(txtTelefono, TextFieldValidator.ValidationType.PHONE);
+        TextFieldValidator.setupValidation(txtCorreo, TextFieldValidator.ValidationType.EMAIL);
+        TextFieldValidator.setupValidation(txtCuentaBancaria, TextFieldValidator.ValidationType.NUMERIC);
+
+        // Validación personalizada para razón social (permite caracteres especiales)
+        txtRazonSocial.textProperty().addListener((obs, oldText, newText) -> {
+            if (newText != null && newText.length() > 100) {
+                txtRazonSocial.setText(oldText);
+            }
+        });
+
+        // Validación para dirección (permite números, letras y caracteres especiales)
+        txtDireccion.textProperty().addListener((obs, oldText, newText) -> {
+            if (newText != null && newText.length() > 200) {
+                txtDireccion.setText(oldText);
+            }
+        });
+
+        // Configurar fecha por defecto
         if (proveedorExistente != null) {
             txtRuc.setText(proveedorExistente.getRuc());
             txtNombre.setText(proveedorExistente.getNombre());
@@ -305,6 +339,39 @@ public class ProveedoresController {
 
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton.getButtonData() == ButtonBar.ButtonData.OK_DONE) {
+                // ✅ VALIDAR ANTES DE PROCESAR
+                Proveedor tempProveedor;
+                if (proveedorExistente != null) {
+                    // Crear copia temporal para validar
+                    tempProveedor = new Proveedor(
+                            txtRuc.getText(),
+                            txtNombre.getText(),
+                            txtRazonSocial.getText(),
+                            txtTelefono.getText(),
+                            txtDireccion.getText(),
+                            txtCuentaBancaria.getText(),
+                            txtCorreo.getText(),
+                            dpFechaRegistro.getValue(),
+                            proveedorExistente.getEstado());
+                } else {
+                    tempProveedor = new Proveedor(
+                            txtRuc.getText(),
+                            txtNombre.getText(),
+                            txtRazonSocial.getText(),
+                            txtTelefono.getText(),
+                            txtDireccion.getText(),
+                            txtCuentaBancaria.getText(),
+                            txtCorreo.getText(),
+                            dpFechaRegistro.getValue(),
+                            "Activo");
+                }
+
+                // Validar el proveedor temporal
+                if (!validarProveedorEnDialogo(tempProveedor)) {
+                    return null; // Cancela el cierre del diálogo
+                }
+
+                // Si pasa las validaciones, proceder
                 if (proveedorExistente != null) {
                     // Actualizar proveedor existente
                     proveedorExistente.setRuc(txtRuc.getText());
@@ -317,17 +384,7 @@ public class ProveedoresController {
                     proveedorExistente.setFecha_registro(dpFechaRegistro.getValue());
                     return proveedorExistente;
                 } else {
-                    // Crear nuevo proveedor
-                    return new Proveedor(
-                            txtRuc.getText(),
-                            txtNombre.getText(),
-                            txtRazonSocial.getText(),
-                            txtTelefono.getText(),
-                            txtDireccion.getText(),
-                            txtCuentaBancaria.getText(),
-                            txtCorreo.getText(),
-                            dpFechaRegistro.getValue(),
-                            "Activo");
+                    return tempProveedor;
                 }
             }
             return null;
@@ -337,40 +394,179 @@ public class ProveedoresController {
     }
 
     private boolean validarProveedor(Proveedor proveedor) {
-        // Validar campos obligatorios
-        if (proveedor.getRuc() == null || proveedor.getRuc().trim().isEmpty()) {
-            DialogHelper.showError(getWindow(), "El RUC es obligatorio");
+        // Validar RUC
+        ValidationResult rucResult = DataValidator.validateRUC(proveedor.getRuc(), "RUC");
+        if (!rucResult.isValid()) {
+            rucResult.showErrorIfInvalid(getWindow());
             return false;
         }
 
-        if (proveedor.getNombre() == null || proveedor.getNombre().trim().isEmpty()) {
-            DialogHelper.showError(getWindow(), "El nombre es obligatorio");
+        // Validar nombre
+        ValidationResult nameResult = DataValidator.validateName(proveedor.getNombre(), "Nombre");
+        if (!nameResult.isValid()) {
+            nameResult.showErrorIfInvalid(getWindow());
             return false;
         }
 
+        // Validar razón social (obligatorio)
         if (proveedor.getRazon_social() == null || proveedor.getRazon_social().trim().isEmpty()) {
-            DialogHelper.showError(getWindow(), "La razón social es obligatoria");
+            DialogHelper.showValidationError(getWindow(), "Razón Social", "La razón social es obligatoria");
             return false;
         }
 
-        // Validar RUC ecuatoriano
-        if (!proveedor.isValidRuc()) {
-            DialogHelper.showError(getWindow(), "El RUC debe tener 13 dígitos y terminar en 001 o 002");
+        if (proveedor.getRazon_social().trim().length() < 3) {
+            DialogHelper.showValidationError(getWindow(), "Razón Social",
+                    "La razón social debe tener al menos 3 caracteres");
             return false;
         }
 
-        // Validar correo si está presente
-        if (proveedor.getCorreo() != null && !proveedor.getCorreo().trim().isEmpty()) {
-            if (!proveedor.isValidEmail()) {
-                DialogHelper.showError(getWindow(), "El formato del correo electrónico no es válido");
+        // Validar teléfono
+        ValidationResult phoneResult = DataValidator.validatePhone(proveedor.getTelefono(), "Teléfono");
+        if (!phoneResult.isValid()) {
+            phoneResult.showErrorIfInvalid(getWindow());
+            return false;
+        }
+
+        // Validar correo electrónico
+        ValidationResult emailResult = DataValidator.validateEmail(proveedor.getCorreo(), "Correo electrónico");
+        if (!emailResult.isValid()) {
+            emailResult.showErrorIfInvalid(getWindow());
+            return false;
+        }
+
+        // Validar dirección (obligatorio)
+        if (proveedor.getDireccion() == null || proveedor.getDireccion().trim().isEmpty()) {
+            DialogHelper.showValidationError(getWindow(), "Dirección", "La dirección es obligatoria");
+            return false;
+        }
+
+        if (proveedor.getDireccion().trim().length() < 10) {
+            DialogHelper.showValidationError(getWindow(), "Dirección",
+                    "La dirección debe tener al menos 10 caracteres");
+            return false;
+        }
+
+        // Validar cuenta bancaria (numérico, opcional)
+        if (proveedor.getCuenta_bancaria() != null && !proveedor.getCuenta_bancaria().trim().isEmpty()) {
+            ValidationResult cuentaResult = DataValidator.validateNumeric(proveedor.getCuenta_bancaria(),
+                    "Cuenta bancaria");
+            if (!cuentaResult.isValid()) {
+                cuentaResult.showErrorIfInvalid(getWindow());
+                return false;
+            }
+
+            if (proveedor.getCuenta_bancaria().trim().length() < 10) {
+                DialogHelper.showValidationError(getWindow(), "Cuenta bancaria",
+                        "La cuenta bancaria debe tener al menos 10 dígitos");
                 return false;
             }
         }
 
-        // Validar RUC único
+        // Validar fecha de registro
+        if (proveedor.getFecha_registro() == null) {
+            DialogHelper.showValidationError(getWindow(), "Fecha de registro", "La fecha de registro es obligatoria");
+            return false;
+        }
+
+        if (proveedor.getFecha_registro().isAfter(LocalDate.now())) {
+            DialogHelper.showValidationError(getWindow(), "Fecha de registro",
+                    "La fecha de registro no puede ser futura");
+            return false;
+        }
+
+        // Validar RUC único (no duplicado)
         for (Proveedor p : masterDataProveedores) {
             if (!p.equals(proveedor) && p.getRuc().equals(proveedor.getRuc())) {
-                DialogHelper.showError(getWindow(), "Ya existe un proveedor con este RUC");
+                DialogHelper.showValidationError(getWindow(), "RUC",
+                        "Ya existe un proveedor con este RUC: " + proveedor.getRuc());
+                return false;
+            }
+        }
+
+        // Validar correo único (no duplicado)
+        for (Proveedor p : masterDataProveedores) {
+            if (!p.equals(proveedor) && p.getCorreo().equalsIgnoreCase(proveedor.getCorreo())) {
+                DialogHelper.showValidationError(getWindow(), "Correo electrónico",
+                        "Ya existe un proveedor con este correo: " + proveedor.getCorreo());
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Validación específica para el diálogo de proveedor
+     * Muestra errores inmediatamente sin cerrar el diálogo
+     */
+    private boolean validarProveedorEnDialogo(Proveedor proveedor) {
+        // Validaciones básicas de formato
+        if (proveedor.getRuc() == null || proveedor.getRuc().trim().isEmpty()) {
+            DialogHelper.showValidationError(getWindow(), "RUC", "El RUC es obligatorio");
+            return false;
+        }
+
+        if (proveedor.getNombre() == null || proveedor.getNombre().trim().isEmpty()) {
+            DialogHelper.showValidationError(getWindow(), "Nombre", "El nombre es obligatorio");
+            return false;
+        }
+
+        if (proveedor.getRazon_social() == null || proveedor.getRazon_social().trim().isEmpty()) {
+            DialogHelper.showValidationError(getWindow(), "Razón Social", "La razón social es obligatoria");
+            return false;
+        }
+
+        if (proveedor.getTelefono() == null || proveedor.getTelefono().trim().isEmpty()) {
+            DialogHelper.showValidationError(getWindow(), "Teléfono", "El teléfono es obligatorio");
+            return false;
+        }
+
+        if (proveedor.getCorreo() == null || proveedor.getCorreo().trim().isEmpty()) {
+            DialogHelper.showValidationError(getWindow(), "Correo", "El correo electrónico es obligatorio");
+            return false;
+        }
+
+        if (proveedor.getDireccion() == null || proveedor.getDireccion().trim().isEmpty()) {
+            DialogHelper.showValidationError(getWindow(), "Dirección", "La dirección es obligatoria");
+            return false;
+        }
+
+        if (proveedor.getFecha_registro() == null) {
+            DialogHelper.showValidationError(getWindow(), "Fecha de registro", "La fecha de registro es obligatoria");
+            return false;
+        }
+
+        // Validaciones de formato usando DataValidator
+        ValidationResult rucResult = DataValidator.validateRUC(proveedor.getRuc(), "RUC");
+        if (!rucResult.isValid()) {
+            rucResult.showErrorIfInvalid(getWindow());
+            return false;
+        }
+
+        ValidationResult nameResult = DataValidator.validateName(proveedor.getNombre(), "Nombre");
+        if (!nameResult.isValid()) {
+            nameResult.showErrorIfInvalid(getWindow());
+            return false;
+        }
+
+        ValidationResult phoneResult = DataValidator.validatePhone(proveedor.getTelefono(), "Teléfono");
+        if (!phoneResult.isValid()) {
+            phoneResult.showErrorIfInvalid(getWindow());
+            return false;
+        }
+
+        ValidationResult emailResult = DataValidator.validateEmail(proveedor.getCorreo(), "Correo electrónico");
+        if (!emailResult.isValid()) {
+            emailResult.showErrorIfInvalid(getWindow());
+            return false;
+        }
+
+        // Validaciones de cuenta bancaria si está presente
+        if (proveedor.getCuenta_bancaria() != null && !proveedor.getCuenta_bancaria().trim().isEmpty()) {
+            ValidationResult cuentaResult = DataValidator.validateNumeric(proveedor.getCuenta_bancaria(),
+                    "Cuenta bancaria");
+            if (!cuentaResult.isValid()) {
+                cuentaResult.showErrorIfInvalid(getWindow());
                 return false;
             }
         }
@@ -405,4 +601,5 @@ public class ProveedoresController {
     public ObservableList<Proveedor> getProveedores() {
         return masterDataProveedores;
     }
+
 }
