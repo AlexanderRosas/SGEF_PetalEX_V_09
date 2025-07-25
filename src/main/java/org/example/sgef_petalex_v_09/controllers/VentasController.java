@@ -36,6 +36,8 @@ public class VentasController {
     @FXML
     private Button btnAddVenta;
     @FXML
+    private Button btnActualizarVenta;
+    @FXML
     private Button btnAnularVenta;
     @FXML
     private TableView<Venta> tableVentas;
@@ -79,6 +81,36 @@ public class VentasController {
         SortedList<Venta> sortedList = new SortedList<>(filteredVentas);
         sortedList.comparatorProperty().bind(tableVentas.comparatorProperty());
         tableVentas.setItems(sortedList);
+
+        // Configurar botones según selección de tabla
+        tableVentas.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            btnActualizarVenta.setDisable(newSel == null);
+            btnAnularVenta.setDisable(newSel == null || "Anulado".equals(newSel.getEstado()));
+        });
+
+        // Inicialmente deshabilitar botones
+        btnActualizarVenta.setDisable(true);
+        btnAnularVenta.setDisable(true);
+
+        // Agregar datos de prueba
+        cargarDatosPrueba();
+    }
+
+    private void cargarDatosPrueba() {
+        // Datos de ejemplo para testing
+        Venta v1 = new Venta("Juan Pérez", "Calle 123", LocalDate.now().minusDays(2));
+        v1.setEstado("Activo");
+        v1.setTotal(150.50);
+
+        Venta v2 = new Venta("María González", "Av. Principal 456", LocalDate.now().minusDays(1));
+        v2.setEstado("Activo");
+        v2.setTotal(320.75);
+
+        Venta v3 = new Venta("Carlos López", "Plaza Central 789", LocalDate.now());
+        v3.setEstado("Anulado");
+        v3.setTotal(89.25);
+
+        allVentas.addAll(v1, v2, v3);
     }
 
     private void filtrar() {
@@ -104,8 +136,8 @@ public class VentasController {
         Stage st = (Stage) btnBack.getScene().getWindow();
         st.getScene().setRoot(main);
         st.setTitle("Index Blooms – Menú Principal");
-        //st.setResizable(false);
-        //st.sizeToScene();
+        // st.setResizable(false);
+        // st.sizeToScene();
         st.setMaximized(true);
         st.centerOnScreen();
     }
@@ -126,6 +158,14 @@ public class VentasController {
 
         Cliente c = selCtrl.getSelectedCliente();
 
+        // Validar que se seleccionó un cliente
+        if (c == null) {
+            DialogHelper.showWarning(
+                    btnAddVenta.getScene().getWindow(),
+                    "Debe seleccionar un cliente para continuar.");
+            return;
+        }
+
         // 2) Confirmar selección
         boolean confirmado = DialogHelper.confirm(
                 btnAddVenta.getScene().getWindow(),
@@ -138,7 +178,7 @@ public class VentasController {
                 c.getNombre(),
                 c.getDireccion(),
                 LocalDate.now());
-                nuevaVenta.setEstado("Activo");
+        nuevaVenta.setEstado("Activo");
 
         // 4) Abrir detalle de venta
         FXMLLoader detLoader = new FXMLLoader(getClass().getResource("/fxml/VentaDetail.fxml"));
@@ -157,29 +197,64 @@ public class VentasController {
         detCtrl.getVentaCreated().ifPresent(v -> allVentas.add(v));
     }
 
-   @FXML
-private void onAnularVenta(ActionEvent event) {
-    Venta ventaSeleccionada = tableVentas.getSelectionModel().getSelectedItem();
-    if (ventaSeleccionada == null) {
-        DialogHelper.showWarning(
-                btnAnularVenta.getScene().getWindow(),
-                "Seleccione una venta para anular.");
-        return;
+    @FXML
+    private void onActualizarVenta(ActionEvent event) throws IOException {
+        Venta ventaSeleccionada = tableVentas.getSelectionModel().getSelectedItem();
+        if (ventaSeleccionada == null) {
+            DialogHelper.showWarning(
+                    btnActualizarVenta.getScene().getWindow(),
+                    "Seleccione una venta para actualizar.");
+            return;
+        }
+
+        if ("Anulado".equals(ventaSeleccionada.getEstado())) {
+            DialogHelper.showWarning(
+                    btnActualizarVenta.getScene().getWindow(),
+                    "No se puede actualizar una venta anulada.");
+            return;
+        }
+
+        // Abrir VentaDetail para editar
+        FXMLLoader detLoader = new FXMLLoader(getClass().getResource("/fxml/VentaDetail.fxml"));
+        Parent detRoot = detLoader.load();
+        VentaDetailController detCtrl = detLoader.getController();
+        detCtrl.initData(ventaSeleccionada);
+
+        Stage detStage = new Stage();
+        detStage.initOwner(btnActualizarVenta.getScene().getWindow());
+        detStage.initModality(Modality.APPLICATION_MODAL);
+        detStage.setScene(new Scene(detRoot));
+        detStage.setTitle("Actualizar Venta");
+        detStage.showAndWait();
+
+        // La tabla se actualiza automáticamente por las properties
+        DialogHelper.showSuccess(
+                btnActualizarVenta.getScene().getWindow(),
+                "Venta actualizada correctamente.");
     }
 
-    boolean confirmado = DialogHelper.confirm(
-            btnAnularVenta.getScene().getWindow(),
-            "¿Está seguro que desea anular la venta seleccionada?");
-    if (!confirmado)
-        return;
+    @FXML
+    private void onAnularVenta(ActionEvent event) {
+        Venta ventaSeleccionada = tableVentas.getSelectionModel().getSelectedItem();
+        if (ventaSeleccionada == null) {
+            DialogHelper.showWarning(
+                    btnAnularVenta.getScene().getWindow(),
+                    "Seleccione una venta para anular.");
+            return;
+        }
 
-    // Solo cambiamos el estado, no se elimina
-    ventaSeleccionada.setEstado("Anulado");
+        boolean confirmado = DialogHelper.confirm(
+                btnAnularVenta.getScene().getWindow(),
+                "¿Está seguro que desea anular la venta seleccionada?");
+        if (!confirmado)
+            return;
 
-    DialogHelper.showSuccess(
-            btnAnularVenta.getScene().getWindow(),
-            "anulado la venta");
-}
+        // Solo cambiamos el estado, no se elimina
+        ventaSeleccionada.setEstado("Anulado");
 
+        DialogHelper.showSuccess(
+                btnAnularVenta.getScene().getWindow(),
+                "anulado la venta");
+    }
 
 }

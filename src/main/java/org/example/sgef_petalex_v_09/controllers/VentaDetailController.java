@@ -56,44 +56,58 @@ public class VentaDetailController {
     private Venta currentVenta;
     private ObservableList<ItemVenta> items = FXCollections.observableArrayList();
 
-    /** Para ver venta existente */
-    public void initData(Venta v) {
-        this.currentVenta = v;
-        setup();
-        items.setAll(v.getItems());
-    }
-
-    private void setup() {
-        btnAcceptVenta.setDisable(true); // al inicio
-
+    @FXML
+    public void initialize() {
+        // Configuración básica que no depende de currentVenta
+        setupTableColumns();
+        setupEventHandlers();
+        tableItems.setItems(items);
+        
+        // Listener para habilitar/deshabilitar botones
         items.addListener((javafx.collections.ListChangeListener.Change<? extends ItemVenta> c) -> {
             btnAcceptVenta.setDisable(items.isEmpty());
         });
-        btnRemoveItem.setOnAction(this::onRemoveItem);
+        
+        // Configurar selección de tabla
+        tableItems.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            btnRemoveItem.setDisable(newSel == null);
+        });
+        
+        // Inicialmente deshabilitar botones
+        btnAcceptVenta.setDisable(true);
+        btnRemoveItem.setDisable(true);
+    }
 
-        lblCliente.setText("Cliente: " + currentVenta.getCliente());
-        lblFecha.setText("Fecha: " + currentVenta.getFecha());
-        lblDireccion.setText("Dirección: " + currentVenta.getDireccion());
+    /** Para ver venta existente */
+    public void initData(Venta v) {
+        this.currentVenta = v;
+        setupVentaInfo();
+        items.setAll(v.getItems());
+        updateTotal();
+    }
 
+    private void setupTableColumns() {
         colItem.setCellValueFactory(i -> i.getValue().itemProperty().asObject());
         colVariedad.setCellValueFactory(i -> i.getValue().variedadProperty());
         colPaquete.setCellValueFactory(i -> i.getValue().paqueteProperty());
         colCantidad.setCellValueFactory(i -> i.getValue().cantidadProperty().asObject());
         colPrecioU.setCellValueFactory(i -> i.getValue().precioUnitProperty().asObject());
         colPrecioT.setCellValueFactory(i -> i.getValue().precioTotalProperty().asObject());
+    }
 
-        tableItems.setItems(items);
-        updateTotal();
-
+    private void setupEventHandlers() {
         btnAddItem.setOnAction(this::onAddItem);
-
+        btnRemoveItem.setOnAction(this::onRemoveItem);
         btnCancelVenta.setOnAction(this::onCancelVenta);
         btnAcceptVenta.setOnAction(this::onAcceptVenta);
     }
 
-    private void closeWindow() {
-        Stage st = (Stage) lblCliente.getScene().getWindow();
-        st.close();
+    private void setupVentaInfo() {
+        if (currentVenta != null) {
+            lblCliente.setText("Cliente: " + currentVenta.getCliente());
+            lblFecha.setText("Fecha: " + currentVenta.getFecha());
+            lblDireccion.setText("Dirección: " + currentVenta.getDireccion());
+        }
     }
 
     /** Para VentasController: devuelve Optional.empty() si canceló */

@@ -17,15 +17,21 @@
     <Label fx:id="lblDireccion"  styleClass="title-label" AnchorPane.topAnchor="40"  AnchorPane.leftAnchor="10"/>
     <Label fx:id="lblFecha"      styleClass="title-label" AnchorPane.topAnchor="70"  AnchorPane.leftAnchor="10"/>
 
-    <!-- Botón Agregar Producto -->
-<HBox spacing="10"
-      AnchorPane.topAnchor="110"
-      AnchorPane.leftAnchor="10">
 
-    <Button fx:id="btnAddItem"
-            onAction="#onAddItem"
-            styleClass="toolbar-button"
-            text="Agregar Producto"/>
+    <!-- Botones Agregar y Eliminar Producto en la parte superior -->
+    <HBox spacing="10" AnchorPane.topAnchor="110" AnchorPane.leftAnchor="10">
+        <Button fx:id="btnAddItem"
+                onAction="#onAddItem"
+                styleClass="toolbar-button"
+                text="Agregar Producto"/>
+        <Button fx:id="btnEliminarItem"
+                text="Eliminar Producto"
+                onAction="#onEliminarItem"
+                styleClass="toolbar-button"
+                disable="true"/>
+    </HBox>
+    
+
 
     <Button fx:id="btnRemoveItem"
             onAction="#onRemoveItem"
@@ -67,5 +73,6 @@
                 text="Aceptar Venta"
                 onAction="#onAcceptVenta"
                 styleClass="toolbar-button"/>
+        
     </HBox>
 </AnchorPane>

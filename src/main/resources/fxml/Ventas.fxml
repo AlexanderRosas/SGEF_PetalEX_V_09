@@ -33,16 +33,15 @@
                 AnchorPane.rightAnchor="10">
                 <Button fx:id="btnAddVenta" onAction="#onAddVenta" styleClass="toolbar-button"
                         text="Agregar Venta" />
-        <!-- <Button fx:id="btnViewVenta" onAction="#onViewVenta" styleClass="toolbar-button"
-                 text="Consultar Venta" /> -->
-         <Button fx:id="btnAnularVenta" onAction="#onAnularVenta" styleClass="toolbar-button"
-                 text="Anular Venta" />
-         <TextField fx:id="txtBuscar" promptText="Buscar..." prefWidth="200" />
-         <ComboBox fx:id="cbEstado" promptText="Estado" prefWidth="150" />
- </HBox>
+                <Button fx:id="btnActualizarVenta" onAction="#onActualizarVenta" styleClass="toolbar-button"
+                        text="Actualizar Venta" />
+                <Button fx:id="btnAnularVenta" onAction="#onAnularVenta" styleClass="toolbar-button"
+                        text="Anular Venta" />
+                <TextField fx:id="txtBuscar" promptText="Buscar..." prefWidth="200" />
+                <ComboBox fx:id="cbEstado" promptText="Estado" prefWidth="150" />
+        </HBox>
 
-
- <!-- Tabla de Ventas realizadas -->
+        <!-- Tabla de Ventas realizadas -->
         <TableView fx:id="tableVentas"
                 AnchorPane.topAnchor="120"
                 AnchorPane.leftAnchor="10"
@@ -53,7 +52,6 @@
                         <TableColumn fx:id="colFecha" text="Fecha" prefWidth="120" />
                         <TableColumn fx:id="colTotal" text="Total" prefWidth="100" />
                         <TableColumn fx:id="colEstado" text="Estado" prefWidth="100" />
-
                 </columns>
         </TableView>
 
