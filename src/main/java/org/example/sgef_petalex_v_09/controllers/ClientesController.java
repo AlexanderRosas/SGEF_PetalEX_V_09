@@ -126,13 +126,13 @@ public class ClientesController {
             confirm.initOwner(owner);
             confirm.setTitle("Confirmar creación");
             confirm.setHeaderText(null);
-            confirm.setContentText("¿Está seguro que desea Crear?");
+            confirm.setContentText("¿Está seguro que desea crear al cliente?");
             Optional<ButtonType> ok = confirm.showAndWait();
 
             if (ok.isPresent() && ok.get().getButtonData() == ButtonData.OK_DONE) {
                 data.add(c);
                 tablaClientes.refresh();
-                DialogHelper.showSuccess(owner, "creado");
+                DialogHelper.showSuccess(owner, "creado al cliente");
             }
         });
     }

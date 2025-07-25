@@ -49,8 +49,8 @@
           AnchorPane.leftAnchor="10"
           AnchorPane.rightAnchor="10">
         <HBox spacing="10" styleClass="toolbar-buttons">
-            <Button fx:id="btnNuevo" text="Nuevo" onAction="#onNuevo" styleClass="toolbar-button"/>
-            <Button fx:id="btnEditar" text="Editar" onAction="#onEditar" styleClass="toolbar-button" disable="true"/>
+            <Button fx:id="btnNuevo" text="Nuevo Cliente" onAction="#onNuevo" styleClass="toolbar-button"/>
+            <Button fx:id="btnEditar" text="Editar Cliente" onAction="#onEditar" styleClass="toolbar-button" disable="true"/>
             <Button fx:id="btnEstado" text="Cambiar Estado" onAction="#onEstado" styleClass="toolbar-button" disable="true"/>
         </HBox>
         <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar-filters">
