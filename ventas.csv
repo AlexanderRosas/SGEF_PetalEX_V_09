@@ -1,5 +1,1 @@
 ID,TipoDestino,Servicio,Cliente,Direccion,Fecha,Precio,IVA,Total,Estado,Items
-V001,null,Ventas,"null","null",2025-07-25,0,00,0,00,0,00,00,""
-V002,null,Ventas,"null","null",2025-07-25,0,00,0,00,0,00,00,""
-V003,null,Ventas,"null","null",2025-07-25,0,00,0,00,30,00,00,""
-V004,null,Ventas,"null","null",2025-07-25,50,00,6,00,56,00,Activo,"EXPLORER - $50,00"

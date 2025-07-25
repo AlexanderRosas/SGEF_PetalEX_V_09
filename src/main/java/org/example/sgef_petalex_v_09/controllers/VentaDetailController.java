@@ -151,15 +151,15 @@ public class VentaDetailController {
         double subtotal = items.stream()
                 .mapToDouble(ItemVenta::getPrecioTotal)
                 .sum();
-        double iva      = subtotal * 0.12;
-        double total    = subtotal + iva;
 
-        // Guarda en la venta
+        // IVA quemado a cero
+        double iva = 0.0;
+        double total = subtotal; // como iva == 0
+
         currentVenta.setSubtotal(subtotal);
-        currentVenta.setIva(iva);
+        //currentVenta.setIva(iva);
         currentVenta.setTotal(total);
 
-        // Actualiza etiqueta
         lblTotal.setText(String.format("Subtotal: $%.2f   IVA: $%.2f   Total: $%.2f",
                 subtotal, iva, total));
     }

@@ -1,6 +1,5 @@
 package org.example.sgef_petalex_v_09.controllers;
 
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -14,10 +13,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.Window;
+import org.example.sgef_petalex_v_09.models.Cliente;
 import org.example.sgef_petalex_v_09.models.Venta;
 import org.example.sgef_petalex_v_09.util.CSVUtil;
 import org.example.sgef_petalex_v_09.util.NavigationHelper;
-import org.example.sgef_petalex_v_09.util.ScreenManager;
 import org.example.sgef_petalex_v_09.util.UserSession;
 
 import java.io.IOException;
@@ -40,31 +40,24 @@ public class VentasController implements Initializable {
     @FXML private Button btnNuevo;
     @FXML private Button btnRecaudar;
     @FXML private Button btnEliminar;
-    
-    @FXML private TableView<Venta> tablaVentas;
-    @FXML private TableColumn<Venta, String> colId;
-    @FXML private TableColumn<Venta, String> colDestino;
-    @FXML private TableColumn<Venta, String> colServicio;
-    @FXML private TableColumn<Venta, String> colCliente;
-    @FXML private TableColumn<Venta, String> colDetalle;
-    @FXML private TableColumn<Venta, Double> colPrecio;
-    @FXML private TableColumn<Venta, Double> colIva;
-    @FXML private TableColumn<Venta, Double> colTotal;
 
-    private ObservableList<Venta> listaVentas = FXCollections.observableArrayList();
+    @FXML private TableView<Venta> tablaVentas;
+    @FXML private TableColumn<Venta, String>  colId;
+    @FXML private TableColumn<Venta, String>  colDestino;
+    @FXML private TableColumn<Venta, String>  colServicio;
+    @FXML private TableColumn<Venta, String>  colCliente;
+    @FXML private TableColumn<Venta, String>  colDetalle;
+    @FXML private TableColumn<Venta, Double>  colPrecio;
+    @FXML private TableColumn<Venta, Double>  colIva;
+    @FXML private TableColumn<Venta, Double>  colTotal;
+
+    private final ObservableList<Venta> listaVentas = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Configurar columnas
         configurarColumnas();
-        
-        // Cargar datos
         cargarDatos();
-        
-        // Configurar campos fijos
         configurarCamposFijos();
-        
-        // Configurar listeners
         configurarListeners();
     }
 
@@ -74,162 +67,146 @@ public class VentasController implements Initializable {
         colServicio.setCellValueFactory(c -> c.getValue().servicioProperty());
         colCliente.setCellValueFactory(c -> c.getValue().clienteProperty());
         colDetalle.setCellValueFactory(c -> new SimpleStringProperty(
-                String.valueOf(c.getValue().getDetalleResumen())));
+                (String) c.getValue().getDetalleResumen()));
         colPrecio.setCellValueFactory(c -> c.getValue().precioProperty().asObject());
-        //colIva.setCellValueFactory(c -> c.getValue().ivaProperty());
+        colIva.setCellValueFactory(c -> c.getValue().ivaProperty());
         colTotal.setCellValueFactory(c -> c.getValue().totalProperty().asObject());
 
-        // Formato para columnas numéricas
-        configurarFormatoColumnas();
+        // Formateo monetario
+        formatoMoneda(colPrecio);
+        formatoMoneda(colIva);
+        formatoMoneda(colTotal);
     }
 
-    private void configurarFormatoColumnas() {
-        colPrecio.setCellFactory(tc -> new TableCell<>() {
+    private void formatoMoneda(TableColumn<Venta, Double> col) {
+        col.setCellFactory(tc -> new TableCell<>() {
             @Override
-            protected void updateItem(Double precio, boolean empty) {
-                super.updateItem(precio, empty);
-                if (empty || precio == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("$%.2f", precio));
-                }
-            }
-        });
-
-        colIva.setCellFactory(tc -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double iva, boolean empty) {
-                super.updateItem(iva, empty);
-                if (empty || iva == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("$%.2f", iva));
-                }
-            }
-        });
-
-        colTotal.setCellFactory(tc -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double total, boolean empty) {
-                super.updateItem(total, empty);
-                if (empty || total == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("$%.2f", total));
-                }
+            protected void updateItem(Double val, boolean empty) {
+                super.updateItem(val, empty);
+                setText(empty || val == null ? null : String.format("$%.2f", val));
             }
         });
     }
 
     private void cargarDatos() {
-        listaVentas.clear();
-        listaVentas.addAll(CSVUtil.leerVentas());
+        listaVentas.setAll(CSVUtil.leerVentas());
         tablaVentas.setItems(listaVentas);
     }
 
     private void configurarCamposFijos() {
         txtPuntoEmision.setText(UserSession.getPuntoEmision());
-        txtFecha.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yy")));
+        txtFecha.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
         txtSucursal.setText(UserSession.getSucursal());
-        
         txtPuntoEmision.setEditable(false);
         txtFecha.setEditable(false);
         txtSucursal.setEditable(false);
     }
 
     private void configurarListeners() {
-        // Listener para selección en tabla
         tablaVentas.getSelectionModel().selectedItemProperty().addListener(
-            (obs, oldSel, newSel) -> {
-                boolean haySeleccion = (newSel != null);
-                btnRecaudar.setDisable(!haySeleccion);
-                btnEliminar.setDisable(!haySeleccion);
-            }
+                (obs, oldSel, newSel) -> {
+                    boolean sel = newSel != null;
+                    btnRecaudar.setDisable(!sel);
+                    btnEliminar.setDisable(!sel);
+                }
         );
     }
 
     @FXML
     private void onNuevo(ActionEvent event) {
-        // 1) Diálogo de tipo de destino
+        // 1) Tipo de Destino
         List<String> opciones = Arrays.asList("Nacional", "Internacional");
-        ChoiceDialog<String> dialog = new ChoiceDialog<>(null, opciones);
-        dialog.setTitle("Nuevo – Tipo de Destino");
-        dialog.setHeaderText(null);
-        dialog.setContentText("Selecciona el Tipo de Destino:");
+        ChoiceDialog<String> tipoDialog = new ChoiceDialog<>(opciones.get(0), opciones);
+        tipoDialog.setTitle("Nueva Venta – Tipo de Destino");
+        tipoDialog.setHeaderText(null);
+        tipoDialog.setContentText("Selecciona el Tipo de Destino:");
 
-        Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
-        okButton.disableProperty().bind(dialog.selectedItemProperty().isNull());
+        // Deshabilitar OK si no hay selección
+        Button okBtn = (Button) tipoDialog.getDialogPane().lookupButton(ButtonType.OK);
+        okBtn.disableProperty().bind(tipoDialog.selectedItemProperty().isNull());
 
-        Optional<String> tipoDestino = dialog.showAndWait();
-        
-        tipoDestino.ifPresent(tipo -> {
-            try {
-                // 2) Abrir selección de cliente en ventana modal
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ClienteSelection.fxml"));
-                Parent root = loader.load();
-            
-                Stage clienteStage = new Stage();
-                clienteStage.initModality(Modality.APPLICATION_MODAL);
-                clienteStage.initOwner(((Node)event.getSource()).getScene().getWindow());
-                clienteStage.setTitle("Seleccionar Cliente");
-                clienteStage.setScene(new Scene(root));
-            
-                ClienteSelectionController controller = loader.getController();
-                clienteStage.showAndWait();
+        Optional<String> tipoOpt = tipoDialog.showAndWait();
+        if (!tipoOpt.isPresent()) return;
+        String tipoDestino = tipoOpt.get();
 
-                // 3) Si se seleccionó un cliente, abrir VentaDetail en nueva ventana
-                if (controller.getClienteSeleccionado() != null) {
-                    FXMLLoader ventaLoader = new FXMLLoader(getClass().getResource("/fxml/VentaDetail.fxml"));
-                    Parent ventaRoot = ventaLoader.load();
-                
-                    Stage ventaStage = new Stage();
-                    ventaStage.initModality(Modality.WINDOW_MODAL);
-                    ventaStage.initOwner(((Node)event.getSource()).getScene().getWindow());
-                    ventaStage.setTitle("Nueva Venta – " + tipo);
-                
-                    Scene scene = new Scene(ventaRoot);
-                    scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
-                    ventaStage.setScene(scene);
-                
-                    VentaDetailController ventaController = ventaLoader.getController();
-                    // Inicializar la venta con el cliente seleccionado
-                    Venta nuevaVenta = new Venta();
-                    nuevaVenta.setCliente(String.valueOf(controller.getClienteSeleccionado()));
-                    nuevaVenta.setTipoDestino(tipo);
-                    ventaController.initData(nuevaVenta);
-                
-                    ventaStage.show();
-                }
-            
-            } catch (IOException e) {
-                e.printStackTrace();
-                new Alert(Alert.AlertType.ERROR,
-                    "Error al abrir la ventana:\n" + e.getMessage())
-                    .showAndWait();
-            }
-        });
+        // 2) Selección de Cliente
+        try {
+            FXMLLoader clLoader = new FXMLLoader(
+                    getClass().getResource("/fxml/ClienteSelection.fxml"));
+            Parent clRoot = clLoader.load();
+            Stage clStage = new Stage();
+            clStage.initModality(Modality.WINDOW_MODAL);
+            clStage.initOwner(((Node) event.getSource()).getScene().getWindow());
+            clStage.setTitle("Seleccionar Cliente");
+            clStage.setScene(new Scene(clRoot));
+            clStage.showAndWait();
+
+            ClienteSelectionController clCtrl = clLoader.getController();
+            Optional<Cliente> clienteOpt = clCtrl.getClienteSeleccionado();
+            if (!clienteOpt.isPresent()) return;
+            Cliente cliente = clienteOpt.get();
+
+            // 3) Detalle de Venta
+            FXMLLoader vdLoader = new FXMLLoader(
+                    getClass().getResource("/fxml/VentaDetail.fxml"));
+            Parent vdRoot = vdLoader.load();
+            Stage vdStage = new Stage();
+            vdStage.initModality(Modality.WINDOW_MODAL);
+            vdStage.initOwner(clStage);
+            vdStage.setTitle("Nueva Venta – " + tipoDestino);
+            Scene vdScene = new Scene(vdRoot);
+            vdScene.getStylesheets().add(
+                    getClass().getResource("/css/styles.css").toExternalForm());
+            vdStage.setScene(vdScene);
+
+            // Inicializar datos
+            VentaDetailController vdCtrl = vdLoader.getController();
+            Venta nuevaVenta = new Venta();
+            nuevaVenta.setTipoDestino(tipoDestino);
+            nuevaVenta.setCliente(cliente.getId());
+            nuevaVenta.setFecha(LocalDate.now());
+            vdCtrl.initData(nuevaVenta);
+
+            vdStage.showAndWait();
+
+            // 4) Recuperar y guardar
+            vdCtrl.getVentaCreated().ifPresent(venta -> {
+                // Generar ID
+                String id = String.format("V%03d", listaVentas.size() + 1);
+                venta.setId(id);
+                venta.setServicio("Ventas");
+                listaVentas.add(venta);
+                CSVUtil.guardarVentas(listaVentas, VENTAS_CSV);
+            });
+
+        } catch (IOException e) {
+            showError("Error al crear nueva venta", e);
+        }
     }
 
     @FXML
     private void onRecaudar(ActionEvent event) {
-        Venta seleccionada = tablaVentas.getSelectionModel().getSelectedItem();
-        if (seleccionada != null) {
-            UserSession.setVentaSeleccionada(seleccionada);
-            ScreenManager.loadScreen(event, "/fxml/Recaudacion.fxml", "Recaudación");
+        Venta sel = tablaVentas.getSelectionModel().getSelectedItem();
+        if (sel != null) {
+            UserSession.setVentaSeleccionada(sel);
+            //NavigationHelper.cargarVista(event, "/fxml/Recaudacion.fxml", "Recaudación");
         }
     }
 
     @FXML
     private void onEliminar(ActionEvent event) {
-        Venta seleccionada = tablaVentas.getSelectionModel().getSelectedItem();
-        if (seleccionada == null) {
-            mostrarAdvertencia("Seleccione una venta para eliminar.");
+        Venta sel = tablaVentas.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            showWarning("Seleccione una venta para eliminar.");
             return;
         }
-
-        if (confirmarEliminacion(seleccionada)) {
-            listaVentas.remove(seleccionada);
-            CSVUtil.guardarVentas(listaVentas);
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                "¿Eliminar venta " + sel.getId() + "?", ButtonType.OK, ButtonType.CANCEL);
+        confirm.setHeaderText(null);
+        confirm.initOwner(tablaVentas.getScene().getWindow());
+        if (confirm.showAndWait().filter(bt -> bt == ButtonType.OK).isPresent()) {
+            listaVentas.remove(sel);
+            CSVUtil.guardarVentas(listaVentas, VENTAS_CSV);
         }
     }
 
@@ -238,27 +215,17 @@ public class VentasController implements Initializable {
         NavigationHelper.volverAlMenuPrincipal(event);
     }
 
-    private boolean confirmarEliminacion(Venta venta) {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Confirmar eliminación");
-        confirm.setHeaderText(null);
-        confirm.setContentText("¿Está seguro que desea eliminar la venta " + venta.getId() + "?");
-        return confirm.showAndWait().filter(bt -> bt == ButtonType.OK).isPresent();
+    /*— Utilitarios de alerta —*/
+    private void showError(String msg, Exception e) {
+        Alert a = new Alert(Alert.AlertType.ERROR, msg + "\n" + e.getMessage());
+        a.initOwner(tablaVentas.getScene().getWindow());
+        a.setHeaderText(null);
+        a.showAndWait();
     }
-
-    private void mostrarError(String mensaje, Exception e) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje + "\n" + e.getMessage());
-        alert.showAndWait();
-    }
-
-    private void mostrarAdvertencia(String mensaje) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Advertencia");
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        alert.showAndWait();
+    private void showWarning(String msg) {
+        Alert a = new Alert(Alert.AlertType.WARNING, msg);
+        a.initOwner(tablaVentas.getScene().getWindow());
+        a.setHeaderText(null);
+        a.showAndWait();
     }
 }

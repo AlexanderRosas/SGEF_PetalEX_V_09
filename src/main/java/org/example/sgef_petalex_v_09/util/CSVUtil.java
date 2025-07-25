@@ -52,24 +52,35 @@ public class CSVUtil {
         }
 
         try (BufferedReader br = Files.newBufferedReader(path)) {
-            // Saltar la primera línea (encabezados)
-            String headers = br.readLine();
             String line;
 
             while ((line = br.readLine()) != null) {
-                String[] campos = line.split(",");
-                if (campos.length >= 6) { // ID, Nombre, Direccion, Telefono, Correo, Estado
-                    Cliente cliente = new Cliente(
-                            // ID
-                            // Nombre
-                            // Direccion
-                            // Telefono
-                            // Correo
-                            // Estado
-                    );
-                    clientes.add(cliente);
+                String[] campos = line.split(",", -1);
+                // Esperamos al menos 6 campos: ID, Nombre, Dirección, Teléfono, Correo, Estado
+                if (campos.length < 6) continue;
+
+                // Si hay encabezado, podemos ignorarlo
+                if ("id".equalsIgnoreCase(campos[0].trim())) {
+                    continue;
                 }
+
+                // 1) Parsear el ID (ej. "C001" → 1)
+                String rawId = campos[0].trim();
+                String digits = rawId.replaceAll("\\D+", "");
+                int id = digits.isEmpty() ? 0 : Integer.parseInt(digits);
+
+                // 2) Resto de campos
+                String nombre    = campos[1].trim();
+                String direccion = campos[2].trim();
+                String telefono  = campos[3].trim();
+                String correo    = campos[4].trim();
+                String estado    = campos[5].trim();
+
+                // 3) Crear el objeto Cliente y añadirlo
+                Cliente cliente = new Cliente(id, nombre, direccion, telefono, correo, estado);
+                clientes.add(cliente);
             }
+
         } catch (IOException e) {
             System.err.println("Error leyendo el archivo de clientes: " + e.getMessage());
             e.printStackTrace();

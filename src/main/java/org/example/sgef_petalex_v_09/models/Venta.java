@@ -1,6 +1,7 @@
 package org.example.sgef_petalex_v_09.models;
 
 import javafx.beans.property.*;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.time.LocalDate;
@@ -22,7 +23,7 @@ public class Venta {
 
     // Totales calculados
     private final DoubleProperty precio = new SimpleDoubleProperty(0.0);
-    private double iva;
+    private ObservableValue<Double> iva;
     private final DoubleProperty total = new SimpleDoubleProperty(0.0);
 
     // Estado y otros campos
@@ -97,8 +98,8 @@ public class Venta {
     public double getPrecio() { return precio.get(); }
     public DoubleProperty precioProperty() { return precio; }
 
-    public double getIva() { return iva; }
-    public double ivaProperty() { return iva; }
+    public double getIva() { return iva.getValue(); }
+    public ObservableValue<Double> ivaProperty() { return iva; }
 
     public double getTotal() { return total.get(); }
     public void setTotal(double sum) { this.total.set(sum); }
@@ -130,7 +131,9 @@ public class Venta {
         return subtotal;
     }
 
-    public void setIva(double iva) {
+    public void setIva(ObservableValue<Double> iva) {
         this.iva = iva;
     }
+
+
 }
