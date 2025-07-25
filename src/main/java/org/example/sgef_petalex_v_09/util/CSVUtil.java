@@ -14,7 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class CSVUtil {
-    public static final String VENTAS_CSV = "ventas.csv";
+    public static final String VENTAS_CSV = "data/ventas.csv";
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     public static final String CLIENTES_CSV = "data/clientes.csv";
 

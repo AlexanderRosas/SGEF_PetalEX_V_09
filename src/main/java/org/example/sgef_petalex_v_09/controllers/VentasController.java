@@ -173,12 +173,20 @@ public class VentasController implements Initializable {
 
             vdStage.showAndWait();
 
-            // 4) Recuperar y guardar
             vdCtrl.getVentaCreated().ifPresent(venta -> {
-                // Generar ID
+                // 1) Generar ID de la venta
                 String id = String.format("V%03d", listaVentas.size() + 1);
                 venta.setId(id);
                 venta.setServicio("Ventas");
+
+                // 2) Reemplazar el campo “cliente” (que llevaba el ID) por el nombre real
+                String clienteId = venta.getCliente();
+                Cliente cli = CSVUtil.buscarClientePorId(clienteId);
+                if (cli != null) {
+                    venta.setCliente(cli.getNombre());
+                }
+
+                // 3) Añadir y persistir
                 listaVentas.add(venta);
                 CSVUtil.guardarVentas(listaVentas, VENTAS_CSV);
             });

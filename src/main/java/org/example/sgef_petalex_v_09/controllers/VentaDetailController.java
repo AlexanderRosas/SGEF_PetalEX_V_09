@@ -16,8 +16,10 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import org.example.sgef_petalex_v_09.models.Cliente;
 import org.example.sgef_petalex_v_09.models.ItemVenta;
 import org.example.sgef_petalex_v_09.models.Venta;
+import org.example.sgef_petalex_v_09.util.CSVUtil;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
 
 import java.io.IOException;
@@ -109,16 +111,40 @@ public class VentaDetailController implements Initializable {
         btnAcceptVenta.setDisable(items.isEmpty());
     }
 
-    /** Rellena los labels de información del cliente y la venta. */
     private void setupVentaInfo() {
-        lblCliente     .setText("Cliente: " + currentVenta.getId());
-        lblDireccion   .setText("Dirección: " + currentVenta.getDireccion());
-        lblTelefono    .setText(""); // o info si la tienes
-        lblCorreo      .setText(""); // o info si la tienes
-        lblFecha       .setText("Fecha: " +
+        // 1) Obtener el cliente completo
+        String clienteId = currentVenta.getCliente();               // p.ej. "C001"
+        Cliente cliente = CSVUtil.buscarClientePorId(clienteId);    // devuelve null si no existe
+
+        if (cliente != null) {
+            lblCliente.setText("Cliente: "    + cliente.getNombre());
+            lblDireccion.setText("Dirección: " + cliente.getDireccion());
+            lblTelefono.setText("Teléfono: "   + cliente.getTelefono());
+            lblCorreo.setText("Correo: "       + cliente.getCorreo());
+
+            // Estado visual según activo/inactivo
+            String est = cliente.getEstado();
+            lblEstadoCliente.setText("Estado: " + est);
+            lblEstadoCliente.getStyleClass().setAll(
+                    "estado-label",
+                    est.equalsIgnoreCase("Activo") ? "estado-activo" : "estado-inactivo"
+            );
+        } else {
+            // Si no se encontró, mostrarlos vacíos o con un mensaje por defecto
+            lblCliente.setText("Cliente: No encontrado");
+            lblDireccion.setText("Dirección: --");
+            lblTelefono.setText("Teléfono: --");
+            lblCorreo.setText("Correo: --");
+            lblEstadoCliente.setText("");
+        }
+
+        // 2) Fecha, tipoDestino y total siguen igual
+        lblFecha.setText("Fecha: " +
                 currentVenta.getFecha().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        lblTipoDestino .setText("Tipo: " + currentVenta.getTipoDestino());
-        lblEstadoCliente.setText("Estado: " + currentVenta.getEstado());
+        lblTipoDestino.setText("Tipo: " + currentVenta.getTipoDestino());
+
+        // Finalmente recálculo totales
+        updateTotal();
     }
 
     /** Recalcula subtotal, IVA quemado y total, y actualiza el label. */

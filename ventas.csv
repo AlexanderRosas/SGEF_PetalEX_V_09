@@ -1,2 +1,4 @@
 ID,TipoDestino,Servicio,Cliente,Direccion,Fecha,Precio,IVA,Total,Estado,Items
-V001,Nacional,Ventas,"1","null",2025-07-25,750,00,0,00,750,00,Activo,""
+V001,Nacional,Ventas,"1","null",2025-07-25,0,00,0,00,0,00,00,""
+V002,Internacional,Ventas,"6","null",2025-07-25,0,00,0,00,0,00,00,""
+V003,Internacional,Ventas,"1","null",2025-07-25,480,00,0,00,480,00,Activo,""

@@ -1,5 +1,2 @@
-V001,Internacional,Ventas,RoseFlower INC.,"Av. Petalos 123, Miami, USA",2024-03-20,5000.00,600.00,5600.00,Activo,"10 Rosas Premium Rojas - $2500, 15 Orquídeas Selectas - $2500"
-V002,Nacional,Ventas,Florería El Jardín,"Av. 10 de Agosto N45-12, Quito",2024-03-19,1200.00,144.00,1344.00,Activo,"20 Claveles Rojos - $600, 15 Girasoles - $600"
-V003,Internacional,Ventas,SweetMoment Ltd.,"Tulip Street 45, Amsterdam",2024-03-18,8500.00,1020.00,9520.00,Activo,"30 Tulipanes Premium - $4500, 20 Lirios Especiales - $4000"
-V004,Nacional,Ventas,Flores y Más,"García Moreno 678, Guayaquil",2024-03-17,950.00,114.00,1064.00,Activo,"25 Margaritas - $450, 20 Crisantemos - $500"
-V005,Internacional,Ventas,BloomExpress Corp.,"Flora Avenue 789, Toronto, Canada",2024-03-16,6800.00,816.00,7616.00,Activo,"40 Rosas Blancas Premium - $3800, 25 Peonías Selectas - $3000"
+ID,TipoDestino,Servicio,Cliente,Direccion,Fecha,Precio,IVA,Total,Estado,Items
+V005,Internacional,Ventas,"Flores del Valle S.A.","null",2025-07-25,1170,00,0,00,1170,00,Activo,""
