@@ -47,6 +47,25 @@ public class MainMenuController {
         cargarVista(event, "/fxml/Administracion.fxml","Index Blooms – Administración del Sistema");
     }
 
+    @FXML
+    private void onLogout(ActionEvent event) {
+        try {
+            Parent loginRoot = FXMLLoader.load(
+                    getClass().getResource("/fxml/Login.fxml")
+            );
+            Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+            Scene scene = new Scene(loginRoot);
+            scene.getStylesheets().add(
+                    getClass().getResource("/css/styles.css").toExternalForm()
+            );
+            stage.setScene(scene);
+            stage.setTitle("Index Blooms – Login");
+            stage.centerOnScreen();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Carga un FXML en una nueva Scene para el Stage actual,
      * reaplica CSS y restaura el tamaño o maximizado.
