@@ -94,12 +94,13 @@
                                 </AnchorPane>
                         </Tab>
 
-                        <!-- Pestaña Facturas -->
+                        <!-- Pestaña Facturas
                         <Tab text="Facturas">
                                 <AnchorPane>
-                                        <!-- Contenido de Facturas (pendiente) -->
+                                         Contenido de Facturas (pendiente)
                                 </AnchorPane>
                         </Tab>
+                        -->
                 </tabs>
         </TabPane>
 </AnchorPane>

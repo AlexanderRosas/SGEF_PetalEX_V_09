@@ -195,6 +195,8 @@ public class GestionUsuariosController implements Initializable {
             txtNombre.setText(existing.getNombre());
             txtCorreo.setText(existing.getCorreo());
             txtUsuario.setText(existing.getUsuario());
+            //java.awt.Label txtSucursal = null;
+            //txtSucursal.setText("Latacunga");
             cbRol.setValue(existing.getRol());
             lblPermisos.setText(existing.getPermisos());
         }
@@ -220,6 +222,7 @@ public class GestionUsuariosController implements Initializable {
                 .or(txtUsuario.textProperty().isEmpty())
                 .or(cbRol.valueProperty().isNull());
         okButton.disableProperty().bind(invalid);
+
 
         // 3) Resultado usa permisosMap
         dlg.setResultConverter(btn -> {

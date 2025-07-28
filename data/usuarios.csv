@@ -1,3 +1,6 @@
 ID,Nombre,Correo,Usuario,Rol,Estado,Sucursal,RUC,Permisos
-U924,Administrador,ariel@outlook.com,ariel,Administrador,Activo,Latacunga,1728907567001,Todos
-U980,Angel,administrador@gmail.com,angel,Contador,Activo,null,null,FINANZAS,REPORTES
+U924,Administrador,ariel@outlook.com,ariel,Administrador,Activo,Latacunga,"",Todos
+U980,Angel,contabilidad@index.com,angel,Contador,Activo,Latacunga,1728907567001,FINANZAS
+U386,Administrador,admin@index.com,admin,Administrador,Activo,Latacunga,null,ALL
+U784,pepe,asdasd,asdasd,Contador,Activo,null,null,
+U165,Maria Rosas,maria@indexblooms.com,mrosas,Gerente,Activo,null,null,VENTAS,COMPRAS,REPORTES
