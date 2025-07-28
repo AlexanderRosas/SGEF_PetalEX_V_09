@@ -1,5 +1,6 @@
 package org.example.sgef_petalex_v_09.controllers;
 
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.*;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
@@ -41,6 +42,8 @@ public class ClientesController {
     private TableColumn<Cliente, String> colEstado;
     @FXML
     private TableColumn<Cliente, String> colUsuarioModificacion;
+    @FXML
+    private TableColumn<Cliente, String> colFechaModificacion;
 
     @FXML
     private TextField txtBuscarNombre;
@@ -71,6 +74,7 @@ public class ClientesController {
         configurarFiltros();
         cargarDatosDesdeCSV();
         tablaClientes.setItems(filteredData);
+        btnEstado.setText("Cambiar estado");
 
     }
 
@@ -84,6 +88,11 @@ public class ClientesController {
         colCorreo.setCellValueFactory(new PropertyValueFactory<>("correo"));
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
         colUsuarioModificacion.setCellValueFactory(new PropertyValueFactory<>("usuarioModificacion"));
+        colFechaModificacion.setCellValueFactory(cellData -> {
+            LocalDateTime fecha = cellData.getValue().getFechaModificacion();
+            String texto = fecha != null ? fecha.toString().replace("T", " ") : "";
+            return new ReadOnlyStringWrapper(texto);
+        });
 
         cbPais.setItems(FXCollections.observableArrayList(PaisUtil.PREFIJOS.keySet()));
         cbEstado.setItems(FXCollections.observableArrayList("Todos", "Activa", "Inactiva"));
@@ -161,9 +170,20 @@ public class ClientesController {
             sel.setCorreo(cliente.getCorreo());
             sel.setUsuarioModificacion(usuarioActual);
             sel.setFechaModificacion(LocalDateTime.now());
+            System.out.println("Antes de guardar:");
+            data.forEach(c -> System.out.println(c.getNombre() + " - " + c.getDireccion()));
 
             CSVUtil.guardarClientes(data);
+
+            System.out.println("Guardado completado.");
+
+            List<Cliente> clientesDesdeArchivo = CSVUtil.leerClientes();
+            System.out.println("Leídos desde archivo:");
+            clientesDesdeArchivo.forEach(c -> System.out.println(c.getNombre() + " - " + c.getDireccion()));
+            tablaClientes.refresh();
+
             DialogHelper.showSuccess(btnEditar.getScene().getWindow(), "Cliente actualizado");
+
         });
     }
 
@@ -173,22 +193,18 @@ public class ClientesController {
         if (sel == null)
             return;
 
-        if ("Inactiva".equals(sel.getEstado())) {
-            DialogHelper.showWarning(btnEstado.getScene().getWindow(), "No se puede reactivar una empresa inactiva");
-            return;
-        }
+        String nuevoEstado = sel.getEstado().equalsIgnoreCase("Activa") ? "Inactiva" : "Activa";
+        String mensajeConfirmacion = "¿Está seguro/a de cambiar el estado del cliente a '" + nuevoEstado + "'?";
 
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Inactivar empresa");
-        confirm.setHeaderText("¿Estás seguro/a de anular esta Empresa Cliente?");
-        Optional<ButtonType> res = confirm.showAndWait();
-        if (res.isPresent() && res.get() == ButtonType.OK) {
-            sel.setEstado("Inactiva");
+        boolean confirmed = DialogHelper.confirm(btnEstado.getScene().getWindow(), mensajeConfirmacion);
+        if (confirmed) {
+            sel.setEstado(nuevoEstado);
             sel.setUsuarioModificacion(usuarioActual);
             sel.setFechaModificacion(LocalDateTime.now());
 
             CSVUtil.guardarClientes(data);
-            DialogHelper.showSuccess(btnEstado.getScene().getWindow(), "Empresa inactivada");
+            tablaClientes.refresh();
+            DialogHelper.showSuccess(btnEstado.getScene().getWindow(), "Estado cambiado a '" + nuevoEstado + "'");
         }
     }
 
@@ -285,27 +301,26 @@ public class ClientesController {
 
             if (!valid) {
                 event.consume();
-                DialogHelper.showValidationError(dialog.getDialogPane().getScene().getWindow(),
-                        "Errores en el formulario",
+                DialogHelper.showError(dialog.getDialogPane().getScene().getWindow(),
                         "Por favor corrige los campos resaltados con errores antes de continuar.");
             }
         });
 
         Button cancelButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
         cancelButton.addEventFilter(ActionEvent.ACTION, event -> {
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-            confirm.setTitle("Cancelar registro");
-            confirm.setHeaderText("¿Está seguro/a de cancelar el registro del Cliente?");
-            Optional<ButtonType> res = confirm.showAndWait();
-            if (res.isEmpty() || res.get() != ButtonType.OK) {
+            String mensaje = (existing != null)
+                    ? "¿Está seguro/a de cancelar el proceso de edición del cliente?"
+                    : "¿Está seguro/a de cancelar el registro del Cliente?";
+
+            boolean confirmed = DialogHelper.confirm(dialog.getDialogPane().getScene().getWindow(), mensaje);
+            if (!confirmed) {
                 event.consume();
             }
         });
-
         dialog.setResultConverter(btn -> {
             if (btn == ButtonType.OK) {
                 Cliente c = new Cliente();
-                c.setId(existing != null ? existing.getId() : UUID.randomUUID().toString());
+                c.setId(existing != null ? existing.getId() : generarNuevoIdIncremental());
                 c.setNombre(txtNombre.getText());
                 c.setIdentificadorEmpresarial(txtIdentificador.getText());
                 c.setPais(cbPais.getValue());
@@ -359,6 +374,19 @@ public class ClientesController {
         Parent root = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.getScene().setRoot(root);
+    }
+
+    private String generarNuevoIdIncremental() {
+        if (data.isEmpty()) {
+            return "1";
+        }
+        int maxId = data.stream()
+                .map(Cliente::getId)
+                .filter(id -> id.matches("\\d+")) // solo IDs numéricos válidos
+                .mapToInt(Integer::parseInt)
+                .max()
+                .orElse(0);
+        return String.valueOf(maxId + 1);
     }
 
 }

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
@@ -66,14 +65,15 @@
                AnchorPane.rightAnchor="10"
                AnchorPane.bottomAnchor="10">
         <columns>
-            <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
-            <TableColumn fx:id="colNombre" text="Nombre" prefWidth="180"/>
+            <TableColumn fx:id="colId" text="ID" prefWidth="80"/>
+            <TableColumn fx:id="colNombre" text="Nombre" prefWidth="200"/>
             <TableColumn fx:id="colIdentificador" text="Identificador" prefWidth="130"/>
             <TableColumn fx:id="colPais" text="País" prefWidth="100"/>
-            <TableColumn fx:id="colDireccion" text="Dirección" prefWidth="200"/>
-            <TableColumn fx:id="colTelefono" text="Teléfono" prefWidth="120"/>
-            <TableColumn fx:id="colCorreo" text="Correo" prefWidth="180"/>
-            <TableColumn fx:id="colEstado" text="Estado" prefWidth="90"/>
+            <TableColumn fx:id="colDireccion" text="Dirección" prefWidth="250"/>
+            <TableColumn fx:id="colTelefono" text="Teléfono" prefWidth="150"/>
+            <TableColumn fx:id="colCorreo" text="Correo" prefWidth="200"/>
+            <TableColumn fx:id="colEstado" text="Estado" prefWidth="100"/>
+            <TableColumn fx:id="colFechaModificacion" text="Fecha Modificación" prefWidth="150"/>
             <TableColumn fx:id="colUsuarioModificacion" text="Modificado por" prefWidth="120"/>
         </columns>
     </TableView>

@@ -11,11 +11,9 @@ public class DataValidator {
     private static final Pattern NUMERIC_PATTERN = Pattern.compile("^[0-9]+$");
     private static final Pattern DECIMAL_PATTERN = Pattern.compile("^[0-9]+(\\.[0-9]{1,2})?$");
     private static final Pattern RUC_PATTERN = Pattern.compile("^[0-9]{13}$");
-    // Nombre empresa: 1-60 letras (español/inglés), tildes, ñ, espacio
-    private static final Pattern EMPRESA_NOMBRE_PATTERN = Pattern.compile("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]{1,60}$");
+    private static final Pattern EMPRESA_NOMBRE_PATTERN = Pattern.compile("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s\\.\\&\\-]{1,60}$");
 
-    // Dirección: 1-100 caracteres (letras, números, punto, guion, espacio)
-    private static final Pattern DIRECCION_PATTERN = Pattern.compile("^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\\s.\\-]{1,100}$");
+    private static final Pattern DIRECCION_PATTERN = Pattern.compile("^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\\s\\.\\,\\-]{1,100}$");
 
     // Teléfono E.164: “+” opcional y hasta 15 dígitos
     private static final Pattern PHONE_E164_PATTERN = Pattern.compile("^\\+?[0-9]{1,15}$");

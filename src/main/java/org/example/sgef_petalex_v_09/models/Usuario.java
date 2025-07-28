@@ -1,9 +1,10 @@
 package org.example.sgef_petalex_v_09.models;
 
-import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.property.ReadOnlyStringWrapper;
+
+import java.time.LocalDateTime;
 
 public class Usuario {
     private final StringProperty nombre = new SimpleStringProperty();
@@ -14,13 +15,17 @@ public class Usuario {
     private final StringProperty sucursal = new SimpleStringProperty();
     private final StringProperty ruc = new SimpleStringProperty();
     private final StringProperty permisos = new SimpleStringProperty("");
-    private final StringProperty password = new SimpleStringProperty(""); // NUEVO campo contraseña
+    private final StringProperty password = new SimpleStringProperty(""); // Si usas password
+    
+    private final StringProperty usuarioModificacion = new SimpleStringProperty();  // NUEVO campo
+    private ObjectProperty<LocalDateTime> fechaModificacion = new SimpleObjectProperty<>(); // NUEVO campo
 
     private String id;
 
     public Usuario() {}
 
-    public Usuario(String nombre, String correo, String usuario, String rol, String estado, String sucursal, String ruc, String password) {
+    public Usuario(String nombre, String correo, String usuario, String rol, String estado, String sucursal,
+                   String ruc, String password, String usuarioModificacion, LocalDateTime fechaModificacion) {
         setNombre(nombre);
         setCorreo(correo);
         setUsuario(usuario);
@@ -29,9 +34,11 @@ public class Usuario {
         setSucursal(sucursal);
         setRuc(ruc);
         setPassword(password);
+        setUsuarioModificacion(usuarioModificacion);
+        setFechaModificacion(fechaModificacion);
     }
 
-    // Getters y setters con properties
+    // Getters y setters con properties (existentes)
     public String getNombre() { return nombre.get(); }
     public void setNombre(String value) { nombre.set(value); }
     public StringProperty nombreProperty() { return nombre; }
@@ -64,11 +71,21 @@ public class Usuario {
     public void setPermisos(String value) { permisos.set(value); }
     public StringProperty permisosProperty() { return permisos; }
 
-    // Getters/setters para password
     public String getPassword() { return password.get(); }
     public void setPassword(String value) { password.set(value); }
     public StringProperty passwordProperty() { return password; }
 
+    // NUEVOS getters y setters para usuarioModificacion y fechaModificacion
+
+    public String getUsuarioModificacion() { return usuarioModificacion.get(); }
+    public void setUsuarioModificacion(String value) { usuarioModificacion.set(value); }
+    public StringProperty usuarioModificacionProperty() { return usuarioModificacion; }
+
+    public LocalDateTime getFechaModificacion() { return fechaModificacion.get(); }
+    public void setFechaModificacion(LocalDateTime value) { fechaModificacion.set(value); }
+    public ObjectProperty<LocalDateTime> fechaModificacionProperty() { return fechaModificacion; }
+
+    // Id simple sin property
     public String getId() { return id; }
     public void setId(String value) { this.id = value; }
 
