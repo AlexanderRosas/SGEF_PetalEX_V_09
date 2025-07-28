@@ -1,2 +1,2 @@
 ID;Nombre;Cedula;Correo;Contraseña;Usuario;Rol;Estado;Permisos;UsuarioModificacion;FechaModificacion
-U739;Martin Davalos;1750111211;martin.davalos@petal.com;martin123#;martin123;Administrador;Activo;VENTA_CREAR,VENTA_MODIFICAR,VENTA_ANULAR,USUARIO_ADMIN,ROL_ADMIN,PARAM_ADMIN,REPORTE_VER,REPORTE_EXPORTAR;admin;2025-07-28T02:15:46.082801
+U739;Martin Davalos;1750111211;martin.davalos@admin.com;admin;admin;Administrador;Activo;VENTA_CREAR,VENTA_MODIFICAR,VENTA_ANULAR,USUARIO_ADMIN,ROL_ADMIN,PARAM_ADMIN,REPORTE_VER,REPORTE_EXPORTAR;admin;2025-07-28T09:55:40.153124

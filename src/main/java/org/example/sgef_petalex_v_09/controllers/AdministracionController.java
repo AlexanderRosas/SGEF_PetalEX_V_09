@@ -4,7 +4,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
@@ -18,8 +17,7 @@ public class AdministracionController {
     private Button btnBack;
     @FXML
     private Button btnGestionUsuarios;
-    @FXML
-    private Button btnRolesPermisos;
+
     @FXML
     private AnchorPane contentPane;
 
@@ -32,25 +30,38 @@ public class AdministracionController {
     @FXML
     private void onBack(ActionEvent event) {
         try {
-            // Carga el FXML del menú principal
-            Parent mainRoot = FXMLLoader.load(
-                    getClass().getResource("/fxml/MainMenu.fxml"));
-            // Obtiene el Stage y reutiliza la Scene actual
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Guardar estado actual
+            boolean wasMaximized = stage.isMaximized();
+            double width = stage.getWidth();
+            double height = stage.getHeight();
+
+            // Cargar raíz principal
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MainMenu.fxml"));
+            AnchorPane mainRoot = loader.load();
+
             Scene scene = stage.getScene();
 
-            // Reemplaza la raíz sin crear nueva Scene
+            // Cambiar raíz
             scene.setRoot(mainRoot);
 
-            // Reaplica tu CSS
+            // Reaplicar CSS
             scene.getStylesheets().clear();
-            scene.getStylesheets().add(
-                    getClass().getResource("/css/styles.css").toExternalForm());
+            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
 
-            // Asegura que siga maximizado
-            //stage.setMaximized(true);
+            // Restaurar estado ventana
+            stage.setResizable(false);
+            if (wasMaximized) {
+                stage.setMaximized(true);
+            } else {
+                stage.setMaximized(false);
+                stage.setWidth(width);
+                stage.setHeight(height);
+                stage.centerOnScreen();
+            }
 
-            // Actualiza el título
+            // Actualizar título
             stage.setTitle("Index Blooms – Menú Principal");
         } catch (IOException e) {
             e.printStackTrace();
@@ -61,12 +72,6 @@ public class AdministracionController {
     private void onGestionUsuarios(ActionEvent event) {
         cargarSeccion("GestionUsuarios.fxml");
         resaltarBoton(btnGestionUsuarios);
-    }
-
-    @FXML
-    private void onRolesPermisos(ActionEvent event) {
-        cargarSeccion("RolesPermisos.fxml");
-        resaltarBoton(btnRolesPermisos);
     }
 
     private void cargarSeccion(String fxmlFile) {
@@ -88,9 +93,10 @@ public class AdministracionController {
     private void resaltarBoton(Button activo) {
         // Remover la clase active de todos los botones
         btnGestionUsuarios.getStyleClass().remove("active");
-        //btnRolesPermisos.getStyleClass().remove("active");
 
         // Agregar la clase active al botón seleccionado
-        activo.getStyleClass().add("active");
+        if (activo != null && !activo.getStyleClass().contains("active")) {
+            activo.getStyleClass().add("active");
+        }
     }
 }

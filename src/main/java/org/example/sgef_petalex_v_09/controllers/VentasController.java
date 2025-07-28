@@ -19,6 +19,7 @@ import javafx.stage.Window;
 import org.example.sgef_petalex_v_09.models.Cliente;
 import org.example.sgef_petalex_v_09.models.Venta;
 import org.example.sgef_petalex_v_09.util.CSVUtil;
+import org.example.sgef_petalex_v_09.util.DialogHelper;
 import org.example.sgef_petalex_v_09.util.NavigationHelper;
 import org.example.sgef_petalex_v_09.util.UserSession;
 
@@ -37,23 +38,39 @@ import static org.example.sgef_petalex_v_09.util.CSVUtil.VENTAS_CSV;
 
 public class VentasController implements Initializable {
 
-    @FXML private Button btnBack;
-    @FXML private TextField txtPuntoEmision;
-    @FXML private TextField txtFecha;
-    @FXML private TextField txtSucursal;
-    @FXML private Button btnNuevo;
-    @FXML private Button btnRecaudar;
-    @FXML private Button btnEliminar;
+    @FXML
+    private Button btnBack;
+    @FXML
+    private TextField txtPuntoEmision;
+    @FXML
+    private TextField txtFecha;
+    @FXML
+    private TextField txtSucursal;
+    @FXML
+    private Button btnNuevo;
+    @FXML
+    private Button btnRecaudar;
+    @FXML
+    private Button btnEliminar;
 
-    @FXML private TableView<Venta> tablaVentas;
-    @FXML private TableColumn<Venta, String>  colId;
-    @FXML private TableColumn<Venta, String>  colDestino;
-    @FXML private TableColumn<Venta, String>  colServicio;
-    @FXML private TableColumn<Venta, String>  colCliente;
-    @FXML private TableColumn<Venta, String>  colDetalle;
-    @FXML private TableColumn<Venta, Double>  colPrecio;
-    @FXML private TableColumn<Venta, Double>  colIva;
-    @FXML private TableColumn<Venta, Double>  colTotal;
+    @FXML
+    private TableView<Venta> tablaVentas;
+    @FXML
+    private TableColumn<Venta, String> colId;
+    @FXML
+    private TableColumn<Venta, String> colDestino;
+    @FXML
+    private TableColumn<Venta, String> colServicio;
+    @FXML
+    private TableColumn<Venta, String> colCliente;
+    @FXML
+    private TableColumn<Venta, String> colDetalle;
+    @FXML
+    private TableColumn<Venta, Double> colPrecio;
+    @FXML
+    private TableColumn<Venta, Double> colIva;
+    @FXML
+    private TableColumn<Venta, Double> colTotal;
 
     private final ObservableList<Venta> listaVentas = FXCollections.observableArrayList();
 
@@ -112,8 +129,7 @@ public class VentasController implements Initializable {
                     boolean sel = newSel != null;
                     btnRecaudar.setDisable(!sel);
                     btnEliminar.setDisable(!sel);
-                }
-        );
+                });
     }
 
     @FXML
@@ -130,7 +146,8 @@ public class VentasController implements Initializable {
         okBtn.disableProperty().bind(tipoDialog.selectedItemProperty().isNull());
 
         Optional<String> tipoOpt = tipoDialog.showAndWait();
-        if (!tipoOpt.isPresent()) return;
+        if (!tipoOpt.isPresent())
+            return;
         String tipoDestino = tipoOpt.get();
 
         // 2) Selección de Cliente
@@ -147,7 +164,8 @@ public class VentasController implements Initializable {
 
             ClienteSelectionController clCtrl = clLoader.getController();
             Optional<Cliente> clienteOpt = clCtrl.getClienteSeleccionado();
-            if (!clienteOpt.isPresent()) return;
+            if (!clienteOpt.isPresent())
+                return;
             Cliente cliente = clienteOpt.get();
 
             // 3) Detalle de Venta
@@ -220,7 +238,7 @@ public class VentasController implements Initializable {
         Venta sel = tablaVentas.getSelectionModel().getSelectedItem();
         if (sel != null) {
             UserSession.setVentaSeleccionada(sel);
-            //NavigationHelper.cargarVista(event, "/fxml/Recaudacion.fxml", "Recaudación");
+            // NavigationHelper.cargarVista(event, "/fxml/Recaudacion.fxml", "Recaudación");
         }
     }
 
@@ -243,16 +261,49 @@ public class VentasController implements Initializable {
 
     @FXML
     private void onBack(ActionEvent event) {
-        NavigationHelper.volverAlMenuPrincipal(event);
+        try {
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Guardar estado ventana actual para restaurar si quieres (opcional)
+            boolean wasMaximized = stage.isMaximized();
+            double width = stage.getWidth();
+            double height = stage.getHeight();
+
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
+
+            Scene scene = stage.getScene();
+            scene.setRoot(root);
+
+            // Reaplicar CSS si usas hojas externas
+            scene.getStylesheets().clear();
+            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+
+            stage.setResizable(false);
+            if (wasMaximized) {
+                stage.setMaximized(true);
+            } else {
+                stage.setMaximized(false);
+                stage.setWidth(width);
+                stage.setHeight(height);
+                stage.centerOnScreen();
+            }
+
+            stage.setTitle("Index Blooms – Menú Principal");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            DialogHelper.showError(null, "No se pudo cargar el menú principal.");
+        }
     }
 
-    /*— Utilitarios de alerta —*/
+    /* — Utilitarios de alerta — */
     private void showError(String msg, Exception e) {
         Alert a = new Alert(Alert.AlertType.ERROR, msg + "\n" + e.getMessage());
         a.initOwner(tablaVentas.getScene().getWindow());
         a.setHeaderText(null);
         a.showAndWait();
     }
+
     private void showWarning(String msg) {
         Alert a = new Alert(Alert.AlertType.WARNING, msg);
         a.initOwner(tablaVentas.getScene().getWindow());

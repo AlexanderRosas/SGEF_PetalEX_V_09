@@ -7,7 +7,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
@@ -239,17 +241,37 @@ public class ProveedoresController {
     @FXML
     private void onBack(ActionEvent event) {
         try {
-            Parent main = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
-            Stage st = (Stage) btnBack.getScene().getWindow();
-            st.getScene().setRoot(main);
-            st.setTitle("Index Blooms – Menú Principal");
-            // st.setResizable(false);
-            // st.sizeToScene();
-            st.setMaximized(true);
-            st.centerOnScreen();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Guardar estado ventana actual para restaurar si quieres (opcional)
+            boolean wasMaximized = stage.isMaximized();
+            double width = stage.getWidth();
+            double height = stage.getHeight();
+
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
+
+            Scene scene = stage.getScene();
+            scene.setRoot(root);
+
+            // Reaplicar CSS si usas hojas externas
+            scene.getStylesheets().clear();
+            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+
+            stage.setResizable(false);
+            if (wasMaximized) {
+                stage.setMaximized(true);
+            } else {
+                stage.setMaximized(false);
+                stage.setWidth(width);
+                stage.setHeight(height);
+                stage.centerOnScreen();
+            }
+
+            stage.setTitle("Index Blooms – Menú Principal");
+
         } catch (IOException e) {
             e.printStackTrace();
-            DialogHelper.showError(getWindow(), "Error al volver al menú principal");
+            DialogHelper.showError(null, "No se pudo cargar el menú principal.");
         }
     }
 

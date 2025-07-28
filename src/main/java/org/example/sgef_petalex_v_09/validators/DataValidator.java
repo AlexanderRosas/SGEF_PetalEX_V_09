@@ -246,7 +246,7 @@ public class DataValidator {
         // Algoritmo de validación de cédula ecuatoriana
         if (!isValidEcuadorianID(trimmedCedula)) {
             return ValidationResult.error(fieldName,
-                    "La " + fieldName.toLowerCase() + " no es válida según el algoritmo ecuatoriano");
+                    "La " + fieldName.toLowerCase() + " no válida.");
         }
 
         return ValidationResult.success();

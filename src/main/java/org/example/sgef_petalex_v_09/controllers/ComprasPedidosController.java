@@ -38,7 +38,8 @@ public class ComprasPedidosController {
             scene.getStylesheets().add(
                     getClass().getResource("/css/styles.css").toExternalForm()
             );
-            stage.setMaximized(true);
+            stage.setMaximized(true); // Ventana maximizada al abrir
+            stage.setResizable(false);
             stage.setTitle("Index Blooms – Menú Principal");
         } catch (IOException e) {
             e.printStackTrace();
