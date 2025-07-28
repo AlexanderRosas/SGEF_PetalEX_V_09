@@ -1,35 +1,36 @@
 package org.example.sgef_petalex_v_09.controllers;
 
+import javafx.collections.*;
 import javafx.collections.transformation.FilteredList;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
+import javafx.scene.*;
 import javafx.scene.control.*;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
-import javafx.stage.Stage;
-import javafx.stage.Window;
+import javafx.stage.*;
 import org.example.sgef_petalex_v_09.models.Cliente;
-import org.example.sgef_petalex_v_09.util.DialogHelper;
+import org.example.sgef_petalex_v_09.util.*;
+import org.example.sgef_petalex_v_09.validators.DataValidator;
+import org.example.sgef_petalex_v_09.validators.ValidationResult;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class ClientesController {
 
     @FXML
     private TableView<Cliente> tablaClientes;
     @FXML
-    private TableColumn<Cliente, Integer> colId;
+    private TableColumn<Cliente, String> colId;
     @FXML
     private TableColumn<Cliente, String> colNombre;
+    @FXML
+    private TableColumn<Cliente, String> colIdentificador;
+    @FXML
+    private TableColumn<Cliente, String> colPais;
     @FXML
     private TableColumn<Cliente, String> colDireccion;
     @FXML
@@ -39,6 +40,15 @@ public class ClientesController {
     @FXML
     private TableColumn<Cliente, String> colEstado;
     @FXML
+    private TableColumn<Cliente, String> colUsuarioModificacion;
+
+    @FXML
+    private TextField txtBuscarNombre;
+    @FXML
+    private TextField txtBuscarIdentificador;
+    @FXML
+    private ComboBox<String> cbPais;
+    @FXML
     private ComboBox<String> cbEstado;
 
     @FXML
@@ -46,211 +56,266 @@ public class ClientesController {
     @FXML
     private Button btnEditar;
     @FXML
-    private Button btnBuscar;
-    @FXML
     private Button btnEstado;
-
     @FXML
-    private TextField txtBuscar;
+    private Button btnBack;
 
     private final ObservableList<Cliente> data = FXCollections.observableArrayList();
     private FilteredList<Cliente> filteredData;
 
+    private final String usuarioActual = "admin"; // Obtener de sesión
+
     @FXML
     public void initialize() {
+        configurarColumnas();
+        configurarFiltros();
+        cargarDatosDesdeCSV();
+        tablaClientes.setItems(filteredData);
+
+    }
+
+    private void configurarColumnas() {
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
+        colIdentificador.setCellValueFactory(new PropertyValueFactory<>("identificadorEmpresarial"));
+        colPais.setCellValueFactory(new PropertyValueFactory<>("pais"));
         colDireccion.setCellValueFactory(new PropertyValueFactory<>("direccion"));
         colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
         colCorreo.setCellValueFactory(new PropertyValueFactory<>("correo"));
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
+        colUsuarioModificacion.setCellValueFactory(new PropertyValueFactory<>("usuarioModificacion"));
 
-        cbEstado.setItems(FXCollections.observableArrayList("Todos", "Activo", "Inactivo"));
+        cbPais.setItems(FXCollections.observableArrayList(PaisUtil.PREFIJOS.keySet()));
+        cbEstado.setItems(FXCollections.observableArrayList("Todos", "Activa", "Inactiva"));
         cbEstado.setValue("Todos");
 
-        btnEditar.setDisable(true);
-        btnEstado.setDisable(true);
+        tablaClientes.getSelectionModel().selectedItemProperty()
+                .addListener((obs, oldSel, newSel) -> {
+                    boolean sel = newSel != null;
+                    btnEditar.setDisable(!sel);
+                    btnEstado.setDisable(!sel);
+                });
+    }
 
-        tablaClientes.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
-            boolean sel = newSel != null;
-            btnEditar.setDisable(!sel);
-            btnEstado.setDisable(!sel);
-        });
-
-        cargarDatosPrototipo();
-
+    private void configurarFiltros() {
         filteredData = new FilteredList<>(data, p -> true);
-        tablaClientes.setItems(filteredData);
-
-        txtBuscar.textProperty().addListener((obs, oldVal, newVal) -> aplicarFiltro());
+        txtBuscarNombre.textProperty().addListener((obs, oldVal, newVal) -> aplicarFiltro());
+        txtBuscarIdentificador.textProperty().addListener((obs, oldVal, newVal) -> aplicarFiltro());
+        cbPais.valueProperty().addListener((obs, oldVal, newVal) -> aplicarFiltro());
         cbEstado.valueProperty().addListener((obs, oldVal, newVal) -> aplicarFiltro());
     }
 
     private void aplicarFiltro() {
-        String filtroTexto = txtBuscar.getText().toLowerCase().trim();
-        String estadoSeleccionado = cbEstado.getValue();
+        String nombre = txtBuscarNombre.getText().toLowerCase();
+        String identificador = txtBuscarIdentificador.getText().toLowerCase();
+        String pais = cbPais.getValue();
+        String estado = cbEstado.getValue();
 
-        filteredData.setPredicate(cliente -> {
-            boolean coincideTexto = filtroTexto.isEmpty()
-                    || String.valueOf(cliente.getId()).contains(filtroTexto)
-                    || cliente.getNombre().toLowerCase().contains(filtroTexto)
-                    || cliente.getDireccion().toLowerCase().contains(filtroTexto)
-                    || cliente.getTelefono().toLowerCase().contains(filtroTexto)
-                    || cliente.getCorreo().toLowerCase().contains(filtroTexto);
-
-            boolean coincideEstado = estadoSeleccionado.equals("Todos")
-                    || cliente.getEstado().equalsIgnoreCase(estadoSeleccionado);
-
-            return coincideTexto && coincideEstado;
-        });
+        filteredData.setPredicate(cliente -> (nombre.isEmpty() || cliente.getNombre().toLowerCase().contains(nombre)) &&
+                (identificador.isEmpty() || cliente.getIdentificadorEmpresarial().toLowerCase().contains(identificador))
+                &&
+                (pais == null || pais.equals("Todos") || cliente.getPais().equalsIgnoreCase(pais)) &&
+                (estado.equals("Todos") || cliente.getEstado().equalsIgnoreCase(estado)));
     }
 
-    private void cargarDatosPrototipo() {
+    private void cargarDatosDesdeCSV() {
         data.clear();
-        data.addAll(
-                new Cliente(1234567890, "RoseFlower INC.", "Av. Petalos 123, Ecuador", "+593991234567", "ventas@roseflower.ec", "Activo"),
-                new Cliente(987654321, "SweetMoment Ltd.", "123 Tulip St., Netherlands", "+31205551234", "contact@sweetmoment.nl", "Activo"),
-                new Cliente(567890123, "GlobalRoses GmbH", "Rosengasse 5, Germany", "+4930123456", "info@globalroses.de", "Activo"),
-                new Cliente(432109876, "FlorAmor Co.", "789 Orchid Ave., Colombia", "+57123456789", "ventas@floramor.co", "Activo"),
-                new Cliente(246801357, "PetalWorld SA", "456 Blossom Rd., USA", "+12025550123", "sales@petalworld.com", "Activo")
-        );
+        data.addAll(CSVUtil.leerClientes());
     }
 
     @FXML
     private void onNuevo(ActionEvent event) {
-        Window owner = btnNuevo.getScene().getWindow();
-
-        Optional<Cliente> formResult = showClientFormDialog("Crear", null);
-        formResult.ifPresent(c -> {
-            Alert confirm = new Alert(AlertType.CONFIRMATION);
-            confirm.initOwner(owner);
-            confirm.setTitle("Confirmar creación");
-            confirm.setHeaderText(null);
-            confirm.setContentText("¿Está seguro que desea crear al cliente?");
-            Optional<ButtonType> ok = confirm.showAndWait();
-
-            if (ok.isPresent() && ok.get().getButtonData() == ButtonData.OK_DONE) {
-                data.add(c);
-                tablaClientes.refresh();
-                DialogHelper.showSuccess(owner, "creado al cliente");
+        Optional<Cliente> result = showClientForm("Crear", null);
+        result.ifPresent(cliente -> {
+            if (existeIdentificador(cliente.getIdentificadorEmpresarial())) {
+                DialogHelper.showError(btnNuevo.getScene().getWindow(), "El identificador ya existe");
+                return;
             }
+
+            cliente.setEstado("Activa");
+            cliente.setUsuarioModificacion(usuarioActual);
+            cliente.setFechaModificacion(LocalDateTime.now());
+
+            data.add(cliente);
+            System.out.println("Clientes a guardar: " + data.size());
+            for (Cliente c : data) {
+                System.out.println(" -> " + c.getNombre() + " [" + c.getIdentificadorEmpresarial() + "]");
+            }
+
+            CSVUtil.guardarClientes(data);
+            DialogHelper.showSuccess(btnNuevo.getScene().getWindow(), "Cliente registrado exitosamente");
         });
     }
 
     @FXML
     private void onEditar(ActionEvent event) {
-        Window owner = btnEditar.getScene().getWindow();
         Cliente sel = tablaClientes.getSelectionModel().getSelectedItem();
-        if (sel == null) {
-            DialogHelper.showWarning(owner, "Selecciona un cliente primero");
+        if (sel == null)
             return;
-        }
 
-        Optional<Cliente> formResult = showClientFormDialog("Actualizar", sel);
-        formResult.ifPresent(c -> {
-            Alert confirm = new Alert(AlertType.CONFIRMATION);
-            confirm.initOwner(owner);
-            confirm.setTitle("Confirmar actualización");
-            confirm.setHeaderText(null);
-            confirm.setContentText("¿Está seguro que desea Actualizar?");
-            Optional<ButtonType> ok = confirm.showAndWait();
+        Optional<Cliente> result = showClientForm("Editar", sel);
+        result.ifPresent(cliente -> {
+            sel.setNombre(cliente.getNombre());
+            sel.setDireccion(cliente.getDireccion());
+            sel.setTelefono(cliente.getTelefono());
+            sel.setCorreo(cliente.getCorreo());
+            sel.setUsuarioModificacion(usuarioActual);
+            sel.setFechaModificacion(LocalDateTime.now());
 
-            if (ok.isPresent() && ok.get().getButtonData() == ButtonData.OK_DONE) {
-                sel.setNombre(c.getNombre());
-                sel.setDireccion(c.getDireccion());
-                sel.setTelefono(c.getTelefono());
-                sel.setCorreo(c.getCorreo());
-                tablaClientes.refresh();
-                DialogHelper.showSuccess(owner, "actualizado");
-            }
+            CSVUtil.guardarClientes(data);
+            DialogHelper.showSuccess(btnEditar.getScene().getWindow(), "Cliente actualizado");
         });
     }
 
     @FXML
     private void onEstado(ActionEvent event) {
-        Window owner = btnEstado.getScene().getWindow();
         Cliente sel = tablaClientes.getSelectionModel().getSelectedItem();
+        if (sel == null)
+            return;
 
-        if (sel == null) {
-            DialogHelper.showWarning(owner, "Selecciona un cliente primero");
+        if ("Inactiva".equals(sel.getEstado())) {
+            DialogHelper.showWarning(btnEstado.getScene().getWindow(), "No se puede reactivar una empresa inactiva");
             return;
         }
 
-        String nuevoEstado = sel.getEstado().equals("Activo") ? "Inactivo" : "Activo";
-
-        Alert confirm = new Alert(AlertType.CONFIRMATION);
-        confirm.initOwner(owner);
-        confirm.setTitle("Confirmar cambio de estado");
-        confirm.setHeaderText(null);
-        confirm.setContentText("¿Está seguro que desea cambiar el estado a '" + nuevoEstado + "'?");
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Inactivar empresa");
+        confirm.setHeaderText("¿Estás seguro/a de anular esta Empresa Cliente?");
         Optional<ButtonType> res = confirm.showAndWait();
+        if (res.isPresent() && res.get() == ButtonType.OK) {
+            sel.setEstado("Inactiva");
+            sel.setUsuarioModificacion(usuarioActual);
+            sel.setFechaModificacion(LocalDateTime.now());
 
-        if (res.isPresent() && res.get().getButtonData() == ButtonData.OK_DONE) {
-            sel.setEstado(nuevoEstado);
-            tablaClientes.refresh();
-            DialogHelper.showSuccess(owner, "Estado cambiado a " + nuevoEstado);
+            CSVUtil.guardarClientes(data);
+            DialogHelper.showSuccess(btnEstado.getScene().getWindow(), "Empresa inactivada");
         }
     }
 
-    private Optional<Cliente> showClientFormDialog(String action, Cliente existing) {
+    private Optional<Cliente> showClientForm(String title, Cliente existing) {
         Dialog<Cliente> dialog = new Dialog<>();
-        dialog.setTitle(action + " cliente");
-        dialog.getDialogPane().getButtonTypes().addAll(
-                new ButtonType("Cancelar", ButtonData.CANCEL_CLOSE),
-                new ButtonType("Aceptar", ButtonData.OK_DONE));
+        dialog.setTitle(title + " cliente");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
 
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-
-        TextField txtIdEmpresarial = new TextField();
-        txtIdEmpresarial.setPromptText("Identificador Empresarial");
+        ComboBox<String> cbPais = new ComboBox<>(FXCollections.observableArrayList(PaisUtil.PREFIJOS.keySet()));
+        TextField txtIdentificador = new TextField();
         TextField txtNombre = new TextField();
-        txtNombre.setPromptText("Nombre");
         TextField txtDireccion = new TextField();
-        txtDireccion.setPromptText("Dirección");
         TextField txtTelefono = new TextField();
-        txtTelefono.setPromptText("Teléfono");
         TextField txtCorreo = new TextField();
-        txtCorreo.setPromptText("Correo");
+
+        // Placeholders
+        txtIdentificador.setPromptText("Ej: 1790012345001");
+        txtNombre.setPromptText("Ej: GlobalRoses S.A.");
+        txtDireccion.setPromptText("Ej: Av. Amazonas 123 y Naciones Unidas");
+        txtCorreo.setPromptText("Ej: contacto@globalroses.com");
+
+        cbPais.getSelectionModel().selectedItemProperty().addListener((obs, oldPais, newPais) -> {
+            if (newPais != null) {
+                String prefijo = PaisUtil.getPrefijo(newPais);
+                txtTelefono.setPromptText(prefijo + " Ej: 9912345678");
+                txtTelefono.setText(prefijo);
+                txtIdentificador.setPromptText("Ej: " + obtenerEjemploIdentificador(newPais));
+            }
+        });
 
         if (existing != null) {
-            txtIdEmpresarial.setText(String.valueOf(existing.getId()));
-            txtIdEmpresarial.setDisable(true);
+            cbPais.setValue(existing.getPais());
+            txtIdentificador.setText(existing.getIdentificadorEmpresarial());
+            txtIdentificador.setDisable(true);
+            cbPais.setDisable(true);
             txtNombre.setText(existing.getNombre());
             txtDireccion.setText(existing.getDireccion());
             txtTelefono.setText(existing.getTelefono());
             txtCorreo.setText(existing.getCorreo());
+        } else {
+            cbPais.getSelectionModel().selectFirst();
         }
 
-        grid.add(new Label("Identificador Empresarial:"), 0, 0);
-        grid.add(txtIdEmpresarial, 1, 0);
-        grid.add(new Label("Nombre:"), 0, 1);
-        grid.add(txtNombre, 1, 1);
-        grid.add(new Label("Dirección:"), 0, 2);
-        grid.add(txtDireccion, 1, 2);
-        grid.add(new Label("Teléfono:"), 0, 3);
-        grid.add(txtTelefono, 1, 3);
-        grid.add(new Label("Correo:"), 0, 4);
-        grid.add(txtCorreo, 1, 4);
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(5);
+
+        grid.addRow(0, new Label("País:"), cbPais);
+        grid.addRow(1, new Label("Identificador:"), txtIdentificador);
+        grid.addRow(2, new Label("Nombre:"), txtNombre);
+        grid.addRow(3, new Label("Dirección:"), txtDireccion);
+        grid.addRow(4, new Label("Teléfono:"), txtTelefono);
+        grid.addRow(5, new Label("Correo:"), txtCorreo);
 
         dialog.getDialogPane().setContent(grid);
 
+        Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+        okButton.addEventFilter(ActionEvent.ACTION, event -> {
+            ValidationResult vIdentificador = DataValidator.validateIdentificador(txtIdentificador.getText(),
+                    cbPais.getValue());
+            ValidationResult vNombre = DataValidator.validateEmpresaNombre(txtNombre.getText());
+            ValidationResult vDireccion = DataValidator.validateDireccion(txtDireccion.getText());
+            ValidationResult vTelefono = DataValidator.validateTelefonoE164(txtTelefono.getText());
+            ValidationResult vCorreo = DataValidator.validateCorreo(txtCorreo.getText());
+
+            clearErrorStyle(txtIdentificador);
+            clearErrorStyle(txtNombre);
+            clearErrorStyle(txtDireccion);
+            clearErrorStyle(txtTelefono);
+            clearErrorStyle(txtCorreo);
+
+            boolean valid = true;
+
+            if (!vIdentificador.isValid()) {
+                setErrorStyle(txtIdentificador, vIdentificador.getErrorMessage());
+                valid = false;
+            }
+            if (!vNombre.isValid()) {
+                setErrorStyle(txtNombre, vNombre.getErrorMessage());
+                valid = false;
+            }
+            if (!vDireccion.isValid()) {
+                setErrorStyle(txtDireccion, vDireccion.getErrorMessage());
+                valid = false;
+            }
+            if (!vTelefono.isValid()) {
+                setErrorStyle(txtTelefono, vTelefono.getErrorMessage());
+                valid = false;
+            }
+            if (!vCorreo.isValid()) {
+                setErrorStyle(txtCorreo, vCorreo.getErrorMessage());
+                valid = false;
+            }
+
+            if (!valid) {
+                event.consume();
+                DialogHelper.showValidationError(dialog.getDialogPane().getScene().getWindow(),
+                        "Errores en el formulario",
+                        "Por favor corrige los campos resaltados con errores antes de continuar.");
+            }
+        });
+
+        Button cancelButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+        cancelButton.addEventFilter(ActionEvent.ACTION, event -> {
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Cancelar registro");
+            confirm.setHeaderText("¿Está seguro/a de cancelar el registro del Cliente?");
+            Optional<ButtonType> res = confirm.showAndWait();
+            if (res.isEmpty() || res.get() != ButtonType.OK) {
+                event.consume();
+            }
+        });
+
         dialog.setResultConverter(btn -> {
-            if (btn.getButtonData() == ButtonData.OK_DONE) {
-                try {
-                    int id = existing != null ? existing.getId()
-                            : Integer.parseInt(txtIdEmpresarial.getText().trim());
-                    String nombre = txtNombre.getText();
-                    String direccion = txtDireccion.getText();
-                    String telefono = txtTelefono.getText();
-                    String correo = txtCorreo.getText();
-                    String estado = existing != null ? existing.getEstado() : "Activo";
-                    return new Cliente(id, nombre, direccion, telefono, correo, estado);
-                } catch (NumberFormatException e) {
-                    DialogHelper.showError(dialog.getDialogPane().getScene().getWindow(), "ID inválido");
-                    return null;
-                }
+            if (btn == ButtonType.OK) {
+                Cliente c = new Cliente();
+                c.setId(existing != null ? existing.getId() : UUID.randomUUID().toString());
+                c.setNombre(txtNombre.getText());
+                c.setIdentificadorEmpresarial(txtIdentificador.getText());
+                c.setPais(cbPais.getValue());
+                c.setDireccion(txtDireccion.getText());
+                c.setTelefono(txtTelefono.getText());
+                c.setCorreo(txtCorreo.getText());
+                c.setEstado(existing != null ? existing.getEstado() : "Activa");
+                c.setUsuarioModificacion(usuarioActual);
+                c.setFechaModificacion(LocalDateTime.now());
+                return c;
             }
             return null;
         });
@@ -258,18 +323,42 @@ public class ClientesController {
         return dialog.showAndWait();
     }
 
-    @FXML
-    private void onBack(ActionEvent event) {
-        try {
-            Parent mainRoot = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene scene = stage.getScene();
-            scene.setRoot(mainRoot);
-            scene.getStylesheets().clear();
-            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
-            stage.setTitle("Index Blooms – Menú Principal");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    // Métodos auxiliares de la clase (no dentro de showClientForm)
+    private void setErrorStyle(TextField field, String message) {
+        field.setStyle("-fx-border-color: red; -fx-border-width: 2px;");
+        Tooltip tooltip = new Tooltip(message);
+        tooltip.setStyle("-fx-background-color: #ffdddd; -fx-text-fill: red;");
+        field.setTooltip(tooltip);
     }
+
+    private void clearErrorStyle(TextField field) {
+        field.setStyle(null);
+        field.setTooltip(null);
+    }
+
+    // Método auxiliar para ejemplos de identificador según país
+    private String obtenerEjemploIdentificador(String pais) {
+        return switch (pais.toUpperCase()) {
+            case "ECUADOR" -> "1790012345001";
+            case "ESTADOS UNIDOS" -> "12-3456789";
+            case "CANADÁ" -> "123456789";
+            case "ESPAÑA" -> "ES12345678X";
+            case "ALEMANIA" -> "DE123456789";
+            case "FRANCIA" -> "FR12345678901";
+            case "PAÍSES BAJOS" -> "NL123456789B01";
+            default -> "";
+        };
+    }
+
+    private boolean existeIdentificador(String identificador) {
+        return data.stream().anyMatch(c -> c.getIdentificadorEmpresarial().equalsIgnoreCase(identificador));
+    }
+
+    @FXML
+    private void onBack(ActionEvent event) throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.getScene().setRoot(root);
+    }
+
 }

@@ -1,17 +1,17 @@
 /* Fondo general */
-.root {
-    -fx-background-color: white;
-}
+
 @font-face {
     font-family: "TRAVAX";
     src: url("../fonts/TRAVAX.ttf");
 }
+
 /* Logo */
 .image-logo {
     -fx-fit-width: 200;
     -fx-preserve-ratio: true;
     -fx-padding: 20 0 10 0;
 }
+
 /* Título Bienvenido */
 .title-label {
     -fx-font-family: "TRAVAX";
@@ -20,17 +20,19 @@
     -fx-text-fill: #333333;
     -fx-padding: 0 0 20 0;
 }
+
 /* Campos de entrada estilo "pill" */
 .input-field {
     -fx-background-color: #1E73BE;
     -fx-background-radius: 20;
     -fx-border-color: transparent;
-    -fx-prompt-text-fill: rgba(255,255,255,0.8);
+    -fx-prompt-text-fill: rgba(255, 255, 255, 0.8);
     -fx-text-fill: white;
     -fx-padding: 10 15;
     -fx-font-size: 14px;
     -fx-pref-width: 240px;
 }
+
 /* Botón de Ingresar */
 .login-button {
     -fx-background-color: #00D28F;
@@ -40,17 +42,20 @@
     -fx-padding: 8 30;
     -fx-pref-width: 180px;
 }
+
 /* Efectos de interacción para los .login-button */
 .login-button:hover {
     -fx-background-color: #3e7163;
 }
+
 .login-button:pressed {
     -fx-background-color: #81cbb6;
 }
 
 /* ==== Botones de menú principales ==== */
 .menu-button {
-    -fx-background-color: #FF85B8;      /* rosa brillante */
+    -fx-background-color: #FF85B8;
+    /* rosa brillante */
     -fx-background-radius: 15;
     -fx-text-fill: white;
     -fx-font-size: 14px;
@@ -61,17 +66,21 @@
     -fx-alignment: CENTER;
     -fx-padding: 10;
 }
+
 .menu-button .text {
     -fx-wrap-text: true;
     -fx-text-alignment: center;
 }
+
 /* Efectos de interacción para los .menu-button */
 .menu-button:hover {
     -fx-background-color: #e573a1;
 }
+
 .menu-button:pressed {
     -fx-background-color: #d81b60;
 }
+
 .sidebar {
     -fx-background-color: #F8F8F8;
     -fx-padding: 20;
@@ -85,9 +94,11 @@
     -fx-alignment: CENTER_LEFT;
     -fx-graphic-text-gap: 10;
 }
+
 .sidebar-button:hover {
-    -fx-background-color: rgba(255,133,184,0.3);
+    -fx-background-color: rgba(255, 133, 184, 0.3);
 }
+
 /* Botón activo */
 .sidebar-button.active {
     -fx-background-color: #FF85B8;
@@ -96,19 +107,8 @@
 
 /* Iconos dentro del botón */
 .sidebar-button .graphic {
-    -fx-padding: 0 10 0 0;  /* separa icono y texto */
-}
-
-/* ===== Botón Volver ===== */
-.back-button {
-    -fx-background-color: transparent;
-    -fx-text-fill: #333333;
-    -fx-font-size: 14px;
-    -fx-alignment: CENTER_LEFT;
-    -fx-padding: 5 10;
-}
-.back-button:hover {
-    -fx-background-color: rgba(0,0,0,0.05);
+    -fx-padding: 0 10 0 0;
+    /* separa icono y texto */
 }
 
 /* ===== Encabezado ===== */
@@ -134,8 +134,10 @@
     -fx-text-fill: #333333;
     -fx-padding: 0 0 10 0;
 }
+
 .sidebar-button.selected {
-    -fx-background-color: #FF9AC8; /* resaltado rosa */
+    -fx-background-color: #FF9AC8;
+    /* resaltado rosa */
 }
 
 /* ===== Módulo Clientes ===== */
@@ -153,8 +155,9 @@
     -fx-alignment: CENTER_LEFT;
     -fx-padding: 5 10;
 }
+
 .back-button:hover {
-    -fx-background-color: rgba(0,0,0,0.05);
+    -fx-background-color: rgba(0, 0, 0, 0.05);
 }
 
 /* Título “Clientes” */
@@ -176,7 +179,8 @@
 
 /* Botones de la toolbar */
 .toolbar-button {
-    -fx-background-color: #FF85B8;      /* rosa brillante */
+    -fx-background-color: #FF85B8;
+    /* rosa brillante */
     -fx-background-radius: 15;
     -fx-text-fill: white;
     -fx-font-size: 14px;
@@ -186,9 +190,11 @@
     -fx-alignment: CENTER;
     -fx-padding: 0;
 }
+
 .toolbar-button:hover {
     -fx-background-color: #e573a1;
 }
+
 .toolbar-button:pressed {
     -fx-background-color: #d81b60;
 }
@@ -214,4 +220,110 @@
 /* Columnas (alineación opcional) */
 .table-clientes .table-column-id {
     -fx-alignment: CENTER;
+}
+
+/* Agregar al archivo CSS principal */
+
+.text-field-valid {
+    -fx-border-color: #28a745;
+    -fx-border-width: 2px;
+    -fx-border-radius: 3px;
+}
+
+.text-field-invalid {
+    -fx-border-color: #dc3545;
+    -fx-border-width: 2px;
+    -fx-border-radius: 3px;
+}
+
+.text-field-valid:focused {
+    -fx-border-color: #28a745;
+    -fx-effect: dropshadow(gaussian, rgba(40, 167, 69, 0.6), 5, 0.0, 0, 1);
+}
+
+.text-field-invalid:focused {
+    -fx-border-color: #dc3545;
+    -fx-effect: dropshadow(gaussian, rgba(220, 53, 69, 0.6), 5, 0.0, 0, 1);
+}
+
+.login-panel {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 10, 0, 0, 0);
+    -fx-background-radius: 5;
+    -fx-padding: 20;
+    -fx-max-width: 400;
+}
+
+.login-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.login-field {
+    -fx-pref-height: 35;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-border-color: #dcdde1;
+    -fx-border-width: 1;
+    -fx-padding: 5 10 5 10;
+}
+
+.login-field:focused {
+    -fx-border-color: #3498db;
+    -fx-border-width: 2;
+}
+
+.login-button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-min-width: 100;
+    -fx-min-height: 35;
+    -fx-background-radius: 5;
+}
+
+.login-button:hover {
+    -fx-background-color: #2980b9;
+}
+
+.login-button-secondary {
+    -fx-background-color: #95a5a6;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-min-width: 100;
+    -fx-min-height: 35;
+    -fx-background-radius: 5;
+}
+
+.login-button-secondary:hover {
+    -fx-background-color: #7f8c8d;
+}
+
+.info-panel {
+    -fx-padding: 10;
+    -fx-background-color: #f5f5f5;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.info-label {
+    -fx-font-size: 14px;
+}
+
+.estado-label {
+    -fx-font-weight: bold;
+    -fx-padding: 5;
+    -fx-background-radius: 3;
+}
+
+.estado-activo {
+    -fx-text-fill: white;
+    -fx-background-color: #28a745;
+}
+
+.estado-inactivo {
+    -fx-text-fill: white;
+    -fx-background-color: #dc3545;
 }

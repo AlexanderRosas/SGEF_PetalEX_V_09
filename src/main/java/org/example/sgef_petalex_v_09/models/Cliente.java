@@ -1,49 +1,43 @@
 package org.example.sgef_petalex_v_09.models;
 
+import java.time.LocalDateTime;
+
 public class Cliente {
-    private int id;
+    private String id;
     private String nombre;
+    private String identificadorEmpresarial; // RUC, EIN, VAT, etc.
+    private String pais;
     private String direccion;
     private String telefono;
     private String correo;
-    private String estado; // Nuevo campo para el estado del cliente
-
-    public String getEstado() {
-        return estado;
-    }
-
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
+    private String estado; // "Activa" o "Inactiva"
+    private String usuarioModificacion;
+    private LocalDateTime fechaModificacion;
 
     public Cliente() {
-        // Constructor por defecto
     }
 
-    public Cliente(int id, String nombre, String direccion, String telefono, String correo) {
+    public Cliente(String id, String nombre, String identificadorEmpresarial, String pais,
+            String direccion, String telefono, String correo, String estado,
+            String usuarioModificacion, LocalDateTime fechaModificacion) {
         this.id = id;
         this.nombre = nombre;
-        this.direccion = direccion;
-        this.telefono = telefono;
-        this.correo = correo;
-    }
-
-    public Cliente(int id, String nombre, String direccion, String telefono, String correo, String estado) {
-        this.id = id;
-        this.nombre = nombre;
+        this.identificadorEmpresarial = identificadorEmpresarial;
+        this.pais = pais;
         this.direccion = direccion;
         this.telefono = telefono;
         this.correo = correo;
         this.estado = estado;
+        this.usuarioModificacion = usuarioModificacion;
+        this.fechaModificacion = fechaModificacion;
     }
 
     // Getters y setters
-
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -53,6 +47,22 @@ public class Cliente {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getIdentificadorEmpresarial() {
+        return identificadorEmpresarial;
+    }
+
+    public void setIdentificadorEmpresarial(String identificadorEmpresarial) {
+        this.identificadorEmpresarial = identificadorEmpresarial;
+    }
+
+    public String getPais() {
+        return pais;
+    }
+
+    public void setPais(String pais) {
+        this.pais = pais;
     }
 
     public String getDireccion() {
@@ -79,16 +89,57 @@ public class Cliente {
         this.correo = correo;
     }
 
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getUsuarioModificacion() {
+        return usuarioModificacion;
+    }
+
+    public void setUsuarioModificacion(String usuarioModificacion) {
+        this.usuarioModificacion = usuarioModificacion;
+    }
+
+    public LocalDateTime getFechaModificacion() {
+        return fechaModificacion;
+    }
+
+    public void setFechaModificacion(LocalDateTime fechaModificacion) {
+        this.fechaModificacion = fechaModificacion;
+    }
+
     @Override
     public String toString() {
         return "Cliente{" +
                 "id=" + id +
                 ", nombre='" + nombre + '\'' +
+                ", identificador='" + identificadorEmpresarial + '\'' +
+                ", pais='" + pais + '\'' +
                 ", direccion='" + direccion + '\'' +
                 ", telefono='" + telefono + '\'' +
                 ", correo='" + correo + '\'' +
                 ", estado='" + estado + '\'' +
+                ", modificadoPor='" + usuarioModificacion + '\'' +
                 '}';
+    }
+
+    public String toCSV() {
+        return String.join(";",
+                id,
+                nombre,
+                identificadorEmpresarial,
+                pais,
+                direccion,
+                telefono,
+                correo,
+                estado,
+                usuarioModificacion,
+                fechaModificacion != null ? fechaModificacion.toString() : "");
     }
 
 }

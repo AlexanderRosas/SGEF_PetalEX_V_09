@@ -12,7 +12,7 @@ public class DialogHelper {
         alert.initOwner(owner);
         alert.setTitle("Éxito");
         alert.setHeaderText(null);
-        alert.setContentText("Se ha " + action + " correctamente.");
+        alert.setContentText( action + " correctamente.");
         alert.showAndWait();
     }
 
@@ -25,14 +25,6 @@ public class DialogHelper {
         alert.showAndWait();
     }
 
-    public static void showWarning(Window owner, String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.initOwner(owner);
-        alert.setTitle("Advertencia");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
 
     public static boolean confirm(Window owner, String message) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -53,5 +45,24 @@ public class DialogHelper {
         alert.setHeaderText("Error en el campo: " + fieldName);
         alert.setContentText(errorMessage);
         alert.showAndWait();
+    }
+
+    public static void showWarning(Window owner, String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        if (owner != null) {
+            alert.initOwner(owner);
+        }
+        alert.setTitle("Advertencia");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    public static void showInformation(Window window, String exportar, String s) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.initOwner(window);
+        alert.setTitle("Información");
+        alert.setHeaderText(null);
+        alert.setContentText(exportar + " " + s);
     }
 }

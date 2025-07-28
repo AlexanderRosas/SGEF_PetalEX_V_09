@@ -11,6 +11,121 @@ public class DataValidator {
     private static final Pattern NUMERIC_PATTERN = Pattern.compile("^[0-9]+$");
     private static final Pattern DECIMAL_PATTERN = Pattern.compile("^[0-9]+(\\.[0-9]{1,2})?$");
     private static final Pattern RUC_PATTERN = Pattern.compile("^[0-9]{13}$");
+    // Nombre empresa: 1-60 letras (español/inglés), tildes, ñ, espacio
+    private static final Pattern EMPRESA_NOMBRE_PATTERN = Pattern.compile("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]{1,60}$");
+
+    // Dirección: 1-100 caracteres (letras, números, punto, guion, espacio)
+    private static final Pattern DIRECCION_PATTERN = Pattern.compile("^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\\s.\\-]{1,100}$");
+
+    // Teléfono E.164: “+” opcional y hasta 15 dígitos
+    private static final Pattern PHONE_E164_PATTERN = Pattern.compile("^\\+?[0-9]{1,15}$");
+    /* ============== Validaciones específicas ============== */
+
+    /** Nombre de la empresa. */
+    public static ValidationResult validateEmpresaNombre(String nombre) {
+        if (nombre == null || nombre.isBlank()) {
+            return ValidationResult.error("Nombre", "El nombre de la empresa es obligatorio");
+        }
+        if (!EMPRESA_NOMBRE_PATTERN.matcher(nombre).matches()) {
+            return ValidationResult.error("Nombre",
+                    "Debe tener 1-60 letras, tildes, ñ o espacios");
+        }
+        return ValidationResult.success();
+    }
+
+    /** Identificador empresarial según país. */
+    public static ValidationResult validateIdentificador(String identificador, String pais) {
+        if (identificador == null || identificador.isBlank()) {
+            return ValidationResult.error("Identificador", "El identificador es obligatorio");
+        }
+
+        String id = identificador.trim();
+
+        switch (pais.toUpperCase()) {
+            case "ECUADOR":
+                if (id.length() == 10) {
+                    return validateEcuadorianID(id, "Cédula");
+                } else if (id.length() == 13 && id.endsWith("001")) {
+                    return validateRUC(id, "RUC");
+                } else {
+                    return ValidationResult.error("Identificador",
+                            "En Ecuador debe ser CI (10 dígitos) o RUC (13 dígitos terminado en 001)");
+                }
+
+            case "ESTADOS UNIDOS":
+                if (!id.matches("^\\d{2}-\\d{7}$")) {
+                    return ValidationResult.error("Identificador",
+                            "El EIN debe tener formato XX-XXXXXXX");
+                }
+                break;
+
+            case "CANADÁ":
+            case "CANADA":
+                if (!id.matches("^\\d{9}$")) {
+                    return ValidationResult.error("Identificador",
+                            "El Business Number debe tener 9 dígitos");
+                }
+                break;
+
+            case "ALEMANIA":
+            case "FRANCIA":
+            case "ESPAÑA":
+            case "PAÍSES BAJOS":
+            case "PAISES BAJOS":
+                if (!id.matches("^[A-Z]{2}[A-Z0-9]{2,12}$")) {
+                    return ValidationResult.error("Identificador",
+                            "El VAT debe empezar por código ISO (2 letras) y seguir formato local");
+                }
+                break;
+
+            default:
+                return ValidationResult.error("País", "País no soportado para validación");
+        }
+        return ValidationResult.success();
+    }
+
+    /** Dirección de la empresa. */
+    public static ValidationResult validateDireccion(String direccion) {
+        if (direccion == null || direccion.isBlank()) {
+            return ValidationResult.error("Dirección", "La dirección es obligatoria");
+        }
+        if (!DIRECCION_PATTERN.matcher(direccion.trim()).matches()) {
+            return ValidationResult.error("Dirección",
+                    "Máx. 100 caracteres: letras, números, punto, guion o espacio");
+        }
+        return ValidationResult.success();
+    }
+
+    /** Teléfono internacional E.164. */
+    public static ValidationResult validateTelefonoE164(String telefono) {
+        if (telefono == null || telefono.isBlank()) {
+            return ValidationResult.error("Teléfono", "El teléfono es obligatorio");
+        }
+        if (!PHONE_E164_PATTERN.matcher(telefono.trim()).matches()) {
+            return ValidationResult.error("Teléfono",
+                    "Formato E.164 inválido (ej. +593991234567)");
+        }
+        return ValidationResult.success();
+    }
+
+    /** Correo electrónico RFC 5322. */
+    public static ValidationResult validateCorreo(String correo) {
+        if (correo == null || correo.isBlank()) {
+            return ValidationResult.error("Correo", "El correo es obligatorio");
+        }
+        if (!EMAIL_PATTERN.matcher(correo.trim()).matches()) {
+            return ValidationResult.error("Correo", "Formato de correo inválido");
+        }
+        return ValidationResult.success();
+    }
+
+    /** País (solo verifica que no esté vacío). */
+    public static ValidationResult validatePais(String pais) {
+        if (pais == null || pais.isBlank()) {
+            return ValidationResult.error("País", "Debe seleccionar un país");
+        }
+        return ValidationResult.success();
+    }
 
     // ✅ Validación de nombres (solo letras, espacios y acentos)
     public static ValidationResult validateName(String name, String fieldName) {

@@ -1,146 +1,185 @@
 package org.example.sgef_petalex_v_09.controllers;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.Window;
+import org.example.sgef_petalex_v_09.models.Cliente;
 import org.example.sgef_petalex_v_09.models.ItemVenta;
 import org.example.sgef_petalex_v_09.models.Venta;
+import org.example.sgef_petalex_v_09.util.CSVUtil;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
 
 import java.io.IOException;
+import java.net.URL;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
-public class VentaDetailController {
+public class VentaDetailController implements Initializable {
 
-    @FXML
-    private Label lblCliente;
-    @FXML
-    private Label lblDireccion;
-    @FXML
-    private Label lblFecha;
-    @FXML
-    private Button btnAddItem;
-    @FXML
-    private Button btnRemoveItem;
-
-    @FXML
-    private TableView<ItemVenta> tableItems;
-    @FXML
-    private TableColumn<ItemVenta, Integer> colItem;
-    @FXML
-    private TableColumn<ItemVenta, String> colVariedad;
-    @FXML
-    private TableColumn<ItemVenta, String> colPaquete;
-    @FXML
-    private TableColumn<ItemVenta, Integer> colCantidad;
-    @FXML
-    private TableColumn<ItemVenta, Double> colPrecioU;
-    @FXML
-    private TableColumn<ItemVenta, Double> colPrecioT;
-    @FXML
-    private Label lblTotal;
-    @FXML
-    private Button btnCancelVenta;
-    @FXML
-    private Button btnAcceptVenta;
-
-    private boolean ventaAceptada = false;
     private Venta currentVenta;
-    private ObservableList<ItemVenta> items = FXCollections.observableArrayList();
+    private boolean ventaAceptada = false;
+    private final ObservableList<ItemVenta> items = FXCollections.observableArrayList();
 
-    @FXML
-    public void initialize() {
-        // Configuración básica que no depende de currentVenta
-        setupTableColumns();
-        setupEventHandlers();
+    // —— FXML controls ——
+    @FXML private Label lblCliente;
+    @FXML private Label lblDireccion;
+    @FXML private Label lblTelefono;
+    @FXML private Label lblCorreo;
+    @FXML private Label lblFecha;
+    @FXML private Label lblTipoDestino;
+    @FXML private Label lblEstadoCliente;
+    @FXML private Label lblTotal;
+
+    @FXML private TableView<ItemVenta> tableItems;
+    @FXML private TableColumn<ItemVenta, Integer> colItem;
+    @FXML private TableColumn<ItemVenta, String>  colVariedad;
+    @FXML private TableColumn<ItemVenta, String>  colPaquete;
+    @FXML private TableColumn<ItemVenta, Integer> colCantidad;
+    @FXML private TableColumn<ItemVenta, Double>  colPrecioU;
+    @FXML private TableColumn<ItemVenta, Double>  colPrecioT;
+
+    @FXML private Button btnAddItem;
+    @FXML private Button btnEliminarItem;
+    @FXML private Button btnCancelVenta;
+    @FXML private Button btnAcceptVenta;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        // Si no se llamó a initData, creamos una venta vacía
+        if (currentVenta == null) {
+            currentVenta = new Venta();
+            currentVenta.setFecha(LocalDate.now());
+        }
+
+        // Configurar columnas con PropertyValueFactory
+        colItem    .setCellValueFactory(new PropertyValueFactory<>("item"));
+        colVariedad.setCellValueFactory(new PropertyValueFactory<>("variedad"));
+        colPaquete .setCellValueFactory(new PropertyValueFactory<>("paquete"));
+        colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
+        colPrecioU .setCellValueFactory(new PropertyValueFactory<>("precioUnitario"));
+        colPrecioT .setCellValueFactory(new PropertyValueFactory<>("precioTotal"));
+
+        // Carga la lista de ítems en la tabla
         tableItems.setItems(items);
-        
-        // Listener para habilitar/deshabilitar botones
-        items.addListener((javafx.collections.ListChangeListener.Change<? extends ItemVenta> c) -> {
+
+        // Configurar handlers de botones
+        btnAddItem      .setOnAction(this::onAddItem);
+        btnEliminarItem .setOnAction(this::onEliminarItem);
+        btnCancelVenta  .setOnAction(this::onCancelVenta);
+        btnAcceptVenta  .setOnAction(this::onAcceptVenta);
+
+        // Inicialmente deshabilitar Eliminar y Aceptar
+        btnEliminarItem.setDisable(true);
+        btnAcceptVenta .setDisable(true);
+
+        // Activar Eliminar cuando haya una selección
+        tableItems.getSelectionModel().selectedItemProperty().addListener(
+                (obs, oldSel, newSel) -> btnEliminarItem.setDisable(newSel == null)
+        );
+
+        // Cada vez que cambian los ítems, recálculo totales y habilito/deshabilito Aceptar
+        items.addListener((ListChangeListener<ItemVenta>) change -> {
+            updateTotal();
             btnAcceptVenta.setDisable(items.isEmpty());
         });
-        
-        // Configurar selección de tabla
-        tableItems.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
-            btnRemoveItem.setDisable(newSel == null);
-        });
-        
-        // Inicialmente deshabilitar botones
-        btnAcceptVenta.setDisable(true);
-        btnRemoveItem.setDisable(true);
     }
 
-    /** Para ver venta existente */
-    public void initData(Venta v) {
-        this.currentVenta = v;
+    /**
+     * Inicializa este controller con una venta ya existente,
+     * mostrando sus datos en pantalla.
+     */
+    public void initData(Venta venta) {
+        this.currentVenta = venta;
         setupVentaInfo();
-        items.setAll(v.getItems());
+        items.setAll(venta.getItems());
         updateTotal();
-    }
-
-    private void setupTableColumns() {
-        colItem.setCellValueFactory(i -> i.getValue().itemProperty().asObject());
-        colVariedad.setCellValueFactory(i -> i.getValue().variedadProperty());
-        colPaquete.setCellValueFactory(i -> i.getValue().paqueteProperty());
-        colCantidad.setCellValueFactory(i -> i.getValue().cantidadProperty().asObject());
-        colPrecioU.setCellValueFactory(i -> i.getValue().precioUnitProperty().asObject());
-        colPrecioT.setCellValueFactory(i -> i.getValue().precioTotalProperty().asObject());
-    }
-
-    private void setupEventHandlers() {
-        btnAddItem.setOnAction(this::onAddItem);
-        btnRemoveItem.setOnAction(this::onRemoveItem);
-        btnCancelVenta.setOnAction(this::onCancelVenta);
-        btnAcceptVenta.setOnAction(this::onAcceptVenta);
+        btnAcceptVenta.setDisable(items.isEmpty());
     }
 
     private void setupVentaInfo() {
-        if (currentVenta != null) {
-            lblCliente.setText("Cliente: " + currentVenta.getCliente());
-            lblFecha.setText("Fecha: " + currentVenta.getFecha());
-            lblDireccion.setText("Dirección: " + currentVenta.getDireccion());
-        }
-    }
+        // 1) Obtener el cliente completo
+        String clienteId = currentVenta.getCliente();               // p.ej. "C001"
+        Cliente cliente = CSVUtil.buscarClientePorId(clienteId);    // devuelve null si no existe
 
-    /** Para VentasController: devuelve Optional.empty() si canceló */
-    public Optional<Venta> getVentaCreated() {
-        if (ventaAceptada) {
-            currentVenta.getItems().clear(); // Limpia antes de agregar
-            items.forEach(currentVenta::addItem);
-            return Optional.of(currentVenta);
+        if (cliente != null) {
+            lblCliente.setText("Cliente: "    + cliente.getNombre());
+            lblDireccion.setText("Dirección: " + cliente.getDireccion());
+            lblTelefono.setText("Teléfono: "   + cliente.getTelefono());
+            lblCorreo.setText("Correo: "       + cliente.getCorreo());
+
+            // Estado visual según activo/inactivo
+            String est = cliente.getEstado();
+            lblEstadoCliente.setText("Estado: " + est);
+            lblEstadoCliente.getStyleClass().setAll(
+                    "estado-label",
+                    est.equalsIgnoreCase("Activo") ? "estado-activo" : "estado-inactivo"
+            );
         } else {
-            return Optional.empty();
+            // Si no se encontró, mostrarlos vacíos o con un mensaje por defecto
+            lblCliente.setText("Cliente: No encontrado");
+            lblDireccion.setText("Dirección: --");
+            lblTelefono.setText("Teléfono: --");
+            lblCorreo.setText("Correo: --");
+            lblEstadoCliente.setText("");
         }
+
+        // 2) Fecha, tipoDestino y total siguen igual
+        lblFecha.setText("Fecha: " +
+                currentVenta.getFecha().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        lblTipoDestino.setText("Tipo: " + currentVenta.getTipoDestino());
+
+        // Finalmente recálculo totales
+        updateTotal();
     }
 
+    /** Recalcula subtotal, IVA quemado y total, y actualiza el label. */
     private void updateTotal() {
-        double sum = items.stream().mapToDouble(ItemVenta::getPrecioTotal).sum();
-        lblTotal.setText(String.format("$%,.2f", sum));
-        currentVenta.setTotal(sum);
+        double subtotal = items.stream()
+                .mapToDouble(ItemVenta::getPrecioTotal)
+                .sum();
+        double iva   = 0.0;       // IVA siempre cero
+        double total = subtotal;  // total = subtotal + iva
+
+        currentVenta.setPrecio(subtotal);
+        currentVenta.setIva(iva);
+        currentVenta.setTotal(total);
+
+        lblTotal.setText(String.format(
+                "Subtotal: $%.2f   IVA: $%.2f   Total: $%.2f",
+                subtotal, iva, total));
     }
 
-    @FXML
-    private void onCancelVenta(ActionEvent e) {
-        ventaAceptada = false;
-        ((Stage) lblCliente.getScene().getWindow()).close();
+    /** Validaciones antes de aceptar la venta. */
+    private boolean validarVenta() {
+        if (items.isEmpty()) {
+            DialogHelper.showWarning(getWindow(), "Debe agregar al menos un ítem.");
+            return false;
+        }
+        if (currentVenta.getCliente() == null || currentVenta.getCliente().isEmpty()) {
+            DialogHelper.showWarning(getWindow(), "Debe seleccionar un cliente.");
+            return false;
+        }
+        return true;
     }
 
+    /** Abre el diálogo/modo de agregar un nuevo ItemVenta. */
     @FXML
-    private void onAcceptVenta(ActionEvent e) {
-        ventaAceptada = true;
-        ((Stage) lblCliente.getScene().getWindow()).close();
-    }
-
-    @FXML
-    private void onAddItem(ActionEvent e) {
+    private void onAddItem(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/RoseSelection.fxml"));
             Parent pop = loader.load(); // Carga nuevo nodo raíz cada vez
@@ -167,25 +206,6 @@ public class VentaDetailController {
             }
         } catch (IOException ex) {
             ex.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void onRemoveItem(ActionEvent e) {
-        ItemVenta selected = tableItems.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            DialogHelper.showWarning(lblCliente.getScene().getWindow(), "Debe seleccionar un ítem para eliminar.");
-            return;
-        }
-        boolean confirm = DialogHelper.confirm(lblCliente.getScene().getWindow(),
-                "¿Está seguro que desea eliminar el ítem seleccionado?");
-        if (confirm) {
-            items.remove(selected);
-            // Reasigna números de ítem para mantener orden
-            for (int i = 0; i < items.size(); i++) {
-                items.get(i).setItem(i + 1);
-            }
-            updateTotal();
         }
     }
 
@@ -256,4 +276,49 @@ public class VentaDetailController {
         return null;
     }
 
+    /** Elimina el item seleccionado de la lista. */
+    @FXML
+    private void onEliminarItem(ActionEvent event) {
+        ItemVenta sel = tableItems.getSelectionModel().getSelectedItem();
+        if (sel != null) {
+            items.remove(sel);
+        }
+    }
+
+    /** Cancela la venta y cierra la ventana sin guardar. */
+    @FXML
+    private void onCancelVenta(ActionEvent event) {
+        ventaAceptada = false;
+        closeWindow();
+    }
+
+    /** Acepta la venta (si pasa validación) y cierra la ventana. */
+    @FXML
+    private void onAcceptVenta(ActionEvent event) {
+        if (validarVenta()) {
+            ventaAceptada = true;
+            closeWindow();
+        }
+    }
+
+    /**
+     * Devuelve Optional.of(currentVenta) si el usuario aceptó,
+     * o Optional.empty() si canceló.
+     */
+    public Optional<Venta> getVentaCreated() {
+        return ventaAceptada
+                ? Optional.of(currentVenta)
+                : Optional.empty();
+    }
+
+    /** Cierra esta ventana modal. */
+    private void closeWindow() {
+        Stage stage = (Stage) lblCliente.getScene().getWindow();
+        stage.close();
+    }
+
+    /** Para centrar diálogos. */
+    private Window getWindow() {
+        return lblCliente.getScene().getWindow();
+    }
 }

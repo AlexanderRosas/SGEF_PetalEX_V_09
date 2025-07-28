@@ -5,23 +5,25 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.event.ActionEvent;
-import javafx.geometry.Insets;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
 import org.example.sgef_petalex_v_09.models.Cliente;
 import org.example.sgef_petalex_v_09.models.Estados;
 import org.example.sgef_petalex_v_09.models.Pedido;
+import org.example.sgef_petalex_v_09.util.CSVUtil;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public class PedidosController {
@@ -50,7 +52,7 @@ public class PedidosController {
     public void initialize() {
         configurarColumnas();
         inicializarComboEstado();
-        cargarDatosQuemados();  // ahora sin DAO
+        cargarDatosDesdeCSV();
         configurarListeners();
         actualizarEstadoBotones(false);
 
@@ -91,14 +93,11 @@ public class PedidosController {
         cbEstado.getSelectionModel().selectFirst();
     }
 
-    private void cargarDatosQuemados() {
+    private void cargarDatosDesdeCSV() {
         masterData.clear();
-        masterData.addAll(
-                new Pedido(1, new Cliente(1234567890, "RoseFlower INC.", "Av. Pétalos 123", "0991234567", "rosa@rose.com", "Activo"),
-                        LocalDate.now().minusDays(3), LocalDate.now().plusDays(2), "En Cuarto Frío", ""),
-                new Pedido(2, new Cliente(987654321, "SweetMoment Ltd.", "Calle Tulipán 45", "0987654321", "sm@moment.com", "Activo"),
-                        LocalDate.now().minusDays(1), LocalDate.now().plusDays(3), "Empacado", "GA-001")
-        );
+        List<Pedido> pedidos = CSVUtil.leerPedidos(); // Carga los pedidos del CSV
+        masterData.addAll(pedidos);
+
         filteredData = new FilteredList<>(masterData, p -> true);
         tablePedidos.setItems(filteredData);
     }
@@ -172,8 +171,10 @@ public class PedidosController {
         tablePedidos.refresh();
         actualizarEstadoBotones(true);
 
+        CSVUtil.guardarPedidos(masterData);  // <-- Guardar aquí
+
         DialogHelper.showSuccess(btnActualizarEstado.getScene().getWindow(),
-                "actualizado el Estado del pedido a: " + nuevo);
+                "Actualizado el estado del pedido a: " + nuevo);
     }
 
     @FXML
@@ -187,7 +188,10 @@ public class PedidosController {
                     pedido.setFechaEstimadaEnvio(p.getFechaEstimadaEnvio());
                     pedido.setCodigoGuiaAerea(p.getCodigoGuiaAerea());
                     tablePedidos.refresh();
-                    DialogHelper.showSuccess(btnEditar.getScene().getWindow(), "actualizado el pedido");
+
+                    CSVUtil.guardarPedidos(masterData);  // <-- Guardar aquí
+
+                    DialogHelper.showSuccess(btnEditar.getScene().getWindow(), "Actualizado el pedido");
                 });
     }
 
@@ -235,7 +239,10 @@ public class PedidosController {
             pedido.setEstadoActual("Anulado");
             tablePedidos.refresh();
             actualizarEstadoBotones(true);
-            DialogHelper.showSuccess(btnAnular.getScene().getWindow(), "anulado el pedido");
+
+            CSVUtil.guardarPedidos(masterData);  // <-- Guardar aquí
+
+            DialogHelper.showSuccess(btnAnular.getScene().getWindow(), "Anulado el pedido");
         }
     }
 
@@ -249,7 +256,10 @@ public class PedidosController {
             pedido.setEstadoActual("Exportado");
             tablePedidos.refresh();
             actualizarEstadoBotones(true);
-            DialogHelper.showSuccess(btnExportar.getScene().getWindow(), "exportado el pedido");
+
+            CSVUtil.guardarPedidos(masterData);  // <-- Guardar aquí
+
+            DialogHelper.showSuccess(btnExportar.getScene().getWindow(), "Exportado el pedido");
         }
     }
 
@@ -264,11 +274,9 @@ public class PedidosController {
         selStage.setScene(new Scene(selRoot));
         selStage.setTitle("Seleccionar Cliente");
         selStage.showAndWait();
-
-        Cliente cliente = selCtrl.getSelectedCliente();
+        Cliente cliente = selCtrl.getClienteSeleccionado().orElse(null);
         if (cliente == null)
             return;
-
         boolean confirmado = DialogHelper.confirm(btnNuevo.getScene().getWindow(),
                 "¿Desea registrar un pedido para " + cliente.getNombre() + "?");
         if (!confirmado)
@@ -298,7 +306,10 @@ public class PedidosController {
         detCtrl.getPedidoResult().ifPresent(pedidoGuardado -> {
             masterData.add(pedidoGuardado);
             tablePedidos.refresh();
-            DialogHelper.showSuccess(btnNuevo.getScene().getWindow(), "registrado el pedido");
+
+            CSVUtil.guardarPedidos(masterData);  // <-- Guardar aquí
+
+            DialogHelper.showSuccess(btnNuevo.getScene().getWindow(), "Registrado el pedido");
         });
     }
 
