@@ -52,7 +52,7 @@ public class LoginController {
         }
 
         if (!correo.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-            DialogHelper.showError(null, "Nombre de Usuario o Contraseña Incompatibles con el Sistema");
+            DialogHelper.showError(null, "Nombre de Usuario o Contraseña incorrectos");
             return;
         }
 
