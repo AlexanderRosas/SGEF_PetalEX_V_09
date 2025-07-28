@@ -1,2 +1,3 @@
 ID;TipoDestino;Servicio;Cliente;Direccion;Fecha;Precio;IVA;Total;Estado;Items
-V005;Internacional;Ventas;"Flores del Valle S.A.";"null";2025-07-25;1170.00;0.00;1170.00;Activo;""
+V005;Internacional;Ventas;"Flores del Valle S.A.";"null";2025-07-25;0,00;0,00;1170,00;Activo;""
+V002;Internacional;Ventas;"Rosas EverWord. S.A.S";"null";2025-07-28;180,00;0,00;180,00;Activo;""
