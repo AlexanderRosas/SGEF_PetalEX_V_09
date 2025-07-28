@@ -32,8 +32,8 @@ public class MainMenuController {
     @FXML
     public void initialize() {
         Usuario usuario = UserSession.getUsuarioActual();
-        if (usuario != null && usuario.getCorreo() != null) {
-            lblBienvenida.setText("Bienvenido: " + usuario.getCorreo());
+        if (usuario != null && usuario.getUsuario() != null) {
+            lblBienvenida.setText("Bienvenido: " + usuario.getUsuario());
         } else {
             lblBienvenida.setText("Bienvenido: Invitado");
         }
