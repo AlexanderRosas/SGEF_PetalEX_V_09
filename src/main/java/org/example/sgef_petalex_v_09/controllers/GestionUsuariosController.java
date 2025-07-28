@@ -120,13 +120,51 @@ public class GestionUsuariosController implements Initializable {
     }
 
     @FXML
-    private void onEditar(ActionEvent ev) {
+private void onEditar(ActionEvent ev) {
+    Window w = getWindow(ev);
+    Usuario seleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
+    if (seleccionado == null) {
+        DialogHelper.showWarning(w, "Seleccione un usuario");
+        return;
+    }
+
+    // Pedir contraseña del administrador en sesión
+    TextInputDialog pwdDialog = new TextInputDialog();
+    pwdDialog.initOwner(w);
+    pwdDialog.setTitle("Verificación");
+    pwdDialog.setHeaderText("Contraseña de Administrador");
+    pwdDialog.setContentText("Ingrese su contraseña:");
+    Optional<String> pwd = pwdDialog.showAndWait();
+
+    if (pwd.isEmpty())
+        return;
+
+    Usuario admin = UserUtil.buscarUsuario(UserSession.getUsuarioActual().getCorreo(), pwd.get());
+    if (admin == null || !"Administrador".equalsIgnoreCase(admin.getRol())) {
+        DialogHelper.showError(w, "Contraseña incorrecta o sin privilegios.");
+        return;
+    }
+
+    // Formulario de edición
+    Optional<Usuario> resultado = mostrarFormularioEdicion(seleccionado);
+    resultado.ifPresent(u -> {
+        seleccionado.setNombre(u.getNombre());
+        seleccionado.setCorreo(u.getCorreo());
+        seleccionado.setPassword(u.getPassword());
+        seleccionado.setRol(u.getRol());
+        seleccionado.setUsuarioModificacion(admin.getUsuario());
+        seleccionado.setFechaModificacion(LocalDateTime.now());
+        CSVUtil.guardarUsuarios(data);
+        tablaUsuarios.refresh();
+        DialogHelper.showSuccess(w, "Usuario actualizado");
+    });
+}
+    @FXML
+    private void onEstado(ActionEvent ev) {
         Window w = getWindow(ev);
         Usuario seleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
-        if (seleccionado == null) {
-            DialogHelper.showWarning(w, "Seleccione un usuario");
+        if (seleccionado == null)
             return;
-        }
 
         // Pedir contraseña del administrador en sesión
         TextInputDialog pwdDialog = new TextInputDialog();
@@ -139,44 +177,7 @@ public class GestionUsuariosController implements Initializable {
         if (pwd.isEmpty())
             return;
 
-        Usuario admin = UserUtil.buscarUsuario(UserSession.getCorreo(), pwd.get());
-        if (admin == null || !"Administrador".equalsIgnoreCase(admin.getRol())) {
-            DialogHelper.showError(w, "Contraseña incorrecta o sin privilegios.");
-            return;
-        }
-
-        // Formulario de edición
-        Optional<Usuario> resultado = mostrarFormularioEdicion(seleccionado);
-        resultado.ifPresent(u -> {
-            seleccionado.setNombre(u.getNombre());
-            seleccionado.setCorreo(u.getCorreo());
-            seleccionado.setPassword(u.getPassword());
-            seleccionado.setRol(u.getRol());
-            seleccionado.setUsuarioModificacion(admin.getUsuario());
-            seleccionado.setFechaModificacion(LocalDateTime.now());
-            CSVUtil.guardarUsuarios(data);
-            tablaUsuarios.refresh();
-            DialogHelper.showSuccess(w, "Usuario actualizado");
-        });
-    }
-    @FXML
-    private void onEstado(ActionEvent ev) {
-        Window w = getWindow(ev);
-        Usuario seleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
-        if (seleccionado == null)
-            return;
-
-        TextInputDialog pwdDialog = new TextInputDialog();
-        pwdDialog.initOwner(w);
-        pwdDialog.setTitle("Verificación");
-        pwdDialog.setHeaderText("Contraseña de Administrador");
-        pwdDialog.setContentText("Ingrese su contraseña:");
-        Optional<String> pwd = pwdDialog.showAndWait();
-
-        if (pwd.isEmpty())
-            return;
-
-        Usuario admin = UserUtil.buscarUsuario(UserSession.getCorreo(), pwd.get());
+        Usuario admin = UserUtil.buscarUsuario(UserSession.getUsuarioActual().getCorreo(), pwd.get());
         if (admin == null || !"Administrador".equalsIgnoreCase(admin.getRol())) {
             DialogHelper.showError(w, "Contraseña incorrecta o sin privilegios.");
             return;
@@ -312,8 +313,49 @@ public class GestionUsuariosController implements Initializable {
         });
         return dialog.showAndWait();
     }
+    private Optional<Usuario> mostrarFormularioEdicion(Usuario usuarioExistente) {
+    Dialog<Usuario> dialog = new Dialog<>();
+    dialog.setTitle("Editar usuario");
+    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
 
-    private void setErrorStyle(TextField field, String message) {
+    GridPane grid = new GridPane();
+    grid.setHgap(10);
+    grid.setVgap(10);
+
+    // Campos del formulario
+    TextField txtNombre = new TextField(usuarioExistente.getNombre());
+    TextField txtCorreo = new TextField(usuarioExistente.getCorreo());
+    PasswordField txtPassword = new PasswordField();
+    txtPassword.setPromptText("Nueva contraseña");
+    ComboBox<String> cbRol = new ComboBox<>(FXCollections.observableArrayList(
+            "Administrador", "Finanzas", "Gerente", "Ventas"));
+    cbRol.setValue(usuarioExistente.getRol());
+
+    // Agregar campos al GridPane
+    grid.addRow(0, new Label("Nombre Natural:"), txtNombre);
+    grid.addRow(1, new Label("Correo Electrónico:"), txtCorreo);
+    grid.addRow(2, new Label("Contraseña:"), txtPassword);
+    grid.addRow(3, new Label("Rol:"), cbRol);
+
+    // Configurar el contenido del diálogo
+    dialog.getDialogPane().setContent(grid);
+
+    // Configurar el resultado del diálogo
+    dialog.setResultConverter(btn -> {
+        if (btn == ButtonType.OK) {
+            usuarioExistente.setNombre(txtNombre.getText().trim());
+            usuarioExistente.setCorreo(txtCorreo.getText().trim());
+            usuarioExistente.setPassword(txtPassword.getText().trim());
+            usuarioExistente.setRol(cbRol.getValue());
+            return usuarioExistente;
+        }
+        return null;
+    });
+
+    // Mostrar el diálogo y esperar la respuesta
+    return dialog.showAndWait();
+}
+   private void setErrorStyle(TextField field, String message) {
         field.setStyle("-fx-border-color: red; -fx-border-width: 2px;");
         Tooltip tooltip = new Tooltip(message);
         tooltip.setStyle("-fx-background-color: #ffdddd; -fx-text-fill: red;");

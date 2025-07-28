@@ -17,10 +17,14 @@ import java.net.URL;
 
 public class LoginController {
 
-    @FXML private TextField txtUsuario;
-    @FXML private PasswordField txtPassword;
-    @FXML private Button btnIngresar;
-    @FXML private Button btnSalir;
+    @FXML
+    private TextField txtUsuario;
+    @FXML
+    private PasswordField txtPassword;
+    @FXML
+    private Button btnIngresar;
+    @FXML
+    private Button btnSalir;
 
     private static final int MAX_INTENTOS = 3;
     private int intentos = 0;
@@ -76,7 +80,7 @@ public class LoginController {
                 scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
                 stage.setScene(scene);
                 stage.setTitle("Index Blooms - Menú Principal");
-                stage.centerOnScreen();
+                stage.setMaximized(true); // Maximizar la ventana
             } catch (IOException e) {
                 DialogHelper.showError(null, "No se pudo cargar el menú principal.");
             }
