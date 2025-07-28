@@ -70,4 +70,7 @@ public class PermisosUtil {
                 .map(String::trim)
                 .anyMatch(p -> p.equals(codigoPermiso));
     }
+    public static Set<String> getRolesDisponibles() {
+    return PERMISOS_POR_ROL.keySet();
+}
 }

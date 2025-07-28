@@ -1,2 +1,2 @@
-ID;Nombre;Correo;Usuario;Rol;Estado;Sucursal;RUC;Permisos
-U551;Ariel Rosas;ariel.rosas@gmail.com;arielros45;Administrador;Activo;Sucursal Sur;null;ALL
+ID;Nombre;Cedula;Correo;Contraseña; Usuario;Rol;Estado;Permisos;UsuarioModificacion;FechaModificacion
+U098;Martin Davalos;1750111211;martin.davalos@petaltech.com;Legenda44#;;agcllmrtn4;Administrador;Activo;VENTA_CREAR,VENTA_MODIFICAR,VENTA_ANULAR,USUARIO_ADMIN,ROL_ADMIN,PARAM_ADMIN,REPORTE_VER,REPORTE_EXPORTAR;admin;2025-07-28T01:22:19.4175

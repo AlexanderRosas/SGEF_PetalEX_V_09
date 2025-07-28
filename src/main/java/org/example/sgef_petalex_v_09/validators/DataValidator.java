@@ -359,4 +359,50 @@ public class DataValidator {
 
         return validatePersonData(name, email, phone);
     }
+
+    // Valida nombre de usuario: alfanumérico 5-10 caracteres
+    public static ValidationResult validateUsername(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            return ValidationResult.error("Nombre de usuario", "El nombre de usuario es obligatorio");
+        }
+        String u = username.trim();
+        if (u.length() < 5 || u.length() > 10) {
+            return ValidationResult.error("Nombre de usuario", "Debe tener entre 5 y 10 caracteres");
+        }
+        if (!u.matches("^[a-zA-Z0-9]+$")) {
+            return ValidationResult.error("Nombre de usuario", "Solo puede contener letras y números");
+        }
+        return ValidationResult.success();
+    }
+
+    // Valida contraseña: 5-20 caracteres, incluye símbolos especiales permitidos
+    public static ValidationResult validatePassword(String password) {
+        if (password == null || password.isEmpty()) {
+            return ValidationResult.error("Contraseña", "La contraseña es obligatoria");
+        }
+        if (password.length() < 5 || password.length() > 20) {
+            return ValidationResult.error("Contraseña", "Debe tener entre 5 y 20 caracteres");
+        }
+        if (!password.matches("^[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{}|\\\\:;\"'<>,.?/~]+$")) {
+            return ValidationResult.error("Contraseña", "Contiene caracteres inválidos");
+        }
+        return ValidationResult.success();
+    }
+
+    // Valida nombre natural: solo letras (incluye vocales tildadas), espacios, 8-60
+    // caracteres
+    public static ValidationResult validateNaturalName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return ValidationResult.error("Nombre natural", "El nombre natural es obligatorio");
+        }
+        String n = name.trim();
+        if (n.length() < 8 || n.length() > 60) {
+            return ValidationResult.error("Nombre natural", "Debe tener entre 8 y 60 caracteres");
+        }
+        if (!n.matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$")) {
+            return ValidationResult.error("Nombre natural", "Solo puede contener letras y espacios");
+        }
+        return ValidationResult.success();
+    }
+
 }

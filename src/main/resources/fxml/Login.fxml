@@ -30,7 +30,7 @@
             <!-- Usuario -->
             <HBox spacing="10" alignment="CENTER">
                 <TextField fx:id="txtUsuario" 
-                          promptText="Usuario"
+                          promptText="Ingrese su correo"
                           styleClass="login-field"
                           prefWidth="250"/>
             </HBox>

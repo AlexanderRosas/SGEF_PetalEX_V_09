@@ -30,7 +30,9 @@ public class CSVUtil {
                 } else if (rutaArchivo.equals(VENTAS_CSV)) {
                     pw.println("ID;TipoDestino;Servicio;Cliente;Direccion;Fecha;Precio;IVA;Total;Estado;Items");
                 } else if (rutaArchivo.equals(USUARIOS_CSV)) {
-                    pw.println("ID;Nombre;Correo;Usuario;Rol;Estado;Sucursal;RUC;Permisos");
+                    // Header sin Sucursal ni RUC
+                    pw.println(
+                            "ID;Nombre;Cedula;Correo;Contraseña; Usuario;Rol;Estado;Permisos;UsuarioModificacion;FechaModificacio");
                 } else if (rutaArchivo.equals(PEDIDOS_CSV)) {
                     pw.println("ID;ClienteID;FechaPedido;FechaEnvio;Estado;GuiaAerea;PrecioTotal");
                 }
@@ -125,9 +127,9 @@ public class CSVUtil {
         try {
             Files.createDirectories(path.getParent());
             if (!Files.exists(path)) {
-                // Cambiar el header para incluir usuarioModificacion y fechaModificacion
+                // Header actualizado sin Sucursal ni RUC
                 Files.write(path,
-                        List.of("ID;Nombre;Correo;Usuario;Rol;Estado;Sucursal;RUC;Permisos;UsuarioModificacion;FechaModificacion"),
+                        List.of("ID;Nombre;Correo;Usuario;Rol;Estado;Permisos;UsuarioModificacion;FechaModificacion"),
                         StandardOpenOption.CREATE);
             }
             try (BufferedReader br = Files.newBufferedReader(path)) {
@@ -139,35 +141,30 @@ public class CSVUtil {
                         continue;
                     }
                     String[] f = line.split(";", -1);
-                    if (f.length < 11) // Ahora 11 campos
+                    if (f.length < 11)
                         continue;
+
                     Usuario u = new Usuario();
                     u.setId(f[0].trim());
                     u.setNombre(f[1].trim());
-                    u.setCorreo(f[2].trim());
-                    u.setUsuario(f[3].trim());
-                    u.setRol(f[4].trim());
-                    u.setEstado(f[5].trim());
-                    u.setSucursal(f[6].trim());
-                    u.setRuc(f[7].trim());
+                    u.setCedula(f[2].trim());
+                    u.setCorreo(f[3].trim());
+                    u.setPassword(f[4].trim()); // <- nuevo campo Contraseña
+                    u.setUsuario(f[5].trim()); // <- campo Usuario
+                    u.setRol(f[6].trim());
+                    u.setEstado(f[7].trim());
                     u.setPermisos(f[8].trim());
-
-                    // Setear usuarioModificacion (campo nuevo)
                     u.setUsuarioModificacion(f[9].trim());
 
-                    // Setear fechaModificacion (campo nuevo), parseando de String a LocalDateTime
                     String fechaModStr = f[10].trim();
                     if (!fechaModStr.isEmpty()) {
                         try {
                             u.setFechaModificacion(
                                     LocalDateTime.parse(fechaModStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME));
                         } catch (Exception e) {
-                            System.err.println("Error parsing fechaModificacion para usuario " + u.getId() + ": "
-                                    + e.getMessage());
                             u.setFechaModificacion(null);
                         }
                     }
-
                     list.add(u);
                 }
             }
@@ -184,9 +181,9 @@ public class CSVUtil {
             try (BufferedWriter bw = Files.newBufferedWriter(path,
                     StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING)) {
-                // Cambiar header para incluir los campos nuevos
+                // Header sin Sucursal ni RUC
                 bw.write(
-                        "ID;Nombre;Correo;Usuario;Rol;Estado;Sucursal;RUC;Permisos;UsuarioModificacion;FechaModificacion\n");
+                        "ID;Nombre;Cedula;Correo;Contraseña;Usuario;Rol;Estado;Permisos;UsuarioModificacion;FechaModificacion\n");
                 for (Usuario u : usuarios) {
                     String fechaModStr = "";
                     if (u.getFechaModificacion() != null) {
@@ -195,12 +192,12 @@ public class CSVUtil {
                     bw.write(String.join(";",
                             u.getId(),
                             u.getNombre(),
+                            u.getCedula(),
                             u.getCorreo(),
-                            u.getUsuario(),
+                            u.getPassword(), // <- nuevo
+                            u.getUsuario(), // <- nuevo
                             u.getRol(),
                             u.getEstado(),
-                            u.getSucursal(),
-                            u.getRuc(),
                             u.getPermisos(),
                             u.getUsuarioModificacion() != null ? u.getUsuarioModificacion() : "",
                             fechaModStr));

@@ -7,36 +7,36 @@
 <?import javafx.scene.layout.VBox?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.example.sgef_petalex_v_09.controllers.GestionUsuariosController"
-            styleClass="root"
-            prefWidth="800" prefHeight="700">
+    xmlns:fx="http://javafx.com/fxml"
+    fx:controller="org.example.sgef_petalex_v_09.controllers.GestionUsuariosController"
+    styleClass="root"
+    prefWidth="800" prefHeight="700">
 
     <!-- Toolbar: acciones -->
     <VBox spacing="5" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
         <HBox spacing="10" styleClass="toolbar-buttons">
             <Button fx:id="btnNuevo"
-                    text="Nuevo"
-                    onAction="#onNuevo"
-                    styleClass="toolbar-button">
+                text="Nuevo"
+                onAction="#onNuevo"
+                styleClass="toolbar-button">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
-                            <Image url="@../images/icon_new.png"/>
+                            <Image url="@../images/icon_new.png" />
                         </image>
                     </ImageView>
                 </graphic>
             </Button>
 
             <Button fx:id="btnEditar"
-                    text="Editar"
-                    onAction="#onEditar"
-                    styleClass="toolbar-button"
-                    disable="true">
+                text="Editar"
+                onAction="#onEditar"
+                styleClass="toolbar-button"
+                disable="true">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
-                            <Image url="@../images/icon_role.png"/>
+                            <Image url="@../images/icon_role.png" />
                         </image>
                     </ImageView>
                 </graphic>
@@ -44,14 +44,14 @@
 
             <!-- Cambiado fx:id a btnEstado para que coincida con tu controlador -->
             <Button fx:id="btnEstado"
-                    text="Activar/Inactivar"
-                    onAction="#onReactivar"
-                    styleClass="toolbar-button"
-                    disable="true">
+                text="Activar/Inactivar"
+                onAction="#onEstado"
+                styleClass="toolbar-button"
+                disable="true">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
                         <image>
-                            <Image url="@../images/icon_reactivate.png"/>
+                            <Image url="@../images/icon_reactivate.png" />
                         </image>
                     </ImageView>
                 </graphic>
@@ -60,32 +60,34 @@
 
         <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar-filters">
             <TextField fx:id="txtBuscar"
-                       promptText="Buscar..."
-                       styleClass="search-field"/>
+                promptText="Buscar..."
+                styleClass="search-field" />
             <ComboBox fx:id="cbEstado"
-                      promptText="Estado"
-                      styleClass="filter-combo"/>
+                promptText="Estado"
+                styleClass="filter-combo" />
         </HBox>
     </VBox>
 
     <!-- Tabla de Usuarios: fx:id corregido a 'tablaUsuarios' -->
     <TableView fx:id="tablaUsuarios"
-               editable="true"
-               styleClass="table-clientes"
-               AnchorPane.topAnchor="80"
-               AnchorPane.leftAnchor="10"
-               AnchorPane.rightAnchor="10"
-               AnchorPane.bottomAnchor="10">
+        editable="true"
+        styleClass="table-clientes"
+        AnchorPane.topAnchor="80"
+        AnchorPane.leftAnchor="10"
+        AnchorPane.rightAnchor="10"
+        AnchorPane.bottomAnchor="10">
         <columns>
-            <TableColumn fx:id="colId"       text="ID"       prefWidth="80"/>
-            <TableColumn fx:id="colNombre"   text="Nombre"   prefWidth="150"/>
-            <TableColumn fx:id="colCorreo"   text="Correo"   prefWidth="200"/>
-            <TableColumn fx:id="colUsuario"  text="Usuario"  prefWidth="150"/>
-            <TableColumn fx:id="colRol"      text="Rol"      prefWidth="150" editable="true"/>
-            <TableColumn fx:id="colEstado"   text="Estado"   prefWidth="100"/>
-            <TableColumn fx:id="colSucursal" text="Sucursal" prefWidth="120"/>
-            <TableColumn fx:id="colRuc"      text="RUC"      prefWidth="120"/>
-            <TableColumn fx:id="colPermisos" text="Permisos" prefWidth="200"/>
+            <TableColumn fx:id="colNombreNatural" text="Nombre Natural" prefWidth="140" />
+            <TableColumn fx:id="colCedula" text="Número de Cédula" prefWidth="100" />
+            <TableColumn fx:id="colUsuario" text="Nombre de Usuario" prefWidth="120" />
+            <TableColumn fx:id="colCorreo" text="Correo Electrónico" prefWidth="180" />
+            <TableColumn fx:id="colRol" text="Rol" prefWidth="110" />
+            <TableColumn fx:id="colPermisos" text="Permisos" prefWidth="200" />
+            <TableColumn fx:id="colEstado" text="Estado" prefWidth="80" />
+            <TableColumn fx:id="colFechaModificacion" text="Fecha de Modificación" prefWidth="150" />
+            <TableColumn fx:id="colUsuarioModificador" text="Usuario Modificador" prefWidth="140" />
+
         </columns>
     </TableView>
+
 </AnchorPane>
