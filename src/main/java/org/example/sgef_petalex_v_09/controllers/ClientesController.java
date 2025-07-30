@@ -312,7 +312,7 @@ public class ClientesController {
         Button cancelButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
         cancelButton.addEventFilter(ActionEvent.ACTION, event -> {
             String mensaje = (existing != null)
-                    ? "¿Está seguro/a de cancelar el proceso de la Empresa Cliente"
+                    ? "¿Está seguro/a de cancelar el proceso de actualización de información de la Empresa Cliente?"
                     : "¿Está seguro/a de cancelar el registro de la Empresa Cliente?";
 
             boolean confirmed = DialogHelper.confirm(dialog.getDialogPane().getScene().getWindow(), mensaje);

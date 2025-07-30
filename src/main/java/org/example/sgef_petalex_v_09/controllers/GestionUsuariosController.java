@@ -381,7 +381,7 @@ public class GestionUsuariosController implements Initializable {
         PasswordField txtPassword = new PasswordField();
         txtPassword.setPromptText("Nueva contraseña (dejar vacío para no cambiar)");
         ComboBox<String> cbRol = new ComboBox<>(FXCollections.observableArrayList(
-                "Administrador", "Finanzas", "Gerente", "Ventas"));
+                "Administrador", "Gerente", "Ventas", "Contabilidad", "Ventas", "Logística"));
         cbRol.setValue(usuarioExistente.getRol());
 
         // Agregar campos al GridPane en orden lógico
