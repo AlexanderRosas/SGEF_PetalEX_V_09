@@ -120,59 +120,16 @@ public class GestionUsuariosController implements Initializable {
     }
 
     @FXML
-private void onEditar(ActionEvent ev) {
-    Window w = getWindow(ev);
-    Usuario seleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
-    if (seleccionado == null) {
-        DialogHelper.showWarning(w, "Seleccione un usuario");
-        return;
-    }
-
-    // Pedir contraseña del administrador en sesión
-    TextInputDialog pwdDialog = new TextInputDialog();
-    pwdDialog.initOwner(w);
-    pwdDialog.setTitle("Verificación");
-    pwdDialog.setHeaderText("Contraseña de Administrador");
-    pwdDialog.setContentText("Ingrese su contraseña:");
-    Optional<String> pwd = pwdDialog.showAndWait();
-
-    if (pwd.isEmpty())
-        return;
-
-    Usuario admin = UserUtil.buscarUsuario(UserSession.getUsuarioActual().getCorreo(), pwd.get());
-    if (admin == null || !"Administrador".equalsIgnoreCase(admin.getRol())) {
-        DialogHelper.showError(w, "Contraseña incorrecta o sin privilegios.");
-        return;
-    }
-
-    // Formulario de edición
-    Optional<Usuario> resultado = mostrarFormularioEdicion(seleccionado);
-    resultado.ifPresent(u -> {
-        seleccionado.setNombre(u.getNombre());
-        seleccionado.setCorreo(u.getCorreo());
-        seleccionado.setPassword(u.getPassword());
-        seleccionado.setRol(u.getRol());
-        seleccionado.setUsuarioModificacion(admin.getUsuario());
-        seleccionado.setFechaModificacion(LocalDateTime.now());
-        CSVUtil.guardarUsuarios(data);
-        tablaUsuarios.refresh();
-        DialogHelper.showSuccess(w, "Usuario actualizado");
-    });
-}
-    @FXML
-    private void onEstado(ActionEvent ev) {
+    private void onEditar(ActionEvent ev) {
         Window w = getWindow(ev);
         Usuario seleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
-        if (seleccionado == null)
+        if (seleccionado == null) {
+            DialogHelper.showWarning(w, "Seleccione un usuario");
             return;
+        }
 
         // Pedir contraseña del administrador en sesión
-        TextInputDialog pwdDialog = new TextInputDialog();
-        pwdDialog.initOwner(w);
-        pwdDialog.setTitle("Verificación");
-        pwdDialog.setHeaderText("Contraseña de Administrador");
-        pwdDialog.setContentText("Ingrese su contraseña:");
-        Optional<String> pwd = pwdDialog.showAndWait();
+        Optional<String> pwd = pedirPasswordAdministrador(w);
 
         if (pwd.isEmpty())
             return;
@@ -183,7 +140,41 @@ private void onEditar(ActionEvent ev) {
             return;
         }
 
-        if (!DialogHelper.confirm(w, "¿Estás seguro/a de anular este usuario?"))
+        // Formulario de edición
+        Optional<Usuario> resultado = mostrarFormularioEdicion(seleccionado);
+        resultado.ifPresent(u -> {
+            seleccionado.setNombre(u.getNombre());
+            seleccionado.setCorreo(u.getCorreo());
+            seleccionado.setPassword(u.getPassword());
+            seleccionado.setRol(u.getRol());
+            seleccionado.setUsuarioModificacion(admin.getUsuario());
+            seleccionado.setFechaModificacion(LocalDateTime.now());
+            CSVUtil.guardarUsuarios(data);
+            tablaUsuarios.refresh();
+            DialogHelper.showSuccess(w, "Usuario actualizado");
+        });
+    }
+
+    @FXML
+    private void onEstado(ActionEvent ev) {
+        Window w = getWindow(ev);
+        Usuario seleccionado = tablaUsuarios.getSelectionModel().getSelectedItem();
+        if (seleccionado == null)
+            return;
+
+        // Pedir contraseña del administrador en sesión
+        Optional<String> pwd = pedirPasswordAdministrador(w);
+
+        if (pwd.isEmpty())
+            return;
+
+        Usuario admin = UserUtil.buscarUsuario(UserSession.getUsuarioActual().getCorreo(), pwd.get());
+        if (admin == null || !"Administrador".equalsIgnoreCase(admin.getRol())) {
+            DialogHelper.showError(w, "Contraseña incorrecta o sin privilegios.");
+            return;
+        }
+
+        if (!DialogHelper.confirm(w, "¿Estás seguro/a de activar/inactivar este usuario?"))
             return;
 
         String nuevoEstado = "Activo".equalsIgnoreCase(seleccionado.getEstado()) ? "Inactivo" : "Activo";
@@ -192,7 +183,7 @@ private void onEditar(ActionEvent ev) {
         seleccionado.setFechaModificacion(LocalDateTime.now());
         CSVUtil.guardarUsuarios(data);
         tablaUsuarios.refresh();
-        DialogHelper.showSuccess(w, "Usuario " + nuevoEstado.toLowerCase() + " correctamente.");
+        DialogHelper.showSuccess(w, "Usuario " + nuevoEstado.toLowerCase());
         btnEstado.setText("Activo".equalsIgnoreCase(nuevoEstado) ? "Inactivar" : "Reactivar");
     }
 
@@ -269,7 +260,19 @@ private void onEditar(ActionEvent ev) {
                 setErrorStyle(txtCedula, vCedula.getErrorMessage());
                 valid = false;
             }
-
+            // Verificar duplicados
+            if (existeCampoDuplicado(usuarioExistente, "cedula", txtCedula.getText())) {
+                setErrorStyle(txtCedula, "Ya existe un usuario con esta cédula.");
+                valid = false;
+            }
+            if (existeCampoDuplicado(usuarioExistente, "usuario", txtUsuario.getText())) {
+                setErrorStyle(txtUsuario, "Ya existe un usuario con este nombre de usuario.");
+                valid = false;
+            }
+            if (existeCampoDuplicado(usuarioExistente, "correo", txtCorreo.getText())) {
+                setErrorStyle(txtCorreo, "Ya existe un usuario con este correo.");
+                valid = false;
+            }
             if (!valid) {
                 event.consume();
                 DialogHelper.showError(dialog.getDialogPane().getScene().getWindow(),
@@ -281,8 +284,8 @@ private void onEditar(ActionEvent ev) {
         Button cancelButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
         cancelButton.addEventFilter(ActionEvent.ACTION, event -> {
             String mensaje = usuarioExistente != null
-                    ? "¿Cancelar edición?"
-                    : "¿Cancelar registro?";
+                    ? "¿Está seguro/a de cancelar la edición de este Usuario?"
+                    : "¿Está seguro/a de cancelar el registro de este Usuario?";
             if (!DialogHelper.confirm(dialog.getDialogPane().getScene().getWindow(), mensaje)) {
                 event.consume();
             }
@@ -291,6 +294,55 @@ private void onEditar(ActionEvent ev) {
         // Resultado
         dialog.setResultConverter(btn -> {
             if (btn == ButtonType.OK) {
+                clearErrors.run();
+
+                boolean valid = true;
+
+                ValidationResult vNombre = DataValidator.validateNaturalName(txtNombre.getText());
+                ValidationResult vCorreo = DataValidator.validateCorreo(txtCorreo.getText());
+                ValidationResult vUsuario = DataValidator.validateUsername(txtUsuario.getText());
+                ValidationResult vPassword = DataValidator.validatePassword(txtPassword.getText());
+                ValidationResult vCedula = DataValidator.validateEcuadorianID(txtCedula.getText(), "Cédula");
+
+                if (!vNombre.isValid()) {
+                    setErrorStyle(txtNombre, vNombre.getErrorMessage());
+                    valid = false;
+                }
+                if (!vCorreo.isValid()) {
+                    setErrorStyle(txtCorreo, vCorreo.getErrorMessage());
+                    valid = false;
+                }
+                if (!vUsuario.isValid()) {
+                    setErrorStyle(txtUsuario, vUsuario.getErrorMessage());
+                    valid = false;
+                }
+                if (!vPassword.isValid()) {
+                    setErrorStyle(txtPassword, vPassword.getErrorMessage());
+                    valid = false;
+                }
+                if (!vCedula.isValid()) {
+                    setErrorStyle(txtCedula, vCedula.getErrorMessage());
+                    valid = false;
+                }
+                if (existeCampoDuplicado(usuarioExistente, "cedula", txtCedula.getText())) {
+                    setErrorStyle(txtCedula, "Ya existe un usuario con esta cédula.");
+                    valid = false;
+                }
+                if (existeCampoDuplicado(usuarioExistente, "usuario", txtUsuario.getText())) {
+                    setErrorStyle(txtUsuario, "Ya existe un usuario con este nombre de usuario.");
+                    valid = false;
+                }
+                if (existeCampoDuplicado(usuarioExistente, "correo", txtCorreo.getText())) {
+                    setErrorStyle(txtCorreo, "Ya existe un usuario con este correo.");
+                    valid = false;
+                }
+
+                if (!valid) {
+                    DialogHelper.showError(dialog.getDialogPane().getScene().getWindow(),
+                            "Por favor corrige los campos resaltados antes de continuar.");
+                    return null; // Aquí se evita el cierre del diálogo
+                }
+
                 Usuario u = usuarioExistente != null ? usuarioExistente : new Usuario();
                 u.setNombre(txtNombre.getText().trim());
                 u.setCorreo(txtCorreo.getText().trim());
@@ -299,11 +351,9 @@ private void onEditar(ActionEvent ev) {
                 u.setCedula(txtCedula.getText().trim());
                 u.setPassword(txtPassword.getText().trim());
 
-                // ✅ Actualizar fecha y usuario modificador
                 u.setUsuarioModificacion(getUsuarioActual());
                 u.setFechaModificacion(LocalDateTime.now());
 
-                // Asignar permisos según rol
                 List<Permiso> permisos = PermisosUtil.getPermisosPorRol(u.getRol());
                 u.setPermisos(permisos.stream().map(Permiso::getCodigo).collect(Collectors.joining(",")));
 
@@ -311,51 +361,98 @@ private void onEditar(ActionEvent ev) {
             }
             return null;
         });
+
         return dialog.showAndWait();
     }
+
     private Optional<Usuario> mostrarFormularioEdicion(Usuario usuarioExistente) {
-    Dialog<Usuario> dialog = new Dialog<>();
-    dialog.setTitle("Editar usuario");
-    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+        Dialog<Usuario> dialog = new Dialog<>();
+        dialog.setTitle("Editar usuario");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
 
-    GridPane grid = new GridPane();
-    grid.setHgap(10);
-    grid.setVgap(10);
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
 
-    // Campos del formulario
-    TextField txtNombre = new TextField(usuarioExistente.getNombre());
-    TextField txtCorreo = new TextField(usuarioExistente.getCorreo());
-    PasswordField txtPassword = new PasswordField();
-    txtPassword.setPromptText("Nueva contraseña");
-    ComboBox<String> cbRol = new ComboBox<>(FXCollections.observableArrayList(
-            "Administrador", "Finanzas", "Gerente", "Ventas"));
-    cbRol.setValue(usuarioExistente.getRol());
+        // Campos del formulario con valores iniciales
+        TextField txtNombre = new TextField(usuarioExistente.getNombre());
+        TextField txtCorreo = new TextField(usuarioExistente.getCorreo());
+        TextField txtUsuario = new TextField(usuarioExistente.getUsuario());
+        PasswordField txtPassword = new PasswordField();
+        txtPassword.setPromptText("Nueva contraseña (dejar vacío para no cambiar)");
+        ComboBox<String> cbRol = new ComboBox<>(FXCollections.observableArrayList(
+                "Administrador", "Gerente", "Ventas", "Contabilidad", "Ventas", "Logística"));
+        cbRol.setValue(usuarioExistente.getRol());
 
-    // Agregar campos al GridPane
-    grid.addRow(0, new Label("Nombre Natural:"), txtNombre);
-    grid.addRow(1, new Label("Correo Electrónico:"), txtCorreo);
-    grid.addRow(2, new Label("Contraseña:"), txtPassword);
-    grid.addRow(3, new Label("Rol:"), cbRol);
+        // Agregar campos al GridPane en orden lógico
+        grid.addRow(0, new Label("Nombre Natural:"), txtNombre);
+        grid.addRow(1, new Label("Correo Electrónico:"), txtCorreo);
+        grid.addRow(2, new Label("Usuario:"), txtUsuario);
+        grid.addRow(3, new Label("Contraseña:"), txtPassword);
+        grid.addRow(4, new Label("Rol:"), cbRol);
 
-    // Configurar el contenido del diálogo
-    dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().setContent(grid);
 
-    // Configurar el resultado del diálogo
-    dialog.setResultConverter(btn -> {
-        if (btn == ButtonType.OK) {
-            usuarioExistente.setNombre(txtNombre.getText().trim());
-            usuarioExistente.setCorreo(txtCorreo.getText().trim());
-            usuarioExistente.setPassword(txtPassword.getText().trim());
-            usuarioExistente.setRol(cbRol.getValue());
-            return usuarioExistente;
-        }
-        return null;
-    });
+        // Validar campos antes de cerrar el diálogo
+        Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+        okButton.addEventFilter(ActionEvent.ACTION, event -> {
+            // Limpia estilos previos
+            clearErrorStyle(txtNombre);
+            clearErrorStyle(txtCorreo);
+            clearErrorStyle(txtUsuario);
+            clearErrorStyle(txtPassword);
 
-    // Mostrar el diálogo y esperar la respuesta
-    return dialog.showAndWait();
-}
-   private void setErrorStyle(TextField field, String message) {
+            boolean valid = true;
+
+            if (txtNombre.getText().trim().isEmpty()) {
+                setErrorStyle(txtNombre, "El nombre natural es obligatorio");
+                valid = false;
+            }
+
+            if (txtCorreo.getText().trim().isEmpty()) {
+                setErrorStyle(txtCorreo, "El correo electrónico es obligatorio");
+                valid = false;
+            } else if (!txtCorreo.getText().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                setErrorStyle(txtCorreo, "Correo electrónico inválido");
+                valid = false;
+            }
+
+            if (txtUsuario.getText().trim().isEmpty()) {
+                setErrorStyle(txtUsuario, "El nombre de usuario es obligatorio");
+                valid = false;
+            } else if (existeCampoDuplicado(usuarioExistente, "usuario", txtUsuario.getText().trim())) {
+                setErrorStyle(txtUsuario, "Ya existe un usuario con este nombre de usuario");
+                valid = false;
+            }
+
+            if (!valid) {
+                event.consume();
+                DialogHelper.showError(dialog.getDialogPane().getScene().getWindow(),
+                        "Por favor corrige los campos resaltados antes de continuar.");
+            }
+        });
+
+        dialog.setResultConverter(btn -> {
+            if (btn == ButtonType.OK) {
+                usuarioExistente.setNombre(txtNombre.getText().trim());
+                usuarioExistente.setCorreo(txtCorreo.getText().trim());
+                usuarioExistente.setUsuario(txtUsuario.getText().trim());
+
+                String newPassword = txtPassword.getText().trim();
+                if (!newPassword.isEmpty()) {
+                    usuarioExistente.setPassword(newPassword);
+                }
+                usuarioExistente.setRol(cbRol.getValue());
+
+                return usuarioExistente;
+            }
+            return null;
+        });
+
+        return dialog.showAndWait();
+    }
+
+    private void setErrorStyle(TextField field, String message) {
         field.setStyle("-fx-border-color: red; -fx-border-width: 2px;");
         Tooltip tooltip = new Tooltip(message);
         tooltip.setStyle("-fx-background-color: #ffdddd; -fx-text-fill: red;");
@@ -372,6 +469,58 @@ private void onEditar(ActionEvent ev) {
     }
 
     private String getUsuarioActual() {
-        return "admin"; // Simulación
+        Usuario actual = UserSession.getUsuarioActual();
+        return (actual != null) ? actual.getUsuario() : "desconocido";
     }
+
+    private boolean existeCampoDuplicado(Usuario usuarioNuevo, String campo, String valor) {
+        return data.stream().anyMatch(u -> !u.equals(usuarioNuevo) && // Para evitar que se compare consigo mismo al
+                                                                      // editar
+                switch (campo) {
+                    case "cedula" -> u.getCedula().equalsIgnoreCase(valor);
+                    case "usuario" -> u.getUsuario().equalsIgnoreCase(valor);
+                    case "correo" -> u.getCorreo().equalsIgnoreCase(valor);
+                    default -> false;
+                });
+    }
+
+    private Optional<String> pedirPasswordAdministrador(Window owner) {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Verificación");
+        dialog.setHeaderText("Contraseña de Administrador");
+        dialog.initOwner(owner);
+
+        ButtonType loginButtonType = new ButtonType("Aceptar", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText("Ingrese su contraseña");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.add(new Label("Contraseña:"), 0, 0);
+        grid.add(passwordField, 1, 0);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // Permite que el botón OK esté habilitado solo si el campo no está vacío
+        Node okButton = dialog.getDialogPane().lookupButton(loginButtonType);
+        okButton.setDisable(true);
+
+        passwordField.textProperty().addListener((obs, oldVal, newVal) -> {
+            okButton.setDisable(newVal.trim().isEmpty());
+        });
+
+        // Devuelve la contraseña ingresada si se pulsa OK
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == loginButtonType) {
+                return passwordField.getText();
+            }
+            return null;
+        });
+
+        return dialog.showAndWait();
+    }
+
 }

@@ -41,13 +41,13 @@ public class DataValidator {
 
         switch (pais.toUpperCase()) {
             case "ECUADOR":
-                if (id.length() == 10) {
-                    return validateEcuadorianID(id, "Cédula");
-                } else if (id.length() == 13 && id.endsWith("001")) {
+                // Solo RUC válido: 13 dígitos terminados en 001 y que los primeros 10 dígitos
+                // formen una cédula válida
+                if (id.length() == 13 && id.endsWith("001")) {
                     return validateRUC(id, "RUC");
                 } else {
                     return ValidationResult.error("Identificador",
-                            "En Ecuador debe ser CI (10 dígitos) o RUC (13 dígitos terminado en 001)");
+                            "El RUC debe tener 13 dígitos terminando en 001");
                 }
 
             case "ESTADOS UNIDOS":
@@ -101,7 +101,7 @@ public class DataValidator {
         }
         if (!PHONE_E164_PATTERN.matcher(telefono.trim()).matches()) {
             return ValidationResult.error("Teléfono",
-                    "Formato E.164 inválido (ej. +593991234567)");
+                    "Formato E.164 inválido para teléfono(ej. +593991234567)");
         }
         return ValidationResult.success();
     }
@@ -112,7 +112,7 @@ public class DataValidator {
             return ValidationResult.error("Correo", "El correo es obligatorio");
         }
         if (!EMAIL_PATTERN.matcher(correo.trim()).matches()) {
-            return ValidationResult.error("Correo", "Formato de correo inválido");
+            return ValidationResult.error("Correo", "Formato de correo inválido (ej. nombre@dominio.com)");
         }
         return ValidationResult.success();
     }
@@ -246,7 +246,7 @@ public class DataValidator {
         // Algoritmo de validación de cédula ecuatoriana
         if (!isValidEcuadorianID(trimmedCedula)) {
             return ValidationResult.error(fieldName,
-                    "La " + fieldName.toLowerCase() + " no es válida según el algoritmo ecuatoriano");
+                    "La " + fieldName.toLowerCase() + " no válida.");
         }
 
         return ValidationResult.success();

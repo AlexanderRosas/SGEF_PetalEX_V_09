@@ -66,8 +66,6 @@ public class ClientesController {
     private final ObservableList<Cliente> data = FXCollections.observableArrayList();
     private FilteredList<Cliente> filteredData;
 
-    private final String usuarioActual = "admin"; // Obtener de sesión
-
     @FXML
     public void initialize() {
         configurarColumnas();
@@ -76,6 +74,11 @@ public class ClientesController {
         tablaClientes.setItems(filteredData);
         btnEstado.setText("Cambiar estado");
 
+    }
+
+    private String getUsuarioActual() {
+        var usuario = UserSession.getUsuarioActual();
+        return (usuario != null) ? usuario.getUsuario() : "desconocido";
     }
 
     private void configurarColumnas() {
@@ -137,22 +140,22 @@ public class ClientesController {
         Optional<Cliente> result = showClientForm("Crear", null);
         result.ifPresent(cliente -> {
             if (existeIdentificador(cliente.getIdentificadorEmpresarial())) {
-                DialogHelper.showError(btnNuevo.getScene().getWindow(), "El identificador ya existe");
+                DialogHelper.showError(btnNuevo.getScene().getWindow(), "El identificador Empresarial ya existe");
                 return;
             }
 
             cliente.setEstado("Activa");
-            cliente.setUsuarioModificacion(usuarioActual);
+            cliente.setUsuarioModificacion(getUsuarioActual());
             cliente.setFechaModificacion(LocalDateTime.now());
 
             data.add(cliente);
-            System.out.println("Clientes a guardar: " + data.size());
+            System.out.println("Empresas Clientes a guardar: " + data.size());
             for (Cliente c : data) {
                 System.out.println(" -> " + c.getNombre() + " [" + c.getIdentificadorEmpresarial() + "]");
             }
 
             CSVUtil.guardarClientes(data);
-            DialogHelper.showSuccess(btnNuevo.getScene().getWindow(), "Cliente registrado exitosamente");
+            DialogHelper.showSuccess(btnNuevo.getScene().getWindow(), "Empresa Cliente registrada exitosamente");
         });
     }
 
@@ -168,7 +171,7 @@ public class ClientesController {
             sel.setDireccion(cliente.getDireccion());
             sel.setTelefono(cliente.getTelefono());
             sel.setCorreo(cliente.getCorreo());
-            sel.setUsuarioModificacion(usuarioActual);
+            sel.setUsuarioModificacion(getUsuarioActual());
             sel.setFechaModificacion(LocalDateTime.now());
             System.out.println("Antes de guardar:");
             data.forEach(c -> System.out.println(c.getNombre() + " - " + c.getDireccion()));
@@ -182,7 +185,7 @@ public class ClientesController {
             clientesDesdeArchivo.forEach(c -> System.out.println(c.getNombre() + " - " + c.getDireccion()));
             tablaClientes.refresh();
 
-            DialogHelper.showSuccess(btnEditar.getScene().getWindow(), "Cliente actualizado");
+            DialogHelper.showSuccess(btnEditar.getScene().getWindow(), "Empresa Cliente actualizada");
 
         });
     }
@@ -194,12 +197,12 @@ public class ClientesController {
             return;
 
         String nuevoEstado = sel.getEstado().equalsIgnoreCase("Activa") ? "Inactiva" : "Activa";
-        String mensajeConfirmacion = "¿Está seguro/a de cambiar el estado del cliente a '" + nuevoEstado + "'?";
+        String mensajeConfirmacion = "¿Está seguro/a de cambiar el estado de la Empresa Cliente?'" + nuevoEstado + "'?";
 
         boolean confirmed = DialogHelper.confirm(btnEstado.getScene().getWindow(), mensajeConfirmacion);
         if (confirmed) {
             sel.setEstado(nuevoEstado);
-            sel.setUsuarioModificacion(usuarioActual);
+            sel.setUsuarioModificacion(getUsuarioActual());
             sel.setFechaModificacion(LocalDateTime.now());
 
             CSVUtil.guardarClientes(data);
@@ -309,8 +312,8 @@ public class ClientesController {
         Button cancelButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
         cancelButton.addEventFilter(ActionEvent.ACTION, event -> {
             String mensaje = (existing != null)
-                    ? "¿Está seguro/a de cancelar el proceso de edición del cliente?"
-                    : "¿Está seguro/a de cancelar el registro del Cliente?";
+                    ? "¿Está seguro/a de cancelar el proceso de actualización de información de la Empresa Cliente?"
+                    : "¿Está seguro/a de cancelar el registro de la Empresa Cliente?";
 
             boolean confirmed = DialogHelper.confirm(dialog.getDialogPane().getScene().getWindow(), mensaje);
             if (!confirmed) {
@@ -328,7 +331,7 @@ public class ClientesController {
                 c.setTelefono(txtTelefono.getText());
                 c.setCorreo(txtCorreo.getText());
                 c.setEstado(existing != null ? existing.getEstado() : "Activa");
-                c.setUsuarioModificacion(usuarioActual);
+                c.setUsuarioModificacion(getUsuarioActual());
                 c.setFechaModificacion(LocalDateTime.now());
                 return c;
             }
@@ -370,10 +373,40 @@ public class ClientesController {
     }
 
     @FXML
-    private void onBack(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.getScene().setRoot(root);
+    private void onBack(ActionEvent event) {
+        try {
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Guardar estado ventana actual para restaurar si quieres (opcional)
+            boolean wasMaximized = stage.isMaximized();
+            double width = stage.getWidth();
+            double height = stage.getHeight();
+
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/MainMenu.fxml"));
+
+            Scene scene = stage.getScene();
+            scene.setRoot(root);
+
+            // Reaplicar CSS si usas hojas externas
+            scene.getStylesheets().clear();
+            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+
+            stage.setResizable(false);
+            if (wasMaximized) {
+                stage.setMaximized(true);
+            } else {
+                stage.setMaximized(false);
+                stage.setWidth(width);
+                stage.setHeight(height);
+                stage.centerOnScreen();
+            }
+
+            stage.setTitle("Index Blooms – Menú Principal");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            DialogHelper.showError(null, "No se pudo cargar el menú principal.");
+        }
     }
 
     private String generarNuevoIdIncremental() {

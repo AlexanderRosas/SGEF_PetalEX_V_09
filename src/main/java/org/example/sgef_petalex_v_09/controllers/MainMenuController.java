@@ -7,29 +7,46 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
 
+import org.example.sgef_petalex_v_09.models.Usuario;
+import org.example.sgef_petalex_v_09.util.UserSession;
+
 public class MainMenuController {
 
-    @FXML private AnchorPane root;
-    @FXML private Button btnClientes;
-    @FXML private Button btnVentas;
-    @FXML private Button btnCompras;
-    @FXML private Button btnProveedores;
-    @FXML private Button btnSistema;
+    @FXML
+    private AnchorPane root;
+
+    @FXML
+    private Button btnClientes, btnVentas, btnCompras, btnProveedores, btnSistema;
+
+    @FXML
+    private Label lblBienvenida;
+
+    // Método initialize sin ResourceBundle para evitar null pointer
+    @FXML
+    public void initialize() {
+        Usuario usuario = UserSession.getUsuarioActual();
+        if (usuario != null && usuario.getUsuario() != null) {
+            lblBienvenida.setText("Bienvenido: " + usuario.getUsuario());
+        } else {
+            lblBienvenida.setText("Bienvenido: Invitado");
+        }
+    }
 
     @FXML
     private void onClientes(ActionEvent event) {
-        cargarVista(event, "/fxml/Clientes.fxml",       "Index Blooms – Clientes");
+        cargarVista(event, "/fxml/Clientes.fxml", "Index Blooms – Clientes");
     }
 
     @FXML
     private void onVentas(ActionEvent event) {
-        cargarVista(event, "/fxml/Ventas.fxml",         "Index Blooms – Ventas");
+        cargarVista(event, "/fxml/Ventas.fxml", "Index Blooms – Ventas");
     }
 
     @FXML
@@ -39,69 +56,51 @@ public class MainMenuController {
 
     @FXML
     private void onProveedores(ActionEvent event) {
-        cargarVista(event, "/fxml/Proveedores.fxml",    "Index Blooms – Proveedores");
+        cargarVista(event, "/fxml/Proveedores.fxml", "Index Blooms – Proveedores");
     }
 
     @FXML
     private void onSistema(ActionEvent event) {
-        cargarVista(event, "/fxml/Administracion.fxml","Index Blooms – Administración del Sistema");
+        cargarVista(event, "/fxml/Administracion.fxml", "Index Blooms – Administración del Sistema");
     }
 
     @FXML
     private void onLogout(ActionEvent event) {
         try {
-            Parent loginRoot = FXMLLoader.load(
-                    getClass().getResource("/fxml/Login.fxml")
-            );
-            Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+            Parent loginRoot = FXMLLoader.load(getClass().getResource("/fxml/Login.fxml"));
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
             Scene scene = new Scene(loginRoot);
-            scene.getStylesheets().add(
-                    getClass().getResource("/css/styles.css").toExternalForm()
-            );
+            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
             stage.setScene(scene);
             stage.setTitle("Index Blooms – Login");
+            stage.setMaximized(false);
+            stage.setResizable(true);
             stage.centerOnScreen();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    /**
-     * Carga un FXML en una nueva Scene para el Stage actual,
-     * reaplica CSS y restaura el tamaño o maximizado.
-     *
-     * @param event     el evento de clic
-     * @param fxmlPath  ruta al recurso FXML (empieza con '/')
-     * @param title     título de la ventana
-     */
     private void cargarVista(ActionEvent event, String fxmlPath, String title) {
         try {
-            // 1) Obtener Stage y guardar estado
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            double width       = stage.getWidth();
-            double height      = stage.getHeight();
-            boolean wasMaximized = stage.isMaximized();
+            Scene scene = stage.getScene();
 
-            // 2) Localizar y cargar el FXML
             URL resource = getClass().getResource(fxmlPath);
             if (resource == null) {
                 System.err.println("ERROR: FXML no encontrado en " + fxmlPath);
                 return;
             }
+
             Parent rootNode = FXMLLoader.load(resource);
 
-            // 3) Nueva Scene y CSS
-            Scene scene = new Scene(rootNode);
-            scene.getStylesheets().add(
-                    getClass().getResource("/css/styles.css").toExternalForm()
-            );
-
-            // 4) Aplicar Scene y título
-            stage.setScene(scene);
+            scene.setRoot(rootNode);
             stage.setTitle(title);
+            stage.setMaximized(true);
+            stage.setResizable(false);
 
-            // 5) Restaurar tamaño o maximizado
-                stage.centerOnScreen();
         } catch (IOException e) {
             e.printStackTrace();
         }
