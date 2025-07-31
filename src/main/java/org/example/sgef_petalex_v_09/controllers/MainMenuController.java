@@ -1,5 +1,6 @@
 package org.example.sgef_petalex_v_09.controllers;
 
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -10,13 +11,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import javafx.stage.Window;
+import org.example.sgef_petalex_v_09.models.Usuario;
+import org.example.sgef_petalex_v_09.util.DialogHelper;
+import org.example.sgef_petalex_v_09.util.PermisosUtil;
+import org.example.sgef_petalex_v_09.util.UserSession;
 
 import java.io.IOException;
 import java.net.URL;
-
-import org.example.sgef_petalex_v_09.models.Usuario;
-import org.example.sgef_petalex_v_09.util.UserSession;
-
 public class MainMenuController {
 
     @FXML
@@ -28,7 +30,6 @@ public class MainMenuController {
     @FXML
     private Label lblBienvenida;
 
-    // Método initialize sin ResourceBundle para evitar null pointer
     @FXML
     public void initialize() {
         Usuario usuario = UserSession.getUsuarioActual();
@@ -36,7 +37,21 @@ public class MainMenuController {
             lblBienvenida.setText("Bienvenido: " + usuario.getUsuario());
         } else {
             lblBienvenida.setText("Bienvenido: Invitado");
+            // Si no hay usuario, ocultar todo
+            btnProveedores.setVisible(false);
+            btnClientes.setVisible(false);
+            btnCompras.setVisible(false);
+            btnVentas.setVisible(false);
+            btnSistema.setVisible(false);
+            return;
         }
+
+        // Mostrar/ocultar botones según permisos
+        btnClientes.setVisible(PermisosUtil.puedeAccederA(usuario, "CLIENTES"));
+        btnProveedores.setVisible(PermisosUtil.puedeAccederA(usuario, "PROVEEDORES"));
+        btnCompras.setVisible(PermisosUtil.puedeAccederA(usuario, "COMPRAS"));
+        btnVentas.setVisible(PermisosUtil.puedeAccederA(usuario, "VENTAS"));
+        btnSistema.setVisible(PermisosUtil.puedeAccederA(usuario, "ADMINISTRACION"));
     }
 
     @FXML
@@ -66,20 +81,25 @@ public class MainMenuController {
 
     @FXML
     private void onLogout(ActionEvent event) {
-        try {
-            Parent loginRoot = FXMLLoader.load(getClass().getResource("/fxml/Login.fxml"));
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        Window window = ((Node) event.getSource()).getScene().getWindow();
+        if (DialogHelper.confirm(window, "¿Estás seguro/a de cerrar sesión?")) {
+            UserSession.cerrarSesion();
+            DialogHelper.showSuccess(window, "Sesión cerrada");
+            try {
+                Parent loginRoot = FXMLLoader.load(getClass().getResource("/fxml/Login.fxml"));
+                Stage stage = (Stage) window;
 
-            Scene scene = new Scene(loginRoot);
-            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
-            stage.setScene(scene);
-            stage.setTitle("Index Blooms – Login");
-            stage.setMaximized(false);
-            stage.setResizable(true);
-            stage.centerOnScreen();
-
-        } catch (IOException e) {
-            e.printStackTrace();
+                Scene scene = new Scene(loginRoot);
+                scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+                stage.setScene(scene);
+                stage.setTitle("Index Blooms – Login");
+                stage.setMaximized(false);
+                stage.setResizable(true);
+                stage.centerOnScreen();
+            } catch (IOException e) {
+                e.printStackTrace();
+                DialogHelper.showError(window, "No se pudo cargar la pantalla de inicio de sesión.");
+            }
         }
     }
 
@@ -100,7 +120,6 @@ public class MainMenuController {
             stage.setTitle(title);
             stage.setMaximized(true);
             stage.setResizable(false);
-
         } catch (IOException e) {
             e.printStackTrace();
         }

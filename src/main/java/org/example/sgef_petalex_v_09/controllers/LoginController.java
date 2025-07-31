@@ -5,12 +5,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.example.sgef_petalex_v_09.models.Usuario;
 import org.example.sgef_petalex_v_09.util.*;
+import org.example.sgef_petalex_v_09.validators.DataValidator;
+import org.example.sgef_petalex_v_09.validators.ValidationResult;
 
 import java.io.IOException;
 import java.net.URL;
@@ -44,19 +44,44 @@ public class LoginController {
         btnIngresar.setDisable(camposVacios);
     }
 
+    private void setErrorStyle(TextField field, String message) {
+        field.setStyle("-fx-border-color: red; -fx-border-width: 2px;");
+        Tooltip tooltip = new Tooltip(message);
+        tooltip.setStyle("-fx-background-color: #ffdddd; -fx-text-fill: red;");
+        field.setTooltip(tooltip);
+    }
+
+    private void clearErrorStyle(TextField field) {
+        field.setStyle(null);
+        field.setTooltip(null);
+    }
+
     @FXML
     private void onIngresar(ActionEvent event) {
         String correo = txtUsuario.getText().trim();
         String password = txtPassword.getText().trim();
 
-        if (correo.isEmpty() || password.isEmpty()) {
-            DialogHelper.showError(null, "Correo electrónico y contraseña son obligatorios.");
-            return;
+        clearErrorStyle(txtUsuario);
+        clearErrorStyle(txtPassword);
+
+        boolean valid = true;
+
+        // Validar correo electrónico
+        ValidationResult vCorreo = DataValidator.validateCorreo(correo);
+        if (!vCorreo.isValid()) {
+            setErrorStyle(txtUsuario, vCorreo.getErrorMessage());
+            valid = false;
         }
 
-        // Validación básica correo electrónico
-        if (!correo.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-            DialogHelper.showError(null, "Formato de correo electrónico inválido.");
+        // Validar contraseña
+        ValidationResult vPassword = DataValidator.validatePassword(password);
+        if (!vPassword.isValid()) {
+            setErrorStyle(txtPassword, vPassword.getErrorMessage());
+            valid = false;
+        }
+
+        if (!valid) {
+            DialogHelper.showError(null, "Error al Iniciar Sesión. Corrige los campos resaltados (mantén el cursor sobre el campo para más información)");
             return;
         }
 
@@ -101,7 +126,9 @@ public class LoginController {
 
         } else {
             intentos++;
-            DialogHelper.showError(null, "Nombre de usuario o contraseña incorrectos.");
+            setErrorStyle(txtUsuario, "Correo electrónico o contraseña incorrectos.");
+            setErrorStyle(txtPassword, "Correo electrónico o contraseña incorrectos.");
+            DialogHelper.showError(null, "Error al Iniciar Sesión. Corrige los campos resaltados (mantén el cursor sobre el campo para más información)");
             txtPassword.clear();
             txtPassword.requestFocus();
         }

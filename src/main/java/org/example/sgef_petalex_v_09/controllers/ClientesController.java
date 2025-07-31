@@ -6,10 +6,12 @@ import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.*;
 import org.example.sgef_petalex_v_09.models.Cliente;
 import org.example.sgef_petalex_v_09.util.*;
@@ -74,6 +76,17 @@ public class ClientesController {
         tablaClientes.setItems(filteredData);
         btnEstado.setText("Cambiar estado");
 
+        // Agregar "Todos" a la lista de países
+        ObservableList<String> paises = FXCollections.observableArrayList();
+        paises.add("Todos"); // Agregar "Todos" al inicio
+        paises.addAll(PaisUtil.PREFIJOS.keySet()); // Agregar los demás países
+
+        cbPais.setItems(paises);
+        cbPais.setValue("Todos"); // Establecer "Todos" como valor predeterminado
+
+        // Agregar "Todos" a la lista de estados
+        cbEstado.setItems(FXCollections.observableArrayList("Todos", "Activa", "Inactiva"));
+        cbEstado.setValue("Todos"); // Establecer "Todos" como valor predeterminado
     }
 
     private String getUsuarioActual() {
@@ -216,12 +229,34 @@ public class ClientesController {
         dialog.setTitle(title + " cliente");
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
 
+        // Controles
         ComboBox<String> cbPais = new ComboBox<>(FXCollections.observableArrayList(PaisUtil.PREFIJOS.keySet()));
         TextField txtIdentificador = new TextField();
         TextField txtNombre = new TextField();
         TextField txtDireccion = new TextField();
-        TextField txtTelefono = new TextField();
+        ComboBox<String> cbPrefijo = new ComboBox<>();
+        TextField txtNumero = new TextField();
         TextField txtCorreo = new TextField();
+        txtNombre.setPrefWidth(220);
+        txtDireccion.setPrefWidth(220);
+        txtNumero.setPrefWidth(140);
+        cbPrefijo.setPrefWidth(80);
+        // Configurar ComboBox de prefijos
+        cbPrefijo.setItems(FXCollections.observableArrayList(PaisUtil.PREFIJOS.values()));
+        cbPrefijo.setPrefWidth(80);
+        txtNumero.setPromptText("Ej: 9912345678");
+
+        HBox telefonoBox = new HBox(5, cbPrefijo, txtNumero);
+        telefonoBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Listener para actualizar prefijo al cambiar país
+        cbPais.getSelectionModel().selectedItemProperty().addListener((obs, oldPais, newPais) -> {
+            if (newPais != null) {
+                String prefijo = PaisUtil.getPrefijo(newPais);
+                cbPrefijo.setValue(prefijo);
+                txtIdentificador.setPromptText("Ej: " + obtenerEjemploIdentificador(newPais));
+            }
+        });
 
         // Placeholders
         txtIdentificador.setPromptText("Ej: 1790012345001");
@@ -229,54 +264,64 @@ public class ClientesController {
         txtDireccion.setPromptText("Ej: Av. Amazonas 123 y Naciones Unidas");
         txtCorreo.setPromptText("Ej: contacto@globalroses.com");
 
-        cbPais.getSelectionModel().selectedItemProperty().addListener((obs, oldPais, newPais) -> {
-            if (newPais != null) {
-                String prefijo = PaisUtil.getPrefijo(newPais);
-                txtTelefono.setPromptText(prefijo + " Ej: 9912345678");
-                txtTelefono.setText(prefijo);
-                txtIdentificador.setPromptText("Ej: " + obtenerEjemploIdentificador(newPais));
-            }
-        });
-
+        // Cargar datos si es edición
         if (existing != null) {
             cbPais.setValue(existing.getPais());
             txtIdentificador.setText(existing.getIdentificadorEmpresarial());
             txtIdentificador.setDisable(true);
             cbPais.setDisable(true);
+
             txtNombre.setText(existing.getNombre());
             txtDireccion.setText(existing.getDireccion());
-            txtTelefono.setText(existing.getTelefono());
             txtCorreo.setText(existing.getCorreo());
+
+            // Cargar prefijo y número desde teléfono completo
+            String telefono = existing.getTelefono();
+            if (telefono != null && telefono.startsWith("+")) {
+                String prefijo = telefono.substring(0, telefono.indexOf("+", 1) > 0 ? telefono.lastIndexOf("+") : 4);
+                String numero = telefono.substring(prefijo.length());
+                cbPrefijo.setValue(prefijo);
+                txtNumero.setText(numero);
+            } else {
+                txtNumero.setText(telefono);
+            }
         } else {
             cbPais.getSelectionModel().selectFirst();
         }
 
+        // Layout
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(5);
-
         grid.addRow(0, new Label("País:"), cbPais);
         grid.addRow(1, new Label("Identificador:"), txtIdentificador);
         grid.addRow(2, new Label("Nombre:"), txtNombre);
         grid.addRow(3, new Label("Dirección:"), txtDireccion);
-        grid.addRow(4, new Label("Teléfono:"), txtTelefono);
+        grid.addRow(4, new Label("Teléfono:"), telefonoBox);
         grid.addRow(5, new Label("Correo:"), txtCorreo);
-
+        dialog.setResizable(false);
+        dialog.getDialogPane().setPrefSize(340, 280);
         dialog.getDialogPane().setContent(grid);
 
+        // Validaciones
         Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
         okButton.addEventFilter(ActionEvent.ACTION, event -> {
+            String telefonoCompleto = cbPrefijo.getValue() + txtNumero.getText();
+
             ValidationResult vIdentificador = DataValidator.validateIdentificador(txtIdentificador.getText(),
                     cbPais.getValue());
             ValidationResult vNombre = DataValidator.validateEmpresaNombre(txtNombre.getText());
             ValidationResult vDireccion = DataValidator.validateDireccion(txtDireccion.getText());
-            ValidationResult vTelefono = DataValidator.validateTelefonoE164(txtTelefono.getText());
+            ValidationResult vTelefono = txtNumero.getText().trim().isEmpty()
+                    ? ValidationResult.error("",
+                            "El teléfono es obligatorio y debe contener solo formato E.164 (ej. +593985095169).")
+                    : DataValidator.validateTelefonoE164(telefonoCompleto);
             ValidationResult vCorreo = DataValidator.validateCorreo(txtCorreo.getText());
 
             clearErrorStyle(txtIdentificador);
             clearErrorStyle(txtNombre);
             clearErrorStyle(txtDireccion);
-            clearErrorStyle(txtTelefono);
+            clearErrorStyle(txtNumero);
             clearErrorStyle(txtCorreo);
 
             boolean valid = true;
@@ -294,7 +339,7 @@ public class ClientesController {
                 valid = false;
             }
             if (!vTelefono.isValid()) {
-                setErrorStyle(txtTelefono, vTelefono.getErrorMessage());
+                setErrorStyle(txtNumero, vTelefono.getErrorMessage());
                 valid = false;
             }
             if (!vCorreo.isValid()) {
@@ -309,6 +354,7 @@ public class ClientesController {
             }
         });
 
+        // Confirmación al cancelar
         Button cancelButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
         cancelButton.addEventFilter(ActionEvent.ACTION, event -> {
             String mensaje = (existing != null)
@@ -320,15 +366,23 @@ public class ClientesController {
                 event.consume();
             }
         });
+
+        // Resultado
         dialog.setResultConverter(btn -> {
             if (btn == ButtonType.OK) {
+                String telefonoCompleto = cbPrefijo.getValue() + txtNumero.getText().trim();
+
+                ValidationResult vTelefono = txtNumero.getText().trim().isEmpty()
+                        ? ValidationResult.success() // ✅ Usa tu método estático correcto
+                        : DataValidator.validateTelefonoE164(telefonoCompleto);
+
                 Cliente c = new Cliente();
                 c.setId(existing != null ? existing.getId() : generarNuevoIdIncremental());
                 c.setNombre(txtNombre.getText());
                 c.setIdentificadorEmpresarial(txtIdentificador.getText());
                 c.setPais(cbPais.getValue());
                 c.setDireccion(txtDireccion.getText());
-                c.setTelefono(txtTelefono.getText());
+                c.setTelefono(telefonoCompleto);
                 c.setCorreo(txtCorreo.getText());
                 c.setEstado(existing != null ? existing.getEstado() : "Activa");
                 c.setUsuarioModificacion(getUsuarioActual());
@@ -339,9 +393,8 @@ public class ClientesController {
         });
 
         return dialog.showAndWait();
-    }
+    } // Métodos auxiliares de la clase (no dentro de showClientForm)
 
-    // Métodos auxiliares de la clase (no dentro de showClientForm)
     private void setErrorStyle(TextField field, String message) {
         field.setStyle("-fx-border-color: red; -fx-border-width: 2px;");
         Tooltip tooltip = new Tooltip(message);

@@ -39,8 +39,15 @@ public class GestionUsuariosController implements Initializable {
     @FXML
     private Button btnNuevo, btnEditar, btnEstado;
     @FXML
-    private TextField txtBuscar;
-
+    private TextField txtBuscarNombreNatural;
+    @FXML
+    private TextField txtBuscarNombreUsuario;
+    @FXML
+    private TextField txtBuscarCedula;
+    @FXML
+    private TextField txtBuscarCorreo;
+    @FXML
+    private ComboBox<String> cbEstado;
     private final ObservableList<Usuario> data = FXCollections.observableArrayList();
     private FilteredList<Usuario> filteredData;
 
@@ -49,6 +56,8 @@ public class GestionUsuariosController implements Initializable {
         configurarTabla();
         cargarUsuarios();
         configurarFiltros();
+        cbEstado.setItems(FXCollections.observableArrayList("Todos", "Activo", "Inactivo"));
+        cbEstado.setValue("Todos");
     }
 
     private void configurarTabla() {
@@ -86,18 +95,34 @@ public class GestionUsuariosController implements Initializable {
     }
 
     private void configurarFiltros() {
-        txtBuscar.textProperty().addListener((obs, o, n) -> {
-            String filtro = n.toLowerCase().trim();
+        txtBuscarNombreNatural.textProperty().addListener((obs, o, n) -> aplicarFiltro());
+        txtBuscarNombreUsuario.textProperty().addListener((obs, o, n) -> aplicarFiltro());
+        txtBuscarCedula.textProperty().addListener((obs, o, n) -> aplicarFiltro());
+        txtBuscarCorreo.textProperty().addListener((obs, o, n) -> aplicarFiltro());
+        cbEstado.valueProperty().addListener((obs, o, n) -> aplicarFiltro());
+    }
 
-            filteredData.setPredicate(u -> {
-                if (filtro.isEmpty())
-                    return true;
+    private void aplicarFiltro() {
+        String nombreNatural = txtBuscarNombreNatural.getText().toLowerCase();
+        String nombreUsuario = txtBuscarNombreUsuario.getText().toLowerCase();
+        String cedula = txtBuscarCedula.getText().toLowerCase();
+        String correo = txtBuscarCorreo.getText().toLowerCase();
+        String estado = cbEstado.getValue();
 
-                return u.getNombre().toLowerCase().contains(filtro) ||
-                        u.getCedula().toLowerCase().contains(filtro) ||
-                        u.getCorreo().toLowerCase().contains(filtro) ||
-                        u.getEstado().toLowerCase().contains(filtro);
-            });
+        filteredData.setPredicate(u -> {
+            if (nombreNatural.isEmpty() && nombreUsuario.isEmpty() && cedula.isEmpty() && correo.isEmpty()
+                    && (estado == null || estado.equals("Todos"))) {
+                return true;
+            }
+
+            boolean nombreNaturalMatch = nombreNatural.isEmpty() || u.getNombre().toLowerCase().contains(nombreNatural);
+            boolean nombreUsuarioMatch = nombreUsuario.isEmpty()
+                    || u.getUsuario().toLowerCase().contains(nombreUsuario);
+            boolean cedulaMatch = cedula.isEmpty() || u.getCedula().toLowerCase().contains(cedula);
+            boolean correoMatch = correo.isEmpty() || u.getCorreo().toLowerCase().contains(correo);
+            boolean estadoMatch = estado == null || estado.equals("Todos") || u.getEstado().equalsIgnoreCase(estado);
+
+            return nombreNaturalMatch && nombreUsuarioMatch && cedulaMatch && correoMatch && estadoMatch;
         });
     }
 
@@ -129,7 +154,7 @@ public class GestionUsuariosController implements Initializable {
         }
 
         // Pedir contraseña del administrador en sesión
-        Optional<String> pwd = pedirPasswordAdministrador(w);
+        Optional<String> pwd = pedirPasswordRolAutorizado(w);
 
         if (pwd.isEmpty())
             return;
@@ -163,8 +188,11 @@ public class GestionUsuariosController implements Initializable {
             return;
 
         // Pedir contraseña del administrador en sesión
-        Optional<String> pwd = pedirPasswordAdministrador(w);
-
+        Optional<String> pwd = pedirPasswordRolAutorizado(w);
+        if ("Administrador".equalsIgnoreCase(seleccionado.getRol())) {
+            DialogHelper.showError(w, "No se puede inactivar a un administrador.");
+            return;
+        }
         if (pwd.isEmpty())
             return;
 
@@ -176,6 +204,10 @@ public class GestionUsuariosController implements Initializable {
 
         if (!DialogHelper.confirm(w, "¿Estás seguro/a de activar/inactivar este usuario?"))
             return;
+        if ("Administrador".equalsIgnoreCase(seleccionado.getRol())) {
+            DialogHelper.showError(w, "No se puede inactivar a un administrador.");
+            return;
+        }
 
         String nuevoEstado = "Activo".equalsIgnoreCase(seleccionado.getEstado()) ? "Inactivo" : "Activo";
         seleccionado.setEstado(nuevoEstado);
@@ -203,21 +235,25 @@ public class GestionUsuariosController implements Initializable {
         TextField txtCedula = new TextField(usuarioExistente != null ? usuarioExistente.getCedula() : "");
         PasswordField txtPassword = new PasswordField();
 
-        ComboBox<String> cbRol = new ComboBox<>(
-                FXCollections.observableArrayList(PermisosUtil.getRolesDisponibles()));
-
-        if (usuarioExistente != null) {
+        ComboBox<String> cbRol = new ComboBox<>(FXCollections.observableArrayList(PermisosUtil.getRolesDisponibles()));
+        if (usuarioExistente != null)
             cbRol.setValue(usuarioExistente.getRol());
-        }
 
-        // Layout compacto
+        // Placeholders con ejemplos
+        txtNombre.setPromptText("Ej: Juan Pérez");
+        txtCorreo.setPromptText("Ej: juan.perez@example.com");
+        txtUsuario.setPromptText("Ej: jperez");
+        txtCedula.setPromptText("Ej: 1750111211");
+        txtPassword.setPromptText("Ej: Pass123");
+        // Layout
         grid.addRow(0, new Label("Nombre natural:"), txtNombre);
         grid.addRow(1, new Label("Correo:"), txtCorreo);
         grid.addRow(2, new Label("Usuario:"), txtUsuario);
         grid.addRow(3, new Label("Contraseña:"), txtPassword);
         grid.addRow(4, new Label("Rol:"), cbRol);
         grid.addRow(5, new Label("Cédula:"), txtCedula);
-
+        dialog.setResizable(false);
+        dialog.getDialogPane().setPrefSize(340, 280);
         dialog.getDialogPane().setContent(grid);
 
         Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
@@ -234,6 +270,7 @@ public class GestionUsuariosController implements Initializable {
             clearErrors.run();
             boolean valid = true;
 
+            // Validaciones formato
             ValidationResult vNombre = DataValidator.validateNaturalName(txtNombre.getText());
             ValidationResult vCorreo = DataValidator.validateCorreo(txtCorreo.getText());
             ValidationResult vUsuario = DataValidator.validateUsername(txtUsuario.getText());
@@ -260,19 +297,33 @@ public class GestionUsuariosController implements Initializable {
                 setErrorStyle(txtCedula, vCedula.getErrorMessage());
                 valid = false;
             }
-            // Verificar duplicados
-            if (existeCampoDuplicado(usuarioExistente, "cedula", txtCedula.getText())) {
-                setErrorStyle(txtCedula, "Ya existe un usuario con esta cédula.");
+
+            // Validaciones duplicados
+            Set<String> cedulas = data.stream().map(u -> u.getCedula().toLowerCase()).collect(Collectors.toSet());
+            Set<String> usuarios = data.stream().map(u -> u.getUsuario().toLowerCase()).collect(Collectors.toSet());
+            Set<String> correos = data.stream().map(u -> u.getCorreo().toLowerCase()).collect(Collectors.toSet());
+
+            String cedulaActual = usuarioExistente != null ? usuarioExistente.getCedula().toLowerCase() : "";
+            String usuarioActual = usuarioExistente != null ? usuarioExistente.getUsuario().toLowerCase() : "";
+            String correoActual = usuarioExistente != null ? usuarioExistente.getCorreo().toLowerCase() : "";
+
+            ValidationResult vCedulaDup = DataValidator.validarDuplicado(txtCedula.getText(), "Cédula", cedulas);
+            ValidationResult vUsuarioDup = DataValidator.validarDuplicado(txtUsuario.getText(), "Usuario", usuarios);
+            ValidationResult vCorreoDup = DataValidator.validarDuplicado(txtCorreo.getText(), "Correo", correos);
+
+            if (!vCedulaDup.isValid() && !txtCedula.getText().trim().equalsIgnoreCase(cedulaActual)) {
+                setErrorStyle(txtCedula, vCedulaDup.getErrorMessage());
                 valid = false;
             }
-            if (existeCampoDuplicado(usuarioExistente, "usuario", txtUsuario.getText())) {
-                setErrorStyle(txtUsuario, "Ya existe un usuario con este nombre de usuario.");
+            if (!vUsuarioDup.isValid() && !txtUsuario.getText().trim().equalsIgnoreCase(usuarioActual)) {
+                setErrorStyle(txtUsuario, vUsuarioDup.getErrorMessage());
                 valid = false;
             }
-            if (existeCampoDuplicado(usuarioExistente, "correo", txtCorreo.getText())) {
-                setErrorStyle(txtCorreo, "Ya existe un usuario con este correo.");
+            if (!vCorreoDup.isValid() && !txtCorreo.getText().trim().equalsIgnoreCase(correoActual)) {
+                setErrorStyle(txtCorreo, vCorreoDup.getErrorMessage());
                 valid = false;
             }
+
             if (!valid) {
                 event.consume();
                 DialogHelper.showError(dialog.getDialogPane().getScene().getWindow(),
@@ -294,53 +345,18 @@ public class GestionUsuariosController implements Initializable {
         // Resultado
         dialog.setResultConverter(btn -> {
             if (btn == ButtonType.OK) {
-                clearErrors.run();
-
                 boolean valid = true;
 
+                // Re-validar por seguridad
                 ValidationResult vNombre = DataValidator.validateNaturalName(txtNombre.getText());
                 ValidationResult vCorreo = DataValidator.validateCorreo(txtCorreo.getText());
                 ValidationResult vUsuario = DataValidator.validateUsername(txtUsuario.getText());
                 ValidationResult vPassword = DataValidator.validatePassword(txtPassword.getText());
                 ValidationResult vCedula = DataValidator.validateEcuadorianID(txtCedula.getText(), "Cédula");
 
-                if (!vNombre.isValid()) {
-                    setErrorStyle(txtNombre, vNombre.getErrorMessage());
-                    valid = false;
-                }
-                if (!vCorreo.isValid()) {
-                    setErrorStyle(txtCorreo, vCorreo.getErrorMessage());
-                    valid = false;
-                }
-                if (!vUsuario.isValid()) {
-                    setErrorStyle(txtUsuario, vUsuario.getErrorMessage());
-                    valid = false;
-                }
-                if (!vPassword.isValid()) {
-                    setErrorStyle(txtPassword, vPassword.getErrorMessage());
-                    valid = false;
-                }
-                if (!vCedula.isValid()) {
-                    setErrorStyle(txtCedula, vCedula.getErrorMessage());
-                    valid = false;
-                }
-                if (existeCampoDuplicado(usuarioExistente, "cedula", txtCedula.getText())) {
-                    setErrorStyle(txtCedula, "Ya existe un usuario con esta cédula.");
-                    valid = false;
-                }
-                if (existeCampoDuplicado(usuarioExistente, "usuario", txtUsuario.getText())) {
-                    setErrorStyle(txtUsuario, "Ya existe un usuario con este nombre de usuario.");
-                    valid = false;
-                }
-                if (existeCampoDuplicado(usuarioExistente, "correo", txtCorreo.getText())) {
-                    setErrorStyle(txtCorreo, "Ya existe un usuario con este correo.");
-                    valid = false;
-                }
-
-                if (!valid) {
-                    DialogHelper.showError(dialog.getDialogPane().getScene().getWindow(),
-                            "Por favor corrige los campos resaltados antes de continuar.");
-                    return null; // Aquí se evita el cierre del diálogo
+                if (!vNombre.isValid() || !vCorreo.isValid() || !vUsuario.isValid() || !vPassword.isValid()
+                        || !vCedula.isValid()) {
+                    return null;
                 }
 
                 Usuario u = usuarioExistente != null ? usuarioExistente : new Usuario();
@@ -350,13 +366,11 @@ public class GestionUsuariosController implements Initializable {
                 u.setRol(cbRol.getValue());
                 u.setCedula(txtCedula.getText().trim());
                 u.setPassword(txtPassword.getText().trim());
-
                 u.setUsuarioModificacion(getUsuarioActual());
                 u.setFechaModificacion(LocalDateTime.now());
 
-                List<Permiso> permisos = PermisosUtil.getPermisosPorRol(u.getRol());
+                List<Permiso> permisos = PermisosUtil.getModulosPorRol(u.getRol());
                 u.setPermisos(permisos.stream().map(Permiso::getCodigo).collect(Collectors.joining(",")));
-
                 return u;
             }
             return null;
@@ -374,61 +388,82 @@ public class GestionUsuariosController implements Initializable {
         grid.setHgap(10);
         grid.setVgap(10);
 
-        // Campos del formulario con valores iniciales
         TextField txtNombre = new TextField(usuarioExistente.getNombre());
         TextField txtCorreo = new TextField(usuarioExistente.getCorreo());
         TextField txtUsuario = new TextField(usuarioExistente.getUsuario());
         PasswordField txtPassword = new PasswordField();
-        txtPassword.setPromptText("Nueva contraseña (dejar vacío para no cambiar)");
-        ComboBox<String> cbRol = new ComboBox<>(FXCollections.observableArrayList(
-                "Administrador", "Gerente", "Ventas", "Contabilidad", "Ventas", "Logística"));
+        txtPassword.setPromptText("Dejar vacío para no cambiar");
+
+        // Crear ComboBox de roles
+        ComboBox<String> cbRol = new ComboBox<>(FXCollections.observableArrayList(PermisosUtil.getRolesDisponibles()));
         cbRol.setValue(usuarioExistente.getRol());
 
-        // Agregar campos al GridPane en orden lógico
+        // Si el usuario es Administrador, deshabilitar el ComboBox de roles
+        if ("Administrador".equalsIgnoreCase(usuarioExistente.getRol())) {
+            cbRol.setDisable(true); // desactivar ComboBox
+            cbRol.setStyle("-fx-opacity: 0.6;"); // aspecto visual
+        }
+
         grid.addRow(0, new Label("Nombre Natural:"), txtNombre);
         grid.addRow(1, new Label("Correo Electrónico:"), txtCorreo);
         grid.addRow(2, new Label("Usuario:"), txtUsuario);
         grid.addRow(3, new Label("Contraseña:"), txtPassword);
         grid.addRow(4, new Label("Rol:"), cbRol);
-
+        dialog.setResizable(false);
+        dialog.getDialogPane().setPrefSize(340, 280);
         dialog.getDialogPane().setContent(grid);
 
-        // Validar campos antes de cerrar el diálogo
         Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
-        okButton.addEventFilter(ActionEvent.ACTION, event -> {
-            // Limpia estilos previos
+        Runnable clearErrors = () -> {
             clearErrorStyle(txtNombre);
             clearErrorStyle(txtCorreo);
             clearErrorStyle(txtUsuario);
-            clearErrorStyle(txtPassword);
+        };
 
+        okButton.addEventFilter(ActionEvent.ACTION, event -> {
+            clearErrors.run();
             boolean valid = true;
 
-            if (txtNombre.getText().trim().isEmpty()) {
-                setErrorStyle(txtNombre, "El nombre natural es obligatorio");
+            ValidationResult vNombre = DataValidator.validateNaturalName(txtNombre.getText());
+            ValidationResult vCorreo = DataValidator.validateCorreo(txtCorreo.getText());
+            ValidationResult vUsuario = DataValidator.validateUsername(txtUsuario.getText());
+
+            if (!vNombre.isValid()) {
+                setErrorStyle(txtNombre, vNombre.getErrorMessage());
+                valid = false;
+            }
+            if (!vCorreo.isValid()) {
+                setErrorStyle(txtCorreo, vCorreo.getErrorMessage());
+                valid = false;
+            }
+            if (!vUsuario.isValid()) {
+                setErrorStyle(txtUsuario, vUsuario.getErrorMessage());
                 valid = false;
             }
 
-            if (txtCorreo.getText().trim().isEmpty()) {
-                setErrorStyle(txtCorreo, "El correo electrónico es obligatorio");
-                valid = false;
-            } else if (!txtCorreo.getText().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-                setErrorStyle(txtCorreo, "Correo electrónico inválido");
+            // Validar duplicados
+            Set<String> usuarios = data.stream().map(u -> u.getUsuario().toLowerCase()).collect(Collectors.toSet());
+            Set<String> correos = data.stream().map(u -> u.getCorreo().toLowerCase()).collect(Collectors.toSet());
+
+            String usuarioActual = usuarioExistente.getUsuario().toLowerCase();
+            String correoActual = usuarioExistente.getCorreo().toLowerCase();
+
+            ValidationResult vUsuarioDup = DataValidator.validarDuplicado(txtUsuario.getText(), "Usuario", usuarios);
+            ValidationResult vCorreoDup = DataValidator.validarDuplicado(txtCorreo.getText(), "Correo", correos);
+
+            if (!vUsuarioDup.isValid() && !txtUsuario.getText().trim().equalsIgnoreCase(usuarioActual)) {
+                setErrorStyle(txtUsuario, vUsuarioDup.getErrorMessage());
                 valid = false;
             }
-
-            if (txtUsuario.getText().trim().isEmpty()) {
-                setErrorStyle(txtUsuario, "El nombre de usuario es obligatorio");
-                valid = false;
-            } else if (existeCampoDuplicado(usuarioExistente, "usuario", txtUsuario.getText().trim())) {
-                setErrorStyle(txtUsuario, "Ya existe un usuario con este nombre de usuario");
+            if (!vCorreoDup.isValid() && !txtCorreo.getText().trim().equalsIgnoreCase(correoActual)) {
+                setErrorStyle(txtCorreo, vCorreoDup.getErrorMessage());
                 valid = false;
             }
 
             if (!valid) {
                 event.consume();
                 DialogHelper.showError(dialog.getDialogPane().getScene().getWindow(),
-                        "Por favor corrige los campos resaltados antes de continuar.");
+                        "Por favor corrige los campos resaltados.");
             }
         });
 
@@ -437,12 +472,19 @@ public class GestionUsuariosController implements Initializable {
                 usuarioExistente.setNombre(txtNombre.getText().trim());
                 usuarioExistente.setCorreo(txtCorreo.getText().trim());
                 usuarioExistente.setUsuario(txtUsuario.getText().trim());
+                usuarioExistente.setRol(cbRol.getValue());
 
                 String newPassword = txtPassword.getText().trim();
                 if (!newPassword.isEmpty()) {
                     usuarioExistente.setPassword(newPassword);
                 }
-                usuarioExistente.setRol(cbRol.getValue());
+
+                usuarioExistente.setUsuarioModificacion(getUsuarioActual());
+                usuarioExistente.setFechaModificacion(LocalDateTime.now());
+
+                List<Permiso> permisos = PermisosUtil.getModulosPorRol(usuarioExistente.getRol());
+                usuarioExistente
+                        .setPermisos(permisos.stream().map(Permiso::getCodigo).collect(Collectors.joining(",")));
 
                 return usuarioExistente;
             }
@@ -473,21 +515,10 @@ public class GestionUsuariosController implements Initializable {
         return (actual != null) ? actual.getUsuario() : "desconocido";
     }
 
-    private boolean existeCampoDuplicado(Usuario usuarioNuevo, String campo, String valor) {
-        return data.stream().anyMatch(u -> !u.equals(usuarioNuevo) && // Para evitar que se compare consigo mismo al
-                                                                      // editar
-                switch (campo) {
-                    case "cedula" -> u.getCedula().equalsIgnoreCase(valor);
-                    case "usuario" -> u.getUsuario().equalsIgnoreCase(valor);
-                    case "correo" -> u.getCorreo().equalsIgnoreCase(valor);
-                    default -> false;
-                });
-    }
-
-    private Optional<String> pedirPasswordAdministrador(Window owner) {
+    private Optional<String> pedirPasswordRolAutorizado(Window owner) {
         Dialog<String> dialog = new Dialog<>();
         dialog.setTitle("Verificación");
-        dialog.setHeaderText("Contraseña de Administrador");
+        dialog.setHeaderText("Contraseña de Administrador o Gerente");
         dialog.initOwner(owner);
 
         ButtonType loginButtonType = new ButtonType("Aceptar", ButtonBar.ButtonData.OK_DONE);
@@ -497,30 +528,20 @@ public class GestionUsuariosController implements Initializable {
         passwordField.setPromptText("Ingrese su contraseña");
 
         GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
         grid.add(new Label("Contraseña:"), 0, 0);
         grid.add(passwordField, 1, 0);
-
         dialog.getDialogPane().setContent(grid);
 
-        // Permite que el botón OK esté habilitado solo si el campo no está vacío
         Node okButton = dialog.getDialogPane().lookupButton(loginButtonType);
         okButton.setDisable(true);
+        passwordField.textProperty().addListener((obs, oldVal, newVal) -> okButton.setDisable(newVal.trim().isEmpty()));
 
-        passwordField.textProperty().addListener((obs, oldVal, newVal) -> {
-            okButton.setDisable(newVal.trim().isEmpty());
-        });
-
-        // Devuelve la contraseña ingresada si se pulsa OK
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == loginButtonType) {
+        dialog.setResultConverter(btn -> {
+            if (btn == loginButtonType)
                 return passwordField.getText();
-            }
             return null;
         });
 
         return dialog.showAndWait();
     }
-
 }

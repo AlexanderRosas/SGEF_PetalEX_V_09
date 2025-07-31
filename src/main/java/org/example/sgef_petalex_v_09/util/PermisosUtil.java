@@ -7,70 +7,70 @@ import java.util.*;
 
 public class PermisosUtil {
     private static final Map<String, List<Permiso>> PERMISOS_POR_ROL = new HashMap<>();
-    private static final List<Permiso> TODOS_LOS_PERMISOS = new ArrayList<>();
+    private static final List<Permiso> TODOS_LOS_MODULOS = new ArrayList<>();
 
     static {
-        // Inicializar permisos
-        inicializarPermisos();
-        // Asignar permisos por rol
-        asignarPermisosPorRol();
+        inicializarModulos();
+        asignarModulosPorRol();
     }
 
-    private static void inicializarPermisos() {
-        // Ventas
-        TODOS_LOS_PERMISOS.add(new Permiso("VENTA_CREAR", "Crear Ventas", "Permite crear nuevas ventas", "Ventas"));
-        TODOS_LOS_PERMISOS.add(new Permiso("VENTA_MODIFICAR", "Modificar Ventas", "Permite modificar ventas existentes", "Ventas"));
-        TODOS_LOS_PERMISOS.add(new Permiso("VENTA_ANULAR", "Anular Ventas", "Permite anular ventas", "Ventas"));
-        
-        // Administración
-        TODOS_LOS_PERMISOS.add(new Permiso("USUARIO_ADMIN", "Administrar Usuarios", "Gestión completa de usuarios", "Administración"));
-        TODOS_LOS_PERMISOS.add(new Permiso("ROL_ADMIN", "Administrar Roles", "Gestión de roles y permisos", "Administración"));
-        TODOS_LOS_PERMISOS.add(new Permiso("PARAM_ADMIN", "Administrar Parámetros", "Configuración del sistema", "Administración"));
-        
-        // Finanzas
-        TODOS_LOS_PERMISOS.add(new Permiso("REPORTE_VER", "Ver Reportes", "Acceso a reportes financieros", "Finanzas"));
-        TODOS_LOS_PERMISOS.add(new Permiso("REPORTE_EXPORTAR", "Exportar Reportes", "Exportar reportes financieros", "Finanzas"));
+    private static void inicializarModulos() {
+        TODOS_LOS_MODULOS.add(new Permiso("CLIENTES", "Clientes", "Acceso al módulo de clientes", "Clientes"));
+        TODOS_LOS_MODULOS.add(
+                new Permiso("PROVEEDORES", "Proveedores", "Acceso al módulo de proveedores", "Proveedores"));
+        TODOS_LOS_MODULOS.add(new Permiso("COMPRAS", "Compras", "Acceso al módulo de compras", "Compras"));
+        TODOS_LOS_MODULOS.add(new Permiso("VENTAS", "Ventas", "Acceso al módulo de ventas", "Ventas"));
+        TODOS_LOS_MODULOS.add(new Permiso("ADMINISTRACION", "Administración",
+                "Acceso al módulo de administración del sistema", "Administración"));
+        TODOS_LOS_MODULOS.add(
+                new Permiso("GUIA_AEREA", "Guía Aérea", "Acceso a actualizar solo la guía aérea", "Logística"));
     }
 
-    private static void asignarPermisosPorRol() {
-        // Administrador
-        List<Permiso> permisosAdmin = new ArrayList<>(TODOS_LOS_PERMISOS);
-        PERMISOS_POR_ROL.put("Administrador", permisosAdmin);
-        
-        // Ventas
-        List<Permiso> permisosVentas = TODOS_LOS_PERMISOS.stream()
-            .filter(p -> p.getModulo().equals("Ventas"))
-            .toList();
-        PERMISOS_POR_ROL.put("Ventas", new ArrayList<>(permisosVentas));
-        
-        // Finanzas
-        List<Permiso> permisosFinanzas = TODOS_LOS_PERMISOS.stream()
-            .filter(p -> p.getModulo().equals("Finanzas"))
-            .toList();
-        PERMISOS_POR_ROL.put("Finanzas", new ArrayList<>(permisosFinanzas));
-        
-        // Gerente
-        List<Permiso> permisosGerente = new ArrayList<>();
-        permisosGerente.addAll(permisosVentas);
-        permisosGerente.addAll(permisosFinanzas);
-        PERMISOS_POR_ROL.put("Gerente", permisosGerente);
+    private static void asignarModulosPorRol() {
+        PERMISOS_POR_ROL.put("Administrador", List.of(
+                new Permiso("CLIENTES", "Clientes", "...", "Clientes"),
+                new Permiso("PROVEEDORES", "Proveedores", "...", "Proveedores"),
+                new Permiso("COMPRAS", "Compras", "...", "Compras"),
+                new Permiso("VENTAS", "Ventas", "...", "Ventas"),
+                new Permiso("ADMINISTRACION", "Administración", "...", "Administración")));
+
+        PERMISOS_POR_ROL.put("Gerente", List.of(
+                new Permiso("CLIENTES", "Clientes", "...", "Clientes"),
+                new Permiso("PROVEEDORES", "Proveedores", "...", "Proveedores"),
+                new Permiso("COMPRAS", "Compras", "...", "Compras"),
+                new Permiso("ADMINISTRACION", "Administración", "...", "Administración")));
+
+        PERMISOS_POR_ROL.put("Ventas", List.of(
+                new Permiso("CLIENTES", "Clientes", "...", "Clientes"),
+                new Permiso("COMPRAS", "Compras", "...", "Compras"),
+                new Permiso("VENTAS", "Ventas", "...", "Ventas")));
+
+        PERMISOS_POR_ROL.put("Contabilidad", List.of(
+                new Permiso("PROVEEDORES", "Proveedores", "...", "Proveedores"),
+                new Permiso("COMPRAS", "Compras", "...", "Compras"),
+                new Permiso("VENTAS", "Ventas", "...", "Ventas")));
+
+        PERMISOS_POR_ROL.put("Logística", List.of(
+                new Permiso("LOGÍSTICA", "Guía Aérea", "...", "Logística")));
     }
 
-    public static List<Permiso> getPermisosPorRol(String rol) {
-        return PERMISOS_POR_ROL.getOrDefault(rol, new ArrayList<>());
+    public static List<Permiso> getModulosPorRol(String rol) {
+        return PERMISOS_POR_ROL.getOrDefault(rol, List.of());
+    }
+
+    public static boolean puedeAccederA(Usuario usuario, String moduloCodigo) {
+        if (usuario == null || usuario.getPermisos() == null)
+            return false;
+        return Arrays.stream(usuario.getPermisos().split(","))
+                .map(String::trim)
+                .anyMatch(p -> p.equals(moduloCodigo));
+    }
+
+    public static Set<String> getRolesDisponibles() {
+        return PERMISOS_POR_ROL.keySet();
     }
 
     public static List<Permiso> getTodosLosPermisos() {
-        return new ArrayList<>(TODOS_LOS_PERMISOS);
+        return new ArrayList<>(TODOS_LOS_MODULOS);
     }
-
-    public static boolean tienePermiso(Usuario usuario, String codigoPermiso) {
-        if (usuario == null || usuario.getPermisos() == null) return false;
-        return Arrays.stream(usuario.getPermisos().split(","))
-                .map(String::trim)
-                .anyMatch(p -> p.equals(codigoPermiso));
-    }
-    public static Set<String> getRolesDisponibles() {
-    return PERMISOS_POR_ROL.keySet();
-}
 }

@@ -1,5 +1,6 @@
 package org.example.sgef_petalex_v_09.validators;
 
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 public class DataValidator {
@@ -7,26 +8,23 @@ public class DataValidator {
     // Patrones de validación
     private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]{2,50}$");
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})$");
-    private static final Pattern PHONE_PATTERN = Pattern.compile("^09[0-9]{8}$");
     private static final Pattern NUMERIC_PATTERN = Pattern.compile("^[0-9]+$");
     private static final Pattern DECIMAL_PATTERN = Pattern.compile("^[0-9]+(\\.[0-9]{1,2})?$");
     private static final Pattern RUC_PATTERN = Pattern.compile("^[0-9]{13}$");
     private static final Pattern EMPRESA_NOMBRE_PATTERN = Pattern.compile("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s\\.\\&\\-]{1,60}$");
-
     private static final Pattern DIRECCION_PATTERN = Pattern.compile("^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\\s\\.\\,\\-]{1,100}$");
-
-    // Teléfono E.164: “+” opcional y hasta 15 dígitos
     private static final Pattern PHONE_E164_PATTERN = Pattern.compile("^\\+?[0-9]{1,15}$");
     /* ============== Validaciones específicas ============== */
 
     /** Nombre de la empresa. */
     public static ValidationResult validateEmpresaNombre(String nombre) {
         if (nombre == null || nombre.isBlank()) {
-            return ValidationResult.error("Nombre", "El nombre de la empresa es obligatorio");
+            return ValidationResult.error("Nombre",
+                    "El nombre es obligatorio y debe contener solo 1-60 letras, tildes, ñ, espacios, punto, guion o &");
         }
         if (!EMPRESA_NOMBRE_PATTERN.matcher(nombre).matches()) {
             return ValidationResult.error("Nombre",
-                    "Debe tener 1-60 letras, tildes, ñ o espacios");
+                    "El nombre debe contener solo 1-60 letras, tildes, ñ, espacios, punto, guion o &");
         }
         return ValidationResult.success();
     }
@@ -47,21 +45,18 @@ public class DataValidator {
                     return validateRUC(id, "RUC");
                 } else {
                     return ValidationResult.error("Identificador",
-                            "El RUC debe tener 13 dígitos terminando en 001");
+                            "El RUC debe contener solo 13 dígitos terminando en 001");
                 }
-
             case "ESTADOS UNIDOS":
                 if (!id.matches("^\\d{2}-\\d{7}$")) {
-                    return ValidationResult.error("Identificador",
-                            "El EIN debe tener formato XX-XXXXXXX");
+                    return ValidationResult.error("Identificador", "El EIN debe contener solo formato XX-XXXXXXX");
                 }
                 break;
 
             case "CANADÁ":
             case "CANADA":
                 if (!id.matches("^\\d{9}$")) {
-                    return ValidationResult.error("Identificador",
-                            "El Business Number debe tener 9 dígitos");
+                    return ValidationResult.error("Identificador", "El Business Number debe contener solo 9 dígitos");
                 }
                 break;
 
@@ -72,7 +67,7 @@ public class DataValidator {
             case "PAISES BAJOS":
                 if (!id.matches("^[A-Z]{2}[A-Z0-9]{2,12}$")) {
                     return ValidationResult.error("Identificador",
-                            "El VAT debe empezar por código ISO (2 letras) y seguir formato local");
+                            "El VAT debe contener solo código ISO (2 letras) y formato local");
                 }
                 break;
 
@@ -85,11 +80,12 @@ public class DataValidator {
     /** Dirección de la empresa. */
     public static ValidationResult validateDireccion(String direccion) {
         if (direccion == null || direccion.isBlank()) {
-            return ValidationResult.error("Dirección", "La dirección es obligatoria");
+            return ValidationResult.error("Dirección",
+                    "La dirección es obligatoria y debe contener solo letras, números, punto, guion, coma o espacio (máx. 100 caracteres)");
         }
         if (!DIRECCION_PATTERN.matcher(direccion.trim()).matches()) {
             return ValidationResult.error("Dirección",
-                    "Máx. 100 caracteres: letras, números, punto, guion o espacio");
+                    "La dirección debe contener solo letras, números, punto, guion, coma o espacio (máx. 100 caracteres)");
         }
         return ValidationResult.success();
     }
@@ -97,11 +93,12 @@ public class DataValidator {
     /** Teléfono internacional E.164. */
     public static ValidationResult validateTelefonoE164(String telefono) {
         if (telefono == null || telefono.isBlank()) {
-            return ValidationResult.error("Teléfono", "El teléfono es obligatorio");
+            return ValidationResult.error("Teléfono",
+                    "El teléfono es obligatorio y debe contener solo formato E.164 (ej. +593985095169)");
         }
         if (!PHONE_E164_PATTERN.matcher(telefono.trim()).matches()) {
             return ValidationResult.error("Teléfono",
-                    "Formato E.164 inválido para teléfono(ej. +593991234567)");
+                    "El teléfono debe contener solo formato E.164 (ej. +593985095169)");
         }
         return ValidationResult.success();
     }
@@ -109,10 +106,12 @@ public class DataValidator {
     /** Correo electrónico RFC 5322. */
     public static ValidationResult validateCorreo(String correo) {
         if (correo == null || correo.isBlank()) {
-            return ValidationResult.error("Correo", "El correo es obligatorio");
+            return ValidationResult.error("Correo",
+                    "El correo es obligatorio y debe contener solo formato RFC 5322 (ej. nombre@dominio.com)");
         }
         if (!EMAIL_PATTERN.matcher(correo.trim()).matches()) {
-            return ValidationResult.error("Correo", "Formato de correo inválido (ej. nombre@dominio.com)");
+            return ValidationResult.error("Correo",
+                    "El correo debe contener solo formato RFC 5322 (ej. nombre@dominio.com)");
         }
         return ValidationResult.success();
     }
@@ -128,14 +127,16 @@ public class DataValidator {
     // ✅ Validación de nombres (solo letras, espacios y acentos)
     public static ValidationResult validateName(String name, String fieldName) {
         if (name == null || name.trim().isEmpty()) {
-            return ValidationResult.error(fieldName, "El " + fieldName.toLowerCase() + " es obligatorio");
+            return ValidationResult.error(fieldName, "El " + fieldName.toLowerCase()
+                    + " es obligatorio y debe contener solo letras, espacios y acentos");
         }
 
         String trimmedName = name.trim();
 
         if (trimmedName.length() < 2) {
             return ValidationResult.error(fieldName,
-                    "El " + fieldName.toLowerCase() + " debe tener al menos 2 caracteres");
+                    "El " + fieldName.toLowerCase()
+                            + " debe contener solo letras, espacios y acentos, y,  al menos 2 caracteres");
         }
 
         if (trimmedName.length() > 50) {
@@ -151,39 +152,6 @@ public class DataValidator {
         return ValidationResult.success();
     }
 
-    // ✅ Validación de email
-    public static ValidationResult validateEmail(String email, String fieldName) {
-        if (email == null || email.trim().isEmpty()) {
-            return ValidationResult.error(fieldName, "El " + fieldName.toLowerCase() + " es obligatorio");
-        }
-
-        String trimmedEmail = email.trim();
-
-        if (!EMAIL_PATTERN.matcher(trimmedEmail).matches()) {
-            return ValidationResult.error(fieldName,
-                    "El formato del " + fieldName.toLowerCase() + " es inválido. Debe ser: usuario@dominio.com");
-        }
-
-        return ValidationResult.success();
-    }
-
-    // ✅ Validación de teléfono celular ecuatoriano
-    public static ValidationResult validatePhone(String phone, String fieldName) {
-        if (phone == null || phone.trim().isEmpty()) {
-            return ValidationResult.error(fieldName, "El " + fieldName.toLowerCase() + " es obligatorio");
-        }
-
-        String trimmedPhone = phone.trim().replaceAll("[\\s-]", ""); // Remover espacios y guiones
-
-        if (!PHONE_PATTERN.matcher(trimmedPhone).matches()) {
-            return ValidationResult.error(fieldName,
-                    "El " + fieldName.toLowerCase() + " debe tener formato 09XXXXXXXX (10 dígitos comenzando con 09)");
-        }
-
-        return ValidationResult.success();
-    }
-
-    // ✅ Validación de números enteros
     public static ValidationResult validateNumeric(String value, String fieldName) {
         if (value == null || value.trim().isEmpty()) {
             return ValidationResult.error(fieldName, "El " + fieldName.toLowerCase() + " es obligatorio");
@@ -255,32 +223,14 @@ public class DataValidator {
     // ✅ Validación de RUC ecuatoriano
     public static ValidationResult validateRUC(String ruc, String fieldName) {
         if (ruc == null || ruc.trim().isEmpty()) {
-            return ValidationResult.error(fieldName, "El " + fieldName.toLowerCase() + " es obligatorio");
-        }
-
-        String trimmedRuc = ruc.trim();
-
-        if (trimmedRuc.length() != 13) {
             return ValidationResult.error(fieldName,
-                    "El " + fieldName.toLowerCase() + " debe tener exactamente 13 dígitos");
+                    "El RUC es obligatorio y debe contener 13 dígitos numéricos terminando en 001");
         }
-
-        if (!RUC_PATTERN.matcher(trimmedRuc).matches()) {
-            return ValidationResult.error(fieldName, "El " + fieldName.toLowerCase() + " solo puede contener números");
+        String trimmedRuc = ruc.trim();
+        if (trimmedRuc.length() != 13 || !trimmedRuc.endsWith("001")
+                || !NUMERIC_PATTERN.matcher(trimmedRuc).matches()) {
+            return ValidationResult.error(fieldName, "El RUC debe contener 13 dígitos numéricos terminando en 001");
         }
-
-        // Los primeros 10 dígitos deben ser una cédula válida
-        String cedulaPart = trimmedRuc.substring(0, 10);
-        if (!isValidEcuadorianID(cedulaPart)) {
-            return ValidationResult.error(fieldName, "El " + fieldName.toLowerCase()
-                    + " no es válido (los primeros 10 dígitos deben formar una cédula válida)");
-        }
-
-        // Los últimos 3 dígitos deben ser 001
-        if (!trimmedRuc.endsWith("001")) {
-            return ValidationResult.error(fieldName, "El " + fieldName.toLowerCase() + " debe terminar en 001");
-        }
-
         return ValidationResult.success();
     }
 
@@ -336,15 +286,15 @@ public class DataValidator {
 
     // ✅ Validación combinada para formularios
     public static ValidationResult validatePersonData(String name, String email, String phone) {
-        ValidationResult nameResult = validateName(name, "Nombre");
+        ValidationResult nameResult = validateNaturalName(name);
         if (!nameResult.isValid())
             return nameResult;
 
-        ValidationResult emailResult = validateEmail(email, "Correo electrónico");
+        ValidationResult emailResult = validateCorreo(email);
         if (!emailResult.isValid())
             return emailResult;
 
-        ValidationResult phoneResult = validatePhone(phone, "Teléfono");
+        ValidationResult phoneResult = validateTelefonoE164(phone);
         if (!phoneResult.isValid())
             return phoneResult;
 
@@ -405,4 +355,10 @@ public class DataValidator {
         return ValidationResult.success();
     }
 
+    public static ValidationResult validarDuplicado(String valor, String campo, Collection<String> valoresExistentes) {
+        if (valoresExistentes.contains(valor.toLowerCase())) {
+            return ValidationResult.error(campo, "El " + campo.toLowerCase() + " ya está registrado");
+        }
+        return ValidationResult.success();
+    }
 }

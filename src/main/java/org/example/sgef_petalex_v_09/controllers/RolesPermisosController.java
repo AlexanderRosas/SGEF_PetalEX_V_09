@@ -96,7 +96,7 @@ public class RolesPermisosController {
                                 String nuevoRol = cbRol.getValue();
                                 // Actualizar permisos según el rol
                                 sel.setPermisos(String.join(",",
-                                        PermisosUtil.getPermisosPorRol(nuevoRol).stream()
+                                        PermisosUtil.getModulosPorRol(nuevoRol).stream()
                                                 .map(Permiso::getCodigo)
                                                 .toList()
                                 ));
