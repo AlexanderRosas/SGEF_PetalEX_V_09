@@ -44,7 +44,7 @@
 
             <!-- Cambiado fx:id a btnEstado para que coincida con tu controlador -->
             <Button fx:id="btnEstado"
-                text="Activar/Inactivar"
+                text="Cambiar estado"
                 onAction="#onEstado"
                 styleClass="toolbar-button"
                 disable="true">

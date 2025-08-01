@@ -168,7 +168,7 @@ public class ClientesController {
             }
 
             CSVUtil.guardarClientes(data);
-            DialogHelper.showSuccess(btnNuevo.getScene().getWindow(), "Empresa Cliente registrada exitosamente");
+            DialogHelper.showSuccess(btnNuevo.getScene().getWindow(), "Empresa Cliente registrada");
         });
     }
 
@@ -210,7 +210,7 @@ public class ClientesController {
             return;
 
         String nuevoEstado = sel.getEstado().equalsIgnoreCase("Activa") ? "Inactiva" : "Activa";
-        String mensajeConfirmacion = "¿Está seguro/a de cambiar el estado de la Empresa Cliente?'" + nuevoEstado + "'?";
+        String mensajeConfirmacion = "¿Está seguro/a de cambiar el estado de la Empresa Cliente a: '" + nuevoEstado +"'?";
 
         boolean confirmed = DialogHelper.confirm(btnEstado.getScene().getWindow(), mensajeConfirmacion);
         if (confirmed) {

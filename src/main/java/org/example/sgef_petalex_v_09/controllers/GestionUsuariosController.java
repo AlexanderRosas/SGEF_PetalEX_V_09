@@ -82,8 +82,7 @@ public class GestionUsuariosController implements Initializable {
             boolean seleccionado = nuevo != null;
             btnEditar.setDisable(!seleccionado);
             btnEstado.setDisable(!seleccionado);
-            btnEstado.setText(
-                    (seleccionado && "Activo".equalsIgnoreCase(nuevo.getEstado())) ? "Inactivar" : "Reactivar");
+
         });
     }
 
@@ -202,21 +201,24 @@ public class GestionUsuariosController implements Initializable {
             return;
         }
 
-        if (!DialogHelper.confirm(w, "¿Estás seguro/a de activar/inactivar este usuario?"))
+        String accion = "Activo".equalsIgnoreCase(seleccionado.getEstado()) ? "inactivar" : "activar";
+        if (!DialogHelper.confirm(w, "¿Está seguro/a de " + accion + " al usuario seleccionado?"))
             return;
         if ("Administrador".equalsIgnoreCase(seleccionado.getRol())) {
             DialogHelper.showError(w, "No se puede inactivar a un administrador.");
             return;
         }
-
         String nuevoEstado = "Activo".equalsIgnoreCase(seleccionado.getEstado()) ? "Inactivo" : "Activo";
+        String accionRealizada = "Activo".equalsIgnoreCase(nuevoEstado) ? "activado" : "inactivado";
+
         seleccionado.setEstado(nuevoEstado);
         seleccionado.setUsuarioModificacion(admin.getUsuario());
         seleccionado.setFechaModificacion(LocalDateTime.now());
         CSVUtil.guardarUsuarios(data);
         tablaUsuarios.refresh();
-        DialogHelper.showSuccess(w, "Usuario " + nuevoEstado.toLowerCase());
+        DialogHelper.showSuccess(w, "Usuario " + accionRealizada);
         btnEstado.setText("Activo".equalsIgnoreCase(nuevoEstado) ? "Inactivar" : "Reactivar");
+
     }
 
     private Optional<Usuario> mostrarFormulario(String titulo, Usuario usuarioExistente) {

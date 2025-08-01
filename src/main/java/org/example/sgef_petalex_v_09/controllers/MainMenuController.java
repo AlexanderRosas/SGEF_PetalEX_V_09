@@ -1,6 +1,5 @@
 package org.example.sgef_petalex_v_09.controllers;
 
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -19,6 +18,7 @@ import org.example.sgef_petalex_v_09.util.UserSession;
 
 import java.io.IOException;
 import java.net.URL;
+
 public class MainMenuController {
 
     @FXML
@@ -47,11 +47,13 @@ public class MainMenuController {
         }
 
         // Mostrar/ocultar botones según permisos
-        btnClientes.setVisible(PermisosUtil.puedeAccederA(usuario, "CLIENTES"));
-        btnProveedores.setVisible(PermisosUtil.puedeAccederA(usuario, "PROVEEDORES"));
-        btnCompras.setVisible(PermisosUtil.puedeAccederA(usuario, "COMPRAS"));
-        btnVentas.setVisible(PermisosUtil.puedeAccederA(usuario, "VENTAS"));
-        btnSistema.setVisible(PermisosUtil.puedeAccederA(usuario, "ADMINISTRACION"));
+        // Habilitar o deshabilitar botones según permisos
+        btnClientes.setDisable(!PermisosUtil.puedeAccederA(usuario, "CLIENTES"));
+        btnProveedores.setDisable(!PermisosUtil.puedeAccederA(usuario, "PROVEEDORES"));
+        btnCompras.setDisable(!PermisosUtil.puedeAccederA(usuario, "COMPRAS"));
+        btnVentas.setDisable(!PermisosUtil.puedeAccederA(usuario, "VENTAS"));
+        btnSistema.setDisable(!PermisosUtil.puedeAccederA(usuario, "ADMINISTRACION"));
+
     }
 
     @FXML
@@ -91,11 +93,19 @@ public class MainMenuController {
 
                 Scene scene = new Scene(loginRoot);
                 scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+
                 stage.setScene(scene);
                 stage.setTitle("Index Blooms – Login");
-                stage.setMaximized(false);
-                stage.setResizable(true);
+
+                // Ajusta el tamaño de la ventana al contenido de la escena
+                stage.sizeToScene();
+
+                // Deshabilita redimensionar para evitar que se modifique el tamaño
+                stage.setResizable(false);
+
+                // Centra la ventana en la pantalla
                 stage.centerOnScreen();
+
             } catch (IOException e) {
                 e.printStackTrace();
                 DialogHelper.showError(window, "No se pudo cargar la pantalla de inicio de sesión.");
