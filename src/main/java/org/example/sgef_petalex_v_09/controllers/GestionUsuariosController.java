@@ -400,7 +400,6 @@ public class GestionUsuariosController implements Initializable {
         ComboBox<String> cbRol = new ComboBox<>(FXCollections.observableArrayList(PermisosUtil.getRolesDisponibles()));
         cbRol.setValue(usuarioExistente.getRol());
         txtNombre.setDisable(true); // No editable
-        txtUsuario.setDisable(true);// No editable
         // Si el usuario es Administrador, deshabilitar el ComboBox de roles
         if ("Administrador".equalsIgnoreCase(usuarioExistente.getRol())) {
             cbRol.setDisable(true); // desactivar ComboBox
