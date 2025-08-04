@@ -1,3 +1,5 @@
 ID;Nombre;Cedula;Correo;Contraseña;Usuario;Rol;Estado;Permisos;UsuarioModificacion;FechaModificacion
 U739;Martin Davalos;1750111211;martin.davalos@petal.com;martin123#;martin123;Administrador;Activo;VENTA_CREAR,VENTA_MODIFICAR,VENTA_ANULAR,USUARIO_ADMIN,ROL_ADMIN,PARAM_ADMIN,REPORTE_VER,REPORTE_EXPORTAR;admin;2025-07-28T02:15:46.082801
 U646;Ariel Rosas;1728907567;ariel.rosas@epn.edu.ec;5516*AR;arielrosas;Administrador;Activo;VENTA_CREAR,VENTA_MODIFICAR,VENTA_ANULAR,USUARIO_ADMIN,ROL_ADMIN,PARAM_ADMIN,REPORTE_VER,REPORTE_EXPORTAR;admin;2025-07-28T02:35:40.5512292
+U332;Daniel Veloz;0503505000;daniel@gmail.com;865438AR;daniel78;Finanzas;Activo;REPORTE_VER,REPORTE_EXPORTAR;arielrosas;2025-07-30T15:17:14.3657687
+U487;Vicente Daniel;1710416130;vicente.Dani@gmail.com;865438;vicente78;Ventas;Activo;VENTA_CREAR,VENTA_MODIFICAR,VENTA_ANULAR;arielrosas;2025-07-30T15:52:50.4683039
