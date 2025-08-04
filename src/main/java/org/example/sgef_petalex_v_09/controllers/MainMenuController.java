@@ -33,27 +33,23 @@ public class MainMenuController {
     @FXML
     public void initialize() {
         Usuario usuario = UserSession.getUsuarioActual();
+
         if (usuario != null && usuario.getUsuario() != null) {
             lblBienvenida.setText("Bienvenido: " + usuario.getUsuario());
         } else {
             lblBienvenida.setText("Bienvenido: Invitado");
-            // Si no hay usuario, ocultar todo
-            btnProveedores.setVisible(false);
-            btnClientes.setVisible(false);
-            btnCompras.setVisible(false);
-            btnVentas.setVisible(false);
-            btnSistema.setVisible(false);
-            return;
         }
 
-        // Mostrar/ocultar botones según permisos
-        // Habilitar o deshabilitar botones según permisos
-        btnClientes.setDisable(!PermisosUtil.puedeAccederA(usuario, "CLIENTES"));
-        btnProveedores.setDisable(!PermisosUtil.puedeAccederA(usuario, "PROVEEDORES"));
-        btnCompras.setDisable(!PermisosUtil.puedeAccederA(usuario, "COMPRAS"));
-        btnVentas.setDisable(!PermisosUtil.puedeAccederA(usuario, "VENTAS"));
-        btnSistema.setDisable(!PermisosUtil.puedeAccederA(usuario, "ADMINISTRACION"));
+        // Por defecto todos los botones están habilitados, excepto "Sistema"
+        btnClientes.setDisable(false);
+        btnProveedores.setDisable(false);
+        btnCompras.setDisable(false);
+        btnVentas.setDisable(false);
 
+        // Solo ADMINISTRADOR o GERENTE pueden acceder a la administración
+        String rol = usuario != null ? usuario.getRol() : "";
+        boolean accesoSistema = rol.equalsIgnoreCase("ADMINISTRADOR") || rol.equalsIgnoreCase("GERENTE");
+        btnSistema.setDisable(!accesoSistema);
     }
 
     @FXML
