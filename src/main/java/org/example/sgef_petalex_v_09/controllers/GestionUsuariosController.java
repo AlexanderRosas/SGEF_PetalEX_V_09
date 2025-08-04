@@ -134,10 +134,7 @@ public class GestionUsuariosController implements Initializable {
         });
 
         boolean sinResultados = filteredData.isEmpty();
-        lblNoUsuarios.setVisible(hayFiltro && sinResultados);
-        lblNoUsuarios.setManaged(hayFiltro && sinResultados);
-        tablaUsuarios.setVisible(!sinResultados || !hayFiltro);
-        tablaUsuarios.setManaged(!sinResultados || !hayFiltro);
+
     }
 
     @FXML
