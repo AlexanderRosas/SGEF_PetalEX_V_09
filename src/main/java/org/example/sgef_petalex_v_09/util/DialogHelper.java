@@ -12,7 +12,7 @@ public class DialogHelper {
         alert.initOwner(owner);
         alert.setTitle("Éxito");
         alert.setHeaderText(null);
-        alert.setContentText( action + " correctamente.");
+        alert.setContentText( action + " exitosamente.");
         alert.showAndWait();
     }
 

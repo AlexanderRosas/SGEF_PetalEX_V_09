@@ -443,14 +443,14 @@ public class ProveedoresController {
         }
 
         // Validar teléfono
-        ValidationResult phoneResult = DataValidator.validatePhone(proveedor.getTelefono(), "Teléfono");
+        ValidationResult phoneResult = DataValidator.validateTelefonoE164(proveedor.getTelefono());
         if (!phoneResult.isValid()) {
             phoneResult.showErrorIfInvalid(getWindow());
             return false;
         }
 
         // Validar correo electrónico
-        ValidationResult emailResult = DataValidator.validateEmail(proveedor.getCorreo(), "Correo electrónico");
+        ValidationResult emailResult = DataValidator.validateCorreo(proveedor.getCorreo());
         if (!emailResult.isValid()) {
             emailResult.showErrorIfInvalid(getWindow());
             return false;
@@ -571,13 +571,13 @@ public class ProveedoresController {
             return false;
         }
 
-        ValidationResult phoneResult = DataValidator.validatePhone(proveedor.getTelefono(), "Teléfono");
+        ValidationResult phoneResult = DataValidator.validateTelefonoE164(proveedor.getTelefono());
         if (!phoneResult.isValid()) {
             phoneResult.showErrorIfInvalid(getWindow());
             return false;
         }
 
-        ValidationResult emailResult = DataValidator.validateEmail(proveedor.getCorreo(), "Correo electrónico");
+        ValidationResult emailResult = DataValidator.validateCorreo(proveedor.getCorreo());
         if (!emailResult.isValid()) {
             emailResult.showErrorIfInvalid(getWindow());
             return false;
