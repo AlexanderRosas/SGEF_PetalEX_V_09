@@ -71,9 +71,18 @@
                 promptText="Estado"
                 styleClass="filter-combo" />
         </HBox>
+
     </VBox>
 
     <!-- Tabla de Usuarios: fx:id corregido a 'tablaUsuarios' -->
+    <Label fx:id="lblNoUsuarios"
+        text="No se encontraron Usuarios"
+        styleClass="no-usuarios-label"
+        visible="false"
+        managed="false"
+        AnchorPane.topAnchor="120.0"
+        AnchorPane.leftAnchor="50.0"
+        AnchorPane.rightAnchor="50.0" />
     <TableView fx:id="tablaUsuarios"
         editable="true"
         styleClass="table-clientes"

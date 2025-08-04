@@ -47,9 +47,12 @@ public class GestionUsuariosController implements Initializable {
     @FXML
     private TextField txtBuscarCorreo;
     @FXML
+    private Label lblNoUsuarios;
+    @FXML
     private ComboBox<String> cbEstado;
     private final ObservableList<Usuario> data = FXCollections.observableArrayList();
     private FilteredList<Usuario> filteredData;
+    private boolean mostrarErrorSiNoHayResultados = false;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -102,27 +105,39 @@ public class GestionUsuariosController implements Initializable {
     }
 
     private void aplicarFiltro() {
-        String nombreNatural = txtBuscarNombreNatural.getText().toLowerCase();
-        String nombreUsuario = txtBuscarNombreUsuario.getText().toLowerCase();
-        String cedula = txtBuscarCedula.getText().toLowerCase();
-        String correo = txtBuscarCorreo.getText().toLowerCase();
+        String nombreNatural = txtBuscarNombreNatural == null ? ""
+                : txtBuscarNombreNatural.getText().toLowerCase().trim();
+        String nombreUsuario = txtBuscarNombreUsuario == null ? ""
+                : txtBuscarNombreUsuario.getText().toLowerCase().trim();
+        String cedula = txtBuscarCedula.getText().toLowerCase().trim();
         String estado = cbEstado.getValue();
 
-        filteredData.setPredicate(u -> {
-            if (nombreNatural.isEmpty() && nombreUsuario.isEmpty() && cedula.isEmpty() && correo.isEmpty()
-                    && (estado == null || estado.equals("Todos"))) {
-                return true;
-            }
+        boolean hayFiltro = !nombreNatural.isEmpty()
+                || !nombreUsuario.isEmpty()
+                || !cedula.isEmpty()
+                || (estado != null && !estado.equals("Todos"));
 
-            boolean nombreNaturalMatch = nombreNatural.isEmpty() || u.getNombre().toLowerCase().contains(nombreNatural);
+        filteredData.setPredicate(u -> {
+            if (!hayFiltro)
+                return true;
+
+            boolean nombreNaturalMatch = nombreNatural.isEmpty()
+                    || u.getNombre().toLowerCase().contains(nombreNatural);
             boolean nombreUsuarioMatch = nombreUsuario.isEmpty()
                     || u.getUsuario().toLowerCase().contains(nombreUsuario);
-            boolean cedulaMatch = cedula.isEmpty() || u.getCedula().toLowerCase().contains(cedula);
-            boolean correoMatch = correo.isEmpty() || u.getCorreo().toLowerCase().contains(correo);
-            boolean estadoMatch = estado == null || estado.equals("Todos") || u.getEstado().equalsIgnoreCase(estado);
+            boolean cedulaMatch = cedula.isEmpty()
+                    || u.getCedula().trim().toLowerCase().startsWith(cedula);
+            boolean estadoMatch = estado == null || estado.equals("Todos")
+                    || u.getEstado().equalsIgnoreCase(estado);
 
-            return nombreNaturalMatch && nombreUsuarioMatch && cedulaMatch && correoMatch && estadoMatch;
+            return nombreNaturalMatch && nombreUsuarioMatch && cedulaMatch && estadoMatch;
         });
+
+        boolean sinResultados = filteredData.isEmpty();
+        lblNoUsuarios.setVisible(hayFiltro && sinResultados);
+        lblNoUsuarios.setManaged(hayFiltro && sinResultados);
+        tablaUsuarios.setVisible(!sinResultados || !hayFiltro);
+        tablaUsuarios.setManaged(!sinResultados || !hayFiltro);
     }
 
     @FXML
@@ -405,7 +420,7 @@ public class GestionUsuariosController implements Initializable {
             cbRol.setDisable(true); // desactivar ComboBox
             cbRol.setStyle("-fx-opacity: 0.6;"); // aspecto visual
         }
-        
+
         grid.addRow(0, new Label("Nombre Natural:"), txtNombre);
         grid.addRow(2, new Label("Usuario:"), txtUsuario);
         grid.addRow(1, new Label("Correo Electrónico:"), txtCorreo);
