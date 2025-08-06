@@ -48,11 +48,8 @@ public class ClientesController {
     private TableColumn<Cliente, String> colFechaModificacion;
 
     @FXML
-    private TextField txtBuscarNombre;
-    @FXML
     private TextField txtBuscarIdentificador;
-    @FXML
-    private ComboBox<String> cbPais;
+
     @FXML
     private ComboBox<String> cbEstado;
 
@@ -81,9 +78,6 @@ public class ClientesController {
         paises.add("Todos"); // Agregar "Todos" al inicio
         paises.addAll(PaisUtil.PREFIJOS.keySet()); // Agregar los demás países
 
-        cbPais.setItems(paises);
-        cbPais.setValue("Todos"); // Establecer "Todos" como valor predeterminado
-
         // Agregar "Todos" a la lista de estados
         cbEstado.setItems(FXCollections.observableArrayList("Todos", "Activa", "Inactiva"));
         cbEstado.setValue("Todos"); // Establecer "Todos" como valor predeterminado
@@ -110,7 +104,6 @@ public class ClientesController {
             return new ReadOnlyStringWrapper(texto);
         });
 
-        cbPais.setItems(FXCollections.observableArrayList(PaisUtil.PREFIJOS.keySet()));
         cbEstado.setItems(FXCollections.observableArrayList("Todos", "Activa", "Inactiva"));
         cbEstado.setValue("Todos");
 
@@ -124,23 +117,20 @@ public class ClientesController {
 
     private void configurarFiltros() {
         filteredData = new FilteredList<>(data, p -> true);
-        txtBuscarNombre.textProperty().addListener((obs, oldVal, newVal) -> aplicarFiltro());
         txtBuscarIdentificador.textProperty().addListener((obs, oldVal, newVal) -> aplicarFiltro());
-        cbPais.valueProperty().addListener((obs, oldVal, newVal) -> aplicarFiltro());
         cbEstado.valueProperty().addListener((obs, oldVal, newVal) -> aplicarFiltro());
     }
 
     private void aplicarFiltro() {
-        String nombre = txtBuscarNombre.getText().toLowerCase();
-        String identificador = txtBuscarIdentificador.getText().toLowerCase();
-        String pais = cbPais.getValue();
+        String identificador = txtBuscarIdentificador.getText().toLowerCase().trim();
         String estado = cbEstado.getValue();
 
-        filteredData.setPredicate(cliente -> (nombre.isEmpty() || cliente.getNombre().toLowerCase().contains(nombre)) &&
-                (identificador.isEmpty() || cliente.getIdentificadorEmpresarial().toLowerCase().contains(identificador))
-                &&
-                (pais == null || pais.equals("Todos") || cliente.getPais().equalsIgnoreCase(pais)) &&
-                (estado.equals("Todos") || cliente.getEstado().equalsIgnoreCase(estado)));
+        filteredData.setPredicate(cliente -> {
+            boolean matchIdentificador = identificador.isEmpty()
+                    || cliente.getIdentificadorEmpresarial().toLowerCase().startsWith(identificador);
+            boolean matchEstado = estado.equals("Todos") || cliente.getEstado().equalsIgnoreCase(estado);
+            return matchIdentificador && matchEstado;
+        });
     }
 
     private void cargarDatosDesdeCSV() {
@@ -210,7 +200,8 @@ public class ClientesController {
             return;
 
         String nuevoEstado = sel.getEstado().equalsIgnoreCase("Activa") ? "Inactiva" : "Activa";
-        String mensajeConfirmacion = "¿Está seguro/a de cambiar el estado de la Empresa Cliente a: '" + nuevoEstado +"'?";
+        String mensajeConfirmacion = "¿Está seguro/a de cambiar el estado de la Empresa Cliente a: '" + nuevoEstado
+                + "'?";
 
         boolean confirmed = DialogHelper.confirm(btnEstado.getScene().getWindow(), mensajeConfirmacion);
         if (confirmed) {

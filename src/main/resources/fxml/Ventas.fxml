@@ -2,8 +2,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml"
@@ -11,95 +9,103 @@
             styleClass="root"
             prefWidth="1024" prefHeight="768">
 
-        <!-- Botón Volver -->
-        <Button fx:id="btnBack"
-                text="← Volver"
-                styleClass="back-button"
-                onAction="#onBack"
-                AnchorPane.topAnchor="10"
-                AnchorPane.leftAnchor="10"/>
+    <!-- Botón Volver -->
+    <Button fx:id="btnBack"
+            text="← Volver"
+            styleClass="back-button"
+            onAction="#onBack"
+            AnchorPane.topAnchor="10"
+            AnchorPane.leftAnchor="10"/>
 
-        <!-- Título -->
-        <Label text="Ventas"
-               styleClass="header-title"
-               AnchorPane.topAnchor="10"
-               AnchorPane.leftAnchor="120"/>
+    <!-- Título -->
+    <Label text="Ventas"
+           styleClass="header-title"
+           AnchorPane.topAnchor="10"
+           AnchorPane.leftAnchor="120"/>
 
-        <!-- Pestañas de Ventas y Facturas -->
-        <TabPane fx:id="tabPane"
-                 AnchorPane.topAnchor="50"
-                 AnchorPane.leftAnchor="10"
-                 AnchorPane.rightAnchor="10"
-                 AnchorPane.bottomAnchor="10"
-                 tabClosingPolicy="UNAVAILABLE">
-                <tabs>
-                        <!-- Pestaña Ventas -->
-                        <Tab text="Ventas">
-                                <AnchorPane>
-                                        <!-- Encabezado Campos Fijos -->
-                                        <HBox spacing="20"
-                                              AnchorPane.topAnchor="10"
-                                              AnchorPane.leftAnchor="10"
-                                              AnchorPane.rightAnchor="10">
-                                                <Label text="Punto Emisión:"/>
-                                                <TextField fx:id="txtPuntoEmision" editable="false"/>
-                                                <Label text="Fecha:"/>
-                                                <TextField fx:id="txtFecha" editable="false"/>
-                                                <Label text="Sucursal:"/>
-                                                <TextField fx:id="txtSucursal" editable="false"/>
-                                        </HBox>
+    <!-- Encabezado Campos Fijos -->
+    <HBox spacing="20"
+          AnchorPane.topAnchor="50"
+          AnchorPane.leftAnchor="10"
+          AnchorPane.rightAnchor="10">
+        <padding>
+            <Insets top="10" right="10" bottom="10" left="10"/>
+        </padding>
+        <Label text="Punto Emisión:"/>
+        <TextField fx:id="txtPuntoEmision" editable="false"/>
+        <Label text="Fecha:"/>
+        <TextField fx:id="txtFecha" editable="false"/>
+        <Label text="Sucursal:"/>
+        <TextField fx:id="txtSucursal" editable="false"/>
+    </HBox>
 
-                                        <!-- Botones de acción -->
-                                        <HBox spacing="10"
-                                              AnchorPane.topAnchor="60"
-                                              AnchorPane.leftAnchor="10"
-                                              AnchorPane.rightAnchor="10">
-                                                <Button fx:id="btnNuevo"
-                                                        text="Nuevo"
-                                                        onAction="#onNuevo"
-                                                        styleClass="toolbar-button"/>
-                                                <Button fx:id="btnRecaudar"
-                                                        text="Recaudar"
-                                                        onAction="#onRecaudar"
-                                                        styleClass="toolbar-button"
-                                                        disable="true"/>
-                                                <Button fx:id="btnEliminar"
-                                                        text="Eliminar"
-                                                        onAction="#onEliminar"
-                                                        styleClass="toolbar-button"
-                                                        disable="true"/>
-                                        </HBox>
+    <!-- Rango de fechas para emitir factura -->
+    <HBox spacing="10"
+          alignment="CENTER_LEFT"
+          AnchorPane.topAnchor="90"
+          AnchorPane.leftAnchor="10"
+          AnchorPane.rightAnchor="10">
+        <padding>
+            <Insets top="10" right="10" bottom="10" left="10"/>
+        </padding>
+        <Label text="Desde:"/>
+        <DatePicker fx:id="dpFechaDesde"/>
+        <Label text="Hasta:"/>
+        <DatePicker fx:id="dpFechaHasta"/>
+        <Button fx:id="btnExportarFactura"
+                text="Emitir Facturas"
+                onAction="#onExportarFactura"
+                styleClass="toolbar-button"/>
+    </HBox>
 
-                                        <!-- Tabla de Ventas -->
-                                        <TableView fx:id="tablaVentas"
-                                                   AnchorPane.topAnchor="110"
-                                                   AnchorPane.leftAnchor="10"
-                                                   AnchorPane.rightAnchor="10"
-                                                   AnchorPane.bottomAnchor="10"
-                                                   tableMenuButtonVisible="false">
-                                                <columns>
-                                                        <TableColumn fx:id="colId"       text="ID"            prefWidth="80"/>
-                                                        <TableColumn fx:id="colDestino"  text="Tipo Destino"  prefWidth="120"/>
-                                                        <TableColumn fx:id="colServicio" text="Servicio"      prefWidth="120"/>
-                                                        <TableColumn fx:id="colCliente"  text="Cliente"       prefWidth="200"/>
-                                                        <TableColumn fx:id="colDetalle"  text="Detalle"       prefWidth="250"/>
-                                                        <TableColumn fx:id="colPrecio"   text="Precio"        prefWidth="100"/>
-                                                        <TableColumn fx:id="colIva"      text="IVA"           prefWidth="80"/>
-                                                        <TableColumn fx:id="colTotal"    text="Total"         prefWidth="100"/>
-                                                </columns>
-                                                <columnResizePolicy>
-                                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-                                                </columnResizePolicy>
-                                        </TableView>
-                                </AnchorPane>
-                        </Tab>
+    <!-- Botones de acción -->
+    <HBox spacing="10"
+          AnchorPane.topAnchor="130"
+          AnchorPane.leftAnchor="10"
+          AnchorPane.rightAnchor="10">
+        <padding>
+            <Insets top="10" right="10" bottom="10" left="10"/>
+        </padding>
+        <Button fx:id="btnAnularVenta"
+                text="Anular Venta"
+                onAction="#onAnularVenta"
+                styleClass="toolbar-button"
+                disable="true"/>
+        <Button fx:id="btnRecaudar"
+                text="Recaudar"
+                onAction="#onRecaudar"
+                styleClass="toolbar-button"
+                disable="true"/>
+        <Button fx:id="btnEliminar"
+                text="Eliminar"
+                onAction="#onEliminar"
+                styleClass="toolbar-button"
+                disable="true"/>
+    </HBox>
 
-                        <!-- Pestaña Facturas -->
-                        <Tab text="Facturas">
-                                <AnchorPane>
-                                        <!-- Contenido de Facturas (pendiente) -->
-                                </AnchorPane>
-                        </Tab>
-                </tabs>
-        </TabPane>
+    <!-- Tabla de Ventas -->
+    <TableView fx:id="tablaVentas"
+               AnchorPane.topAnchor="170"
+               AnchorPane.leftAnchor="10"
+               AnchorPane.rightAnchor="10"
+               AnchorPane.bottomAnchor="10"
+               tableMenuButtonVisible="false">
+        <columns>
+            <TableColumn fx:id="colId"       text="ID"            prefWidth="80"/>
+            <TableColumn fx:id="colDestino"  text="Tipo Destino"  prefWidth="120"/>
+            <TableColumn fx:id="colServicio" text="Servicio"      prefWidth="120"/>
+            <TableColumn fx:id="colCliente"  text="Cliente"       prefWidth="200"/>
+            <TableColumn fx:id="colDetalle"  text="Detalle"       prefWidth="250"/>
+            <TableColumn fx:id="colPrecio"   text="Precio"        prefWidth="100"/>
+            <TableColumn fx:id="colIva"      text="IVA"           prefWidth="80"/>
+            <TableColumn fx:id="colTotal"    text="Total"         prefWidth="100"/>
+            <TableColumn fx:id="colEstado"   text="Estado"        prefWidth="100"/>
+            <TableColumn fx:id="colFecha"    text="Fecha"         prefWidth="120"/>
+            <TableColumn fx:id="colUsuarioResponsable" text="Usuario Responsable" prefWidth="150"/>
+        </columns>
+        <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+        </columnResizePolicy>
+    </TableView>
+
 </AnchorPane>

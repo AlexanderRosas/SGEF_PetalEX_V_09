@@ -1,5 +1,22 @@
 package org.example.sgef_petalex_v_09.controllers;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+import org.example.sgef_petalex_v_09.models.Compra;
+import org.example.sgef_petalex_v_09.models.Estados;
+import org.example.sgef_petalex_v_09.models.Proveedor;
+import org.example.sgef_petalex_v_09.models.Rosa;
+import org.example.sgef_petalex_v_09.services.InventarioService;
+import org.example.sgef_petalex_v_09.util.CSVUtil;
+import org.example.sgef_petalex_v_09.util.DialogHelper;
+import org.example.sgef_petalex_v_09.util.UserSession;
+
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -7,23 +24,24 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Window;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.ReadOnlyStringWrapper;
-import org.example.sgef_petalex_v_09.models.Compra;
-import org.example.sgef_petalex_v_09.models.Estados;
-import org.example.sgef_petalex_v_09.models.Proveedor;
-import org.example.sgef_petalex_v_09.models.Rosa;
-import org.example.sgef_petalex_v_09.util.DialogHelper;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
 public class ComprasController {
 
@@ -46,31 +64,45 @@ public class ComprasController {
     @FXML
     private TableColumn<Compra, LocalDate> colFechaCompra;
     @FXML
+    private TableColumn<Compra, LocalDate> colFechaActualizacion;
+    @FXML
+    private TableColumn<Compra, String> colUsuarioResponsable;
+
+    @FXML
     private DatePicker dpFechaDesde, dpFechaHasta;
     private ObservableList<Compra> masterData;
     private FilteredList<Compra> filteredData;
+    private ObservableList<Proveedor> proveedoresReales = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
+        proveedoresReales.setAll(CSVUtil.leerProveedores());
+        masterData = cargarComprasDesdeCSV("data/compras.csv");
         colId.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getId()));
-        colProveedor.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getProveedor()));
-        colRuc.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getRuc()));
+        colProveedor.setCellValueFactory(c -> new ReadOnlyStringWrapper(
+                c.getValue().getProveedor() != null ? c.getValue().getProveedor().getNombre() : ""));
+        colRuc.setCellValueFactory(c -> new ReadOnlyStringWrapper(
+                c.getValue().getProveedor() != null ? c.getValue().getProveedor().getRuc() : ""));
+
         colTipoRosa.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getTipoRosa()));
         colTipoCorte.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getTipoCorte()));
         colCantidad.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getCantidad()));
         colCostoUnitario.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getCostoUnitario()));
+        colTotal.setCellValueFactory(
+                c -> new ReadOnlyObjectWrapper<>(c.getValue().getCantidad() * c.getValue().getCostoUnitario()));
         colFechaCompra.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getFechaCompra()));
-        colEstado.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getEstadoActual()));
-        colTotal.setCellValueFactory(c -> {
-            Compra compra = c.getValue();
-            return new ReadOnlyObjectWrapper<>(compra.getCantidad() * compra.getCostoUnitario());
-        });
+        colFechaActualizacion
+                .setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getFechaUltimaActualizacion()));
+        colUsuarioResponsable.setCellValueFactory(c -> new ReadOnlyStringWrapper(
+                c.getValue().getUsuarioResponsable() != null ? c.getValue().getUsuarioResponsable() : ""));
+        colEstado.setCellValueFactory(c -> new ReadOnlyStringWrapper(
+                c.getValue().getEstadoActual() != null ? c.getValue().getEstadoActual() : ""));
 
         colTotal.setCellFactory(tc -> new TableCell<>() {
             @Override
             protected void updateItem(Double total, boolean empty) {
                 super.updateItem(total, empty);
-                setText((empty || total == null) ? null : String.format("$ %.2f", total));
+                setText(empty || total == null ? null : String.format("$ %.2f", total));
             }
         });
 
@@ -80,9 +112,6 @@ public class ComprasController {
 
         dpFechaDesde.valueProperty().addListener((obs, old, val) -> filtrar());
         dpFechaHasta.valueProperty().addListener((obs, old, val) -> filtrar());
-        masterData = FXCollections.observableArrayList(
-                new Compra(1, "FlorAndina", "1791512345009", "MONDIAL", "RUSO", 70.0, 120, 0.80, LocalDate.now(),
-                        "Recibida"));
 
         filteredData = new FilteredList<>(masterData, p -> true);
 
@@ -108,8 +137,8 @@ public class ComprasController {
             return;
         }
         String estado = compra.getEstadoActual() != null ? compra.getEstadoActual().trim() : "";
-        btnActualizar.setDisable(estado.equalsIgnoreCase("Inactiva") || estado.equalsIgnoreCase("En Cuarto Frío"));
-        btnInactivar.setDisable(estado.equalsIgnoreCase("Inactiva"));
+        btnActualizar.setDisable(estado.equalsIgnoreCase("Devuelta") || estado.equalsIgnoreCase("En Cuarto Frío"));
+        btnInactivar.setDisable(estado.equalsIgnoreCase("Devuelta"));
     }
 
     private void filtrar() {
@@ -119,8 +148,11 @@ public class ComprasController {
         LocalDate hasta = dpFechaHasta.getValue();
 
         filteredData.setPredicate(c -> {
-            boolean matchTexto = texto.isEmpty() || c.getProveedor().toLowerCase().contains(texto)
+            boolean matchTexto = texto.isEmpty()
+                    || (c.getProveedor() != null && (c.getProveedor().getNombre().toLowerCase().contains(texto) ||
+                            c.getProveedor().getRuc().toLowerCase().contains(texto)))
                     || c.getTipoRosa().toLowerCase().contains(texto);
+
             boolean matchEstado = estadoFiltro.equals("Todos") || c.getEstadoActual().equals(estadoFiltro);
             boolean matchFecha = true;
             if (desde != null && hasta != null) {
@@ -137,7 +169,7 @@ public class ComprasController {
             @Override
             protected void updateItem(Compra item, boolean empty) {
                 super.updateItem(item, empty);
-                setStyle((item != null && "Inactiva".equalsIgnoreCase(item.getEstadoActual()))
+                setStyle((item != null && "Devuelta".equalsIgnoreCase(item.getEstadoActual()))
                         ? "-fx-background-color: lightgray;"
                         : "");
             }
@@ -156,8 +188,19 @@ public class ComprasController {
             if (confirm(owner, "¿Deseas registrar esta compra?")) {
                 c.setId(masterData.stream().mapToInt(Compra::getId).max().orElse(0) + 1);
                 c.setEstadoActual("Recibida");
+                c.setFechaUltimaActualizacion(LocalDate.now());
+                c.setUsuarioResponsable(UserSession.getUsuarioActual().getUsuario());
+
                 masterData.add(c);
-                DialogHelper.showSuccess(owner, "registrado la compra");
+                CSVUtil.guardarCompras(masterData); // ✅ Guardar en CSV
+
+                try {
+                    InventarioService.agregarUnidades(c.getTipoRosa(), c.getTipoCorte(), c.getCantidad());
+                } catch (IOException e) {
+                    DialogHelper.showError(owner, "Error al actualizar inventario: " + e.getMessage());
+                }
+
+                DialogHelper.showSuccess(owner, "registrado la compra y actualizado inventario");
             }
         });
     }
@@ -169,13 +212,16 @@ public class ComprasController {
         if (seleccionado == null)
             return;
         String estado = seleccionado.getEstadoActual().trim();
-        if (estado.equalsIgnoreCase("Inactiva") || estado.equalsIgnoreCase("En Cuarto Frío"))
+        if (estado.equalsIgnoreCase("Devuelta") || estado.equalsIgnoreCase("En Cuarto Frío"))
             return;
 
         ObservableList<String> estados = Estados.ESTADOS_COMPRA;
         int index = estados.indexOf(estado);
         if (index >= 0 && index < estados.size() - 1) {
             String nuevoEstado = estados.get(index + 1);
+            seleccionado.setFechaUltimaActualizacion(LocalDate.now());
+            seleccionado.setUsuarioResponsable(UserSession.getUsuarioActual().getUsuario());
+            CSVUtil.guardarCompras(masterData);
             seleccionado.setEstadoActual(nuevoEstado);
             tableCompras.refresh();
             DialogHelper.showSuccess(owner, "actualizado el estado de la compra a \"" + nuevoEstado + "\"");
@@ -187,10 +233,27 @@ public class ComprasController {
     private void onInactivar() {
         Window owner = btnInactivar.getScene().getWindow();
         Compra seleccionado = tableCompras.getSelectionModel().getSelectedItem();
-        if (seleccionado != null && confirm(owner, "¿Está seguro/a de inactivar esta compra?")) {
-            seleccionado.setEstadoActual("Inactiva");
+        if (seleccionado != null && confirm(owner, "¿Está seguro/a de devolver esta compra?")) {
+            seleccionado.setEstadoActual("Devuelta");
+
+            try {
+                boolean exito = InventarioService.consumirUnidades(
+                        seleccionado.getTipoRosa(),
+                        seleccionado.getTipoCorte(),
+                        seleccionado.getCantidad());
+
+                if (!exito) {
+                    DialogHelper.showWarning(owner,
+                            "No hay suficientes unidades en inventario para devolver esta compra.");
+                }
+            } catch (IOException e) {
+                DialogHelper.showError(owner, "Error al actualizar inventario: " + e.getMessage());
+            }
+            seleccionado.setFechaUltimaActualizacion(LocalDate.now());
+            seleccionado.setUsuarioResponsable(UserSession.getUsuarioActual().getUsuario());
+            CSVUtil.guardarCompras(masterData);
             tableCompras.refresh();
-            DialogHelper.showSuccess(owner, "inactivado la compra");
+            DialogHelper.showSuccess(owner, "inactivado la compra y actualizado inventario");
             actualizarEstadoBotones(seleccionado);
             tableCompras.getSelectionModel().clearSelection();
             tableCompras.getSelectionModel().select(seleccionado);
@@ -211,17 +274,7 @@ public class ComprasController {
         alert.setTitle("Confirmación");
         Optional<ButtonType> respuesta = alert.showAndWait();
         return respuesta.isPresent() && respuesta.get().getButtonData() == ButtonData.OK_DONE;
-    }
-
-    // Lista simulada de proveedores globales
-    private static final ObservableList<Proveedor> PROVEEDORES_GLOBALES = FXCollections.observableArrayList(
-            new Proveedor("1791512345001", "Rosas del Azuay", "Exportadora Rosas del Azuay S.A.",
-                    "+593998112233", "Cuenca, Azuay", "1234567890001", "contacto@azuayrosas.ec",
-                    LocalDate.of(2022, 3, 1), "Activo"),
-
-            new Proveedor("1791512345002", "Florícolas Galápagos", "Floricultores del Pacífico",
-                    "+593998223344", "Puerto Ayora, Galápagos", "1234567890002", "info@floragalapagos.ec",
-                    LocalDate.of(2021, 9, 15), "Activo"));
+    };
 
     private Optional<Compra> showCompraFormDialog(String title, Compra existing) {
         boolean esEdicion = existing != null;
@@ -239,8 +292,8 @@ public class ComprasController {
         grid.setVgap(10);
         grid.setPadding(new Insets(20));
 
-        ObservableList<Proveedor> proveedoresActivos = PROVEEDORES_GLOBALES
-                .filtered(p -> "Activo".equals(p.getEstado()));
+        ObservableList<Proveedor> proveedoresActivos = proveedoresReales.filtered(p -> "Activo".equals(p.getEstado()));
+
         ComboBox<Proveedor> cbProveedor = new ComboBox<>(proveedoresActivos);
         cbProveedor.setCellFactory(lv -> new ListCell<Proveedor>() {
             @Override
@@ -345,7 +398,7 @@ public class ComprasController {
         // obligatorios
         btnAceptarButton.disableProperty().bind(
                 cbProveedor.valueProperty().isNull());
-         btnAceptarButton.addEventFilter(ActionEvent.ACTION, event -> {
+        btnAceptarButton.addEventFilter(ActionEvent.ACTION, event -> {
             if (cbProveedor.getValue() == null ||
                     cbTipoRosa.getValue() == null ||
                     cbTipoCorte.getValue() == null ||
@@ -376,20 +429,35 @@ public class ComprasController {
             if (button == btnAceptar) {
                 Compra c = new Compra();
                 c.setId(0);
-                c.setProveedor(cbProveedor.getValue().getNombre());
+                c.setProveedor(cbProveedor.getValue());
                 c.setRuc(cbProveedor.getValue().getRuc());
                 c.setTipoRosa(cbTipoRosa.getValue().name());
                 c.setTipoCorte(cbTipoCorte.getValue().name());
+                c.setLargoTallo(0.0); // Campo faltante
                 c.setCantidad(Integer.parseInt(tfCantidad.getText()));
+                c.setCantidadDisponible(Integer.parseInt(tfCantidad.getText())); // Campo faltante
                 c.setCostoUnitario(Double.parseDouble(tfPrecioUnitario.getText()));
+                c.setPrecioUnitario(Double.parseDouble(tfPrecioUnitario.getText())); // Campo faltante
+                c.setPrecioTotal(c.getCantidad() * c.getPrecioUnitario()); // Campo faltante
                 c.setFechaCompra(dpFecha.getValue());
-                c.setEstadoActual("Recibida"); // Estado fijo al crear
+                c.setEstadoActual("Recibida");
+                c.setFechaHidratacion(null); // Campo faltante
+                c.setFechaCuartoFrio(null); // Campo faltante
+                c.setFechaEmpaque(null); // Campo faltante
+                c.setFechaExportacion(null); // Campo faltante
+                c.setObservaciones(""); // Campo faltante
+                c.setFechaUltimaActualizacion(LocalDate.now());
+                c.setUsuarioResponsable(UserSession.getUsuarioActual().getUsuario());
                 return c;
             }
             return null;
         });
 
         return dlg.showAndWait();
+    }
+
+    private ObservableList<Compra> cargarComprasDesdeCSV(String ruta) {
+        return FXCollections.observableArrayList(CSVUtil.leerCompras());
     }
 
 }

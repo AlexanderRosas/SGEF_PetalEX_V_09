@@ -1,2 +1,1 @@
-ID;ClienteID;FechaPedido;FechaEnvio;Estado;GuiaAerea;PrecioTotal
-1;C001;2025-07-27;2025-07-29;Empacado;GUIA;650,00
+ID;ClienteID;ClienteNombre;ClienteIdentificadorEmpresarial;ClienteDireccion;ClienteTelefono;FechaPedido;FechaEnvio;Estado;GuiaAerea;PrecioTotal;EmpresaTransporte;FechaCreacion;FechaModificacion;UsuarioResponsable;Items

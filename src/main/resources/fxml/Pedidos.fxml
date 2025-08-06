@@ -24,7 +24,6 @@
                 </graphic>
             </Button>
 
-            <!-- NUEVO BOTÓN: Actualizar Estado -->
             <Button fx:id="btnActualizarEstado" text="Actualizar Estado"
                 onAction="#onActualizarEstado"
                 styleClass="toolbar-button" disable="true">
@@ -59,7 +58,7 @@
                     </ImageView>
                 </graphic>
             </Button>
-            <Button fx:id="btnExportar" text="Facturar" onAction="#onExportar"
+            <Button fx:id="btnExportar" text="Exportar en .csv" onAction="#onExportar"
                 styleClass="toolbar-button">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
@@ -88,19 +87,18 @@
         AnchorPane.rightAnchor="10"
         AnchorPane.bottomAnchor="10">
         <columns>
-            <TableColumn fx:id="colId" text="ID" prefWidth="50" />
-            <TableColumn fx:id="colCliente" text="Cliente" prefWidth="150" />
-            <TableColumn fx:id="colFechaPedido" text="Fecha Pedido" prefWidth="120" />
-            <TableColumn fx:id="colFechaExportacion" text="Fecha Exportación" prefWidth="130" />
+            <TableColumn fx:id="colCliente" text="Empresa Cliente" prefWidth="200" />
+            <TableColumn fx:id="colFechaPedido" text="Fecha Registro" prefWidth="120" />
+            <TableColumn fx:id="colFechaExportacion" text="Fecha Estimada Exportación"
+                prefWidth="170" />
             <TableColumn fx:id="colEstado" text="Estado" prefWidth="100" />
-            <TableColumn fx:id="colTotalProductos" text="Productos" prefWidth="80" />
-            <TableColumn fx:id="colPrecioTotal" text="Total" prefWidth="100" />
-            <TableColumn fx:id="colGuiaAerea" text="Guía Aérea" prefWidth="120" />
-            <!-- NUEVA COLUMNA: Empresa de Transporte -->
-            <TableColumn fx:id="colEmpresaTransporte" text="Empresa de Transporte" prefWidth="150" />
-            <TableColumn fx:id="colFechaModificacion" text="Últ. Modificación" prefWidth="140" />
+            <TableColumn fx:id="colEmpresaTransporte" text="Agencia de Transporte" prefWidth="150" />
+            <TableColumn fx:id="colTotalProductos" text="Detalle Productos" prefWidth="150" />
+            <TableColumn fx:id="colPrecioTotal" text="Precio Total" prefWidth="100" />
+            <TableColumn fx:id="colFechaModificacion" text="Fecha Actualización" prefWidth="140" />
             <TableColumn fx:id="colUsuarioModificador" text="Usuario Responsable" prefWidth="140" />
         </columns>
     </TableView>
+
 
 </AnchorPane>

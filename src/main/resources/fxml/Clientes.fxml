@@ -53,11 +53,8 @@
 
         <!-- Filtros de búsqueda -->
         <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar-filters">
-            <TextField fx:id="txtBuscarNombre" layoutX="100" layoutY="100" prefWidth="200.0"
-                promptText="Nombre de la Empresa" />
             <TextField fx:id="txtBuscarIdentificador" layoutX="100" layoutY="150" prefWidth="200.0"
                 promptText="Identificador Empresarial" />
-            <ComboBox fx:id="cbPais" layoutX="100" layoutY="200" prefWidth="200.0" promptText="País" />
             <ComboBox fx:id="cbEstado" layoutX="100" layoutY="250" prefWidth="200.0"
                 promptText="Estado" />
         </HBox>
