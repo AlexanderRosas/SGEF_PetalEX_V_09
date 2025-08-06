@@ -361,4 +361,35 @@ public class DataValidator {
         }
         return ValidationResult.success();
     }
+
+    private static final Pattern IATA_AWB_PATTERN = Pattern.compile("^[0-9]{11}$");
+
+    public static ValidationResult validateIATAWaybill(String waybill) {
+        if (waybill == null || waybill.trim().isEmpty()) {
+            return ValidationResult.error("Guía Aérea",
+                    "La guía aérea es obligatoria y debe tener 11 dígitos numéricos.");
+        }
+
+        String trimmedWaybill = waybill.trim();
+
+        if (!IATA_AWB_PATTERN.matcher(trimmedWaybill).matches()) {
+            return ValidationResult.error("Guía Aérea", "La guía aérea debe tener exactamente 11 dígitos numéricos.");
+        }
+
+        return ValidationResult.success();
+    }
+
+    /** Nombre de rosa o producto. */
+    public static ValidationResult validateNombreRosaProducto(String nombre) {
+        if (nombre == null || nombre.isBlank()) {
+            return ValidationResult.error("Nombre de rosa/producto",
+                    "El nombre de la flor es obligatorio y debe contener solo letras, números, espacios, punto, guion o coma (máx. 30 caracteres)");
+        }
+        if (!DIRECCION_PATTERN.matcher(nombre.trim()).matches()) {
+            return ValidationResult.error("Nombre de rosa/producto",
+                    "El nombre de la flor debe contener solo letras, números, espacios, punto, guion o coma (máx. 30 caracteres)");
+        }
+        return ValidationResult.success();
+    }
+
 }

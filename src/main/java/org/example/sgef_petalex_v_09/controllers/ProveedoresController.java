@@ -1,11 +1,14 @@
 package org.example.sgef_petalex_v_09.controllers;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -14,19 +17,23 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.example.sgef_petalex_v_09.models.Proveedor;
+import org.example.sgef_petalex_v_09.util.CSVUtil;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
 import org.example.sgef_petalex_v_09.validators.DataValidator;
 import org.example.sgef_petalex_v_09.validators.TextFieldValidator;
 import org.example.sgef_petalex_v_09.validators.ValidationResult;
 
 import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
-public class ProveedoresController {
+public class ProveedoresController implements Initializable {
 
     @FXML
     private Button btnBack;
@@ -52,6 +59,13 @@ public class ProveedoresController {
     private TableColumn<Proveedor, String> colCorreo;
     @FXML
     private TableColumn<Proveedor, String> colEstado;
+
+    @FXML
+    private TableColumn<Proveedor, LocalDate> colFechaRegistro;
+    @FXML
+    private TableColumn<Proveedor, LocalDate> colFechaModificacion;
+    @FXML
+    private TableColumn<Proveedor, String> colUsuarioResponsable;
     @FXML
     private TextField txtBuscarProveedor;
     @FXML
@@ -68,14 +82,25 @@ public class ProveedoresController {
     private final ObservableList<Proveedor> masterDataProveedores = FXCollections.observableArrayList();
     private FilteredList<Proveedor> filteredDataProveedores;
 
-    // Controlador de productos
-    private ProductosController productosController;
-
-    @FXML
-    public void initialize() {
-
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
         initializeProveedoresTab();
         initializeProductosTab();
+    }
+
+    private void initializeProductosTab() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/RoseSelection.fxml"));
+            Parent root = loader.load();
+
+            RoseSelectionController controller = loader.getController();
+            controller.setModoOperacion(RoseSelectionController.ModoOperacion.AGREGAR_PRODUCTO);
+
+            tabProductos.setContent(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Opcional: muestra alerta o loguea error
+        }
     }
 
     private void initializeProveedoresTab() {
@@ -86,6 +111,9 @@ public class ProveedoresController {
         colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
         colCorreo.setCellValueFactory(new PropertyValueFactory<>("correo"));
         colEstado.setCellValueFactory(new PropertyValueFactory<>("estado"));
+        colFechaRegistro.setCellValueFactory(new PropertyValueFactory<>("fechaRegistro"));
+        colFechaModificacion.setCellValueFactory(new PropertyValueFactory<>("fechaModificacion"));
+        colUsuarioResponsable.setCellValueFactory(new PropertyValueFactory<>("usuarioResponsable"));
 
         // Configurar ComboBox de estado
         cbEstadoProveedor.getItems().addAll("Todos", "Activo", "Inactivo");
@@ -115,37 +143,6 @@ public class ProveedoresController {
         cbEstadoProveedor.valueProperty().addListener((obs, oldVal, newVal) -> filtrarProveedores());
     }
 
-    private void initializeProductosTab() {
-        try {
-            // ✅ CORREGIR: Cargar el FXML correcto
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/ProductosTab.fxml"));
-            AnchorPane productosContent = loader.load();
-
-            // Configurar el contenido de la pestaña
-            tabProductos.setContent(productosContent);
-
-            // Obtener el controlador
-            productosController = loader.getController();
-
-            // Pasar la lista de proveedores al controlador de productos
-            if (productosController != null) {
-                productosController.setProveedoresDisponibles(masterDataProveedores);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error al cargar ProductosTab.fxml: " + e.getMessage());
-
-            // ✅ FALLBACK: Si no se puede cargar el FXML, crear contenido simple
-            Label errorLabel = new Label("Error al cargar la pestaña de productos: " + e.getMessage());
-            errorLabel.setStyle("-fx-text-fill: red; -fx-font-size: 14px;");
-            AnchorPane errorPane = new AnchorPane(errorLabel);
-            AnchorPane.setTopAnchor(errorLabel, 20.0);
-            AnchorPane.setLeftAnchor(errorLabel, 20.0);
-            tabProductos.setContent(errorPane);
-        }
-    }
-
     private void filtrarProveedores() {
         String filtroTexto = txtBuscarProveedor.getText().toLowerCase().trim();
         String estadoSeleccionado = cbEstadoProveedor.getValue();
@@ -166,6 +163,43 @@ public class ProveedoresController {
         });
     }
 
+    private boolean yaSeAbrioEnEstaSesion = false;
+
+    @FXML
+    private void onTabProductosSeleccionado(Event event) {
+        Tab tab = (Tab) event.getSource();
+        if (tab.isSelected() && !yaSeAbrioEnEstaSesion) {
+            yaSeAbrioEnEstaSesion = true;
+            abrirSelectorRosaParaAgregarProducto();
+        }
+    }
+
+    private void abrirSelectorRosaParaAgregarProducto() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/org/example/sgef_petalex_v_09/views/RoseSelection.fxml"));
+            Parent root = loader.load();
+
+            RoseSelectionController controller = loader.getController();
+            controller.setModoOperacion(RoseSelectionController.ModoOperacion.AGREGAR_PRODUCTO);
+
+            Stage stage = new Stage();
+            stage.setTitle("Seleccionar tipo de rosa");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+
+            String rosaSeleccionada = controller.getSelectedRose();
+            if (rosaSeleccionada != null) {
+                System.out.println("Producto nuevo con rosa: " + rosaSeleccionada);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            DialogHelper.showError(null, "Error al abrir el selector de rosas.");
+        }
+    }
+
     @FXML
     private void onNuevoProveedor(ActionEvent event) {
         Optional<Proveedor> resultado = mostrarFormularioProveedor("Nuevo Proveedor", null);
@@ -175,10 +209,7 @@ public class ProveedoresController {
             if (validarProveedor(nuevoProveedor)) {
                 if (DialogHelper.confirm(getWindow(), "¿Está seguro que desea agregar este proveedor?")) {
                     masterDataProveedores.add(nuevoProveedor);
-                    // Actualizar lista en productos
-                    if (productosController != null) {
-                        productosController.setProveedoresDisponibles(masterDataProveedores);
-                    }
+                    CSVUtil.guardarProveedores(masterDataProveedores);
                     DialogHelper.showSuccess(getWindow(), "Proveedor agregado exitosamente");
                 }
             }
@@ -198,11 +229,7 @@ public class ProveedoresController {
         if (resultado.isPresent()) {
             if (validarProveedor(seleccionado)) {
                 if (DialogHelper.confirm(getWindow(), "¿Está seguro que desea actualizar este proveedor?")) {
-                    tableProveedores.refresh();
-                    // Actualizar lista en productos
-                    if (productosController != null) {
-                        productosController.setProveedoresDisponibles(masterDataProveedores);
-                    }
+                    CSVUtil.guardarProveedores(masterDataProveedores);
                     DialogHelper.showSuccess(getWindow(), "Proveedor actualizado exitosamente");
                 }
             }
@@ -226,7 +253,7 @@ public class ProveedoresController {
 
         if (DialogHelper.confirm(getWindow(), mensaje)) {
             seleccionado.setEstado(nuevoEstado);
-            tableProveedores.refresh();
+            CSVUtil.guardarProveedores(masterDataProveedores);
             DialogHelper.showSuccess(getWindow(),
                     String.format("Proveedor %s exitosamente",
                             nuevoEstado.equals("Activo") ? "activado" : "inactivado"));
@@ -334,7 +361,7 @@ public class ProveedoresController {
             txtDireccion.setText(proveedorExistente.getDireccion());
             txtCuentaBancaria.setText(proveedorExistente.getCuenta_bancaria());
             txtCorreo.setText(proveedorExistente.getCorreo());
-            dpFechaRegistro.setValue(proveedorExistente.getFecha_registro());
+            dpFechaRegistro.setValue(proveedorExistente.getFechaRegistro());
         } else {
             dpFechaRegistro.setValue(LocalDate.now());
         }
@@ -359,12 +386,69 @@ public class ProveedoresController {
 
         dialog.getDialogPane().setContent(grid);
 
+        Button okButton = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+        okButton.setDisable(true);
+
+        // Validar campos en tiempo real
+        txtRuc.textProperty().addListener((obs, oldVal, newVal) -> {
+            ValidationResult result = DataValidator.validateRUC(newVal.trim(), "RUC");
+            if (!result.isValid()) {
+                setErrorStyle(txtRuc, result.getErrorMessage());
+                okButton.setDisable(true);
+            } else {
+                clearErrorStyle(txtRuc);
+                okButton.setDisable(false);
+            }
+        });
+
+        txtNombre.textProperty().addListener((obs, oldVal, newVal) -> {
+            ValidationResult result = DataValidator.validateName(newVal.trim(), "Nombre");
+            if (!result.isValid()) {
+                setErrorStyle(txtNombre, result.getErrorMessage());
+                okButton.setDisable(true);
+            } else {
+                clearErrorStyle(txtNombre);
+                okButton.setDisable(false);
+            }
+        });
+
+        txtTelefono.textProperty().addListener((obs, oldVal, newVal) -> {
+            ValidationResult result = DataValidator.validateTelefonoE164(newVal.trim());
+            if (!result.isValid()) {
+                setErrorStyle(txtTelefono, result.getErrorMessage());
+                okButton.setDisable(true);
+            } else {
+                clearErrorStyle(txtTelefono);
+                okButton.setDisable(false);
+            }
+        });
+
+        txtCorreo.textProperty().addListener((obs, oldVal, newVal) -> {
+            ValidationResult result = DataValidator.validateCorreo(newVal.trim());
+            if (!result.isValid()) {
+                setErrorStyle(txtCorreo, result.getErrorMessage());
+                okButton.setDisable(true);
+            } else {
+                clearErrorStyle(txtCorreo);
+                okButton.setDisable(false);
+            }
+        });
+
+        txtCuentaBancaria.textProperty().addListener((obs, oldVal, newVal) -> {
+            ValidationResult result = DataValidator.validateNumeric(newVal.trim(), "Cuenta bancaria");
+            if (!result.isValid()) {
+                setErrorStyle(txtCuentaBancaria, result.getErrorMessage());
+                okButton.setDisable(true);
+            } else {
+                clearErrorStyle(txtCuentaBancaria);
+                okButton.setDisable(false);
+            }
+        });
+
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton.getButtonData() == ButtonBar.ButtonData.OK_DONE) {
-                // ✅ VALIDAR ANTES DE PROCESAR
                 Proveedor tempProveedor;
                 if (proveedorExistente != null) {
-                    // Crear copia temporal para validar
                     tempProveedor = new Proveedor(
                             txtRuc.getText(),
                             txtNombre.getText(),
@@ -374,7 +458,10 @@ public class ProveedoresController {
                             txtCuentaBancaria.getText(),
                             txtCorreo.getText(),
                             dpFechaRegistro.getValue(),
-                            proveedorExistente.getEstado());
+                            proveedorExistente.getEstado(),
+                            LocalDate.now(), // fechaModificacion
+                            "Sistema" // usuarioResponsable
+                    );
                 } else {
                     tempProveedor = new Proveedor(
                             txtRuc.getText(),
@@ -385,17 +472,17 @@ public class ProveedoresController {
                             txtCuentaBancaria.getText(),
                             txtCorreo.getText(),
                             dpFechaRegistro.getValue(),
-                            "Activo");
+                            "Activo",
+                            LocalDate.now(), // fechaModificacion
+                            "Sistema" // usuarioResponsable
+                    );
                 }
 
-                // Validar el proveedor temporal
                 if (!validarProveedorEnDialogo(tempProveedor)) {
                     return null; // Cancela el cierre del diálogo
                 }
 
-                // Si pasa las validaciones, proceder
                 if (proveedorExistente != null) {
-                    // Actualizar proveedor existente
                     proveedorExistente.setRuc(txtRuc.getText());
                     proveedorExistente.setNombre(txtNombre.getText());
                     proveedorExistente.setRazon_social(txtRazonSocial.getText());
@@ -403,7 +490,9 @@ public class ProveedoresController {
                     proveedorExistente.setDireccion(txtDireccion.getText());
                     proveedorExistente.setCuenta_bancaria(txtCuentaBancaria.getText());
                     proveedorExistente.setCorreo(txtCorreo.getText());
-                    proveedorExistente.setFecha_registro(dpFechaRegistro.getValue());
+                    proveedorExistente.setFechaRegistro(dpFechaRegistro.getValue());
+                    proveedorExistente.setFechaModificacion(LocalDate.now()); // Actualizar fecha de modificación
+                    proveedorExistente.setUsuarioResponsable("Sistema"); // Actualizar usuario responsable
                     return proveedorExistente;
                 } else {
                     return tempProveedor;
@@ -413,6 +502,81 @@ public class ProveedoresController {
         });
 
         return dialog.showAndWait();
+    }
+
+    private boolean validarProveedorEnDialogo(Proveedor proveedor) {
+        // Validaciones básicas de formato
+        if (proveedor.getRuc() == null || proveedor.getRuc().trim().isEmpty()) {
+            DialogHelper.showValidationError(getWindow(), "RUC", "El RUC es obligatorio");
+            return false;
+        }
+
+        if (proveedor.getNombre() == null || proveedor.getNombre().trim().isEmpty()) {
+            DialogHelper.showValidationError(getWindow(), "Nombre", "El nombre es obligatorio");
+            return false;
+        }
+
+        if (proveedor.getRazon_social() == null || proveedor.getRazon_social().trim().isEmpty()) {
+            DialogHelper.showValidationError(getWindow(), "Razón Social", "La razón social es obligatoria");
+            return false;
+        }
+
+        if (proveedor.getTelefono() == null || proveedor.getTelefono().trim().isEmpty()) {
+            DialogHelper.showValidationError(getWindow(), "Teléfono", "El teléfono es obligatorio");
+            return false;
+        }
+
+        if (proveedor.getCorreo() == null || proveedor.getCorreo().trim().isEmpty()) {
+            DialogHelper.showValidationError(getWindow(), "Correo", "El correo electrónico es obligatorio");
+            return false;
+        }
+
+        if (proveedor.getDireccion() == null || proveedor.getDireccion().trim().isEmpty()) {
+            DialogHelper.showValidationError(getWindow(), "Dirección", "La dirección es obligatoria");
+            return false;
+        }
+
+        if (proveedor.getFecha_registro() == null) {
+            DialogHelper.showValidationError(getWindow(), "Fecha de registro", "La fecha de registro es obligatoria");
+            return false;
+        }
+
+        // Validaciones de formato usando DataValidator
+        ValidationResult rucResult = DataValidator.validateRUC(proveedor.getRuc(), "RUC");
+        if (!rucResult.isValid()) {
+            rucResult.showErrorIfInvalid(getWindow());
+            return false;
+        }
+
+        ValidationResult nameResult = DataValidator.validateName(proveedor.getNombre(), "Nombre");
+        if (!nameResult.isValid()) {
+            nameResult.showErrorIfInvalid(getWindow());
+            return false;
+        }
+
+        ValidationResult phoneResult = DataValidator.validateTelefonoE164(proveedor.getTelefono());
+        if (!phoneResult.isValid()) {
+            phoneResult.showErrorIfInvalid(getWindow());
+            return false;
+        }
+
+        ValidationResult emailResult = DataValidator.validateCorreo(proveedor.getCorreo());
+        if (!emailResult.isValid()) {
+            emailResult.showErrorIfInvalid(getWindow());
+            return false;
+        }
+
+        // Validaciones de cuenta bancaria si está presente
+        if (proveedor.getCuenta_bancaria() != null && !proveedor.getCuenta_bancaria().trim().isEmpty()) {
+            ValidationResult cuentaResult = DataValidator.validateNumeric(proveedor.getCuenta_bancaria(),
+                    "Cuenta bancaria");
+            if (!cuentaResult.isValid()) {
+                cuentaResult.showErrorIfInvalid(getWindow());
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private boolean validarProveedor(Proveedor proveedor) {
@@ -521,98 +685,9 @@ public class ProveedoresController {
      * Validación específica para el diálogo de proveedor
      * Muestra errores inmediatamente sin cerrar el diálogo
      */
-    private boolean validarProveedorEnDialogo(Proveedor proveedor) {
-        // Validaciones básicas de formato
-        if (proveedor.getRuc() == null || proveedor.getRuc().trim().isEmpty()) {
-            DialogHelper.showValidationError(getWindow(), "RUC", "El RUC es obligatorio");
-            return false;
-        }
-
-        if (proveedor.getNombre() == null || proveedor.getNombre().trim().isEmpty()) {
-            DialogHelper.showValidationError(getWindow(), "Nombre", "El nombre es obligatorio");
-            return false;
-        }
-
-        if (proveedor.getRazon_social() == null || proveedor.getRazon_social().trim().isEmpty()) {
-            DialogHelper.showValidationError(getWindow(), "Razón Social", "La razón social es obligatoria");
-            return false;
-        }
-
-        if (proveedor.getTelefono() == null || proveedor.getTelefono().trim().isEmpty()) {
-            DialogHelper.showValidationError(getWindow(), "Teléfono", "El teléfono es obligatorio");
-            return false;
-        }
-
-        if (proveedor.getCorreo() == null || proveedor.getCorreo().trim().isEmpty()) {
-            DialogHelper.showValidationError(getWindow(), "Correo", "El correo electrónico es obligatorio");
-            return false;
-        }
-
-        if (proveedor.getDireccion() == null || proveedor.getDireccion().trim().isEmpty()) {
-            DialogHelper.showValidationError(getWindow(), "Dirección", "La dirección es obligatoria");
-            return false;
-        }
-
-        if (proveedor.getFecha_registro() == null) {
-            DialogHelper.showValidationError(getWindow(), "Fecha de registro", "La fecha de registro es obligatoria");
-            return false;
-        }
-
-        // Validaciones de formato usando DataValidator
-        ValidationResult rucResult = DataValidator.validateRUC(proveedor.getRuc(), "RUC");
-        if (!rucResult.isValid()) {
-            rucResult.showErrorIfInvalid(getWindow());
-            return false;
-        }
-
-        ValidationResult nameResult = DataValidator.validateName(proveedor.getNombre(), "Nombre");
-        if (!nameResult.isValid()) {
-            nameResult.showErrorIfInvalid(getWindow());
-            return false;
-        }
-
-        ValidationResult phoneResult = DataValidator.validateTelefonoE164(proveedor.getTelefono());
-        if (!phoneResult.isValid()) {
-            phoneResult.showErrorIfInvalid(getWindow());
-            return false;
-        }
-
-        ValidationResult emailResult = DataValidator.validateCorreo(proveedor.getCorreo());
-        if (!emailResult.isValid()) {
-            emailResult.showErrorIfInvalid(getWindow());
-            return false;
-        }
-
-        // Validaciones de cuenta bancaria si está presente
-        if (proveedor.getCuenta_bancaria() != null && !proveedor.getCuenta_bancaria().trim().isEmpty()) {
-            ValidationResult cuentaResult = DataValidator.validateNumeric(proveedor.getCuenta_bancaria(),
-                    "Cuenta bancaria");
-            if (!cuentaResult.isValid()) {
-                cuentaResult.showErrorIfInvalid(getWindow());
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     private void cargarDatosProveedores() {
-        masterDataProveedores.addAll(
-                new Proveedor("1790123456001", "FloriPetals", "FloriPetals S.A.", "02-2345678",
-                        "Av. de las Rosas 123, Quito", "1234567890", "contacto@floripetalsa.com",
-                        LocalDate.now().minusMonths(6), "Activo"),
-                new Proveedor("1790234567001", "Roses Export", "Roses Export Ecuador Cia. Ltda.", "02-3456789",
-                        "Calle Flores 456, Cayambe", "2345678901", "ventas@rosesexport.com",
-                        LocalDate.now().minusMonths(4), "Activo"),
-                new Proveedor("1790345678001", "Garden Flowers", "Garden Flowers Cia. Ltda.", "02-4567890",
-                        "Av. Floresta 789, Tabacundo", "3456789012", "info@gardenflowers.ec",
-                        LocalDate.now().minusMonths(8), "Activo"),
-                new Proveedor("1790456789001", "EcuaFlores", "EcuaFlores Internacional S.A.", "02-5678901",
-                        "Km 25 Vía Cayambe, Cayambe", "4567890123", "admin@ecuaflores.com",
-                        LocalDate.now().minusMonths(12), "Inactivo"),
-                new Proveedor("1790567890001", "Premium Blooms", "Premium Blooms del Ecuador S.A.", "02-6789012",
-                        "Sector La Esperanza, Pedro Moncayo", "5678901234", "premium@blooms.ec",
-                        LocalDate.now().minusMonths(2), "Activo"));
+        masterDataProveedores.clear();
+        masterDataProveedores.addAll(CSVUtil.leerProveedores());
     }
 
     private Window getWindow() {
@@ -622,6 +697,24 @@ public class ProveedoresController {
     // Métodos para acceso desde otros controladores
     public ObservableList<Proveedor> getProveedores() {
         return masterDataProveedores;
+    }
+
+    private void setErrorStyle(Control control, String message) {
+        Platform.runLater(() -> {
+            control.setStyle("-fx-border-color: red; -fx-border-width: 2px;");
+            Tooltip tooltip = new Tooltip(
+                    "Error, corrige los campos resaltados (mantén el cursor sobre el campo para más información)\n"
+                            + message);
+            tooltip.setStyle("-fx-background-color: #ffdddd; -fx-text-fill: red;");
+            control.setTooltip(tooltip);
+        });
+    }
+
+    private void clearErrorStyle(Control control) {
+        Platform.runLater(() -> {
+            control.setStyle(null);
+            control.setTooltip(null);
+        });
     }
 
 }

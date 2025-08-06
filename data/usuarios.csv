@@ -1,4 +1,4 @@
 ID;Nombre;Cedula;Correo;Contraseña;Usuario;Rol;Estado;Permisos;UsuarioModificacion;FechaModificacion
-U739;Martin Davalos;1750111211;martin.davalos@admin.com;admin;admin;Administrador;Activo;CLIENTES,PROVEEDORES,COMPRAS,VENTAS,ADMINISTRACION;admin;2025-07-31T10:59:13.319999
+U739;Martin Davalos;1750111211;martin.davalos@admin.com;admin;admin;Administrador;Activo;CLIENTES,PROVEEDORES,COMPRAS,VENTAS,ADMINISTRACION;admin;2025-08-06T02:42:13.854215
 U420;Rodrigo Ortiz;1727245191;rodrigo@xyz.com;r23ortiz;rOrtiz23;Ventas;Activo;CLIENTES,COMPRAS,VENTAS;admin;2025-08-01T16:16:17.966037
 U886;Ariel Rosas;1728907567;rosas.ariel@gerencia.com;r$r13l;rariel76;Gerente;Activo;CLIENTES,PROVEEDORES,COMPRAS,ADMINISTRACION;admin;2025-08-01T15:52:22.972401

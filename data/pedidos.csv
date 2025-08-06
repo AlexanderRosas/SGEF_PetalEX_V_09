@@ -1,2 +1,2 @@
-ID;ClienteID;FechaPedido;FechaEnvio;Estado;GuiaAerea;PrecioTotal
-1;C001;2025-07-27;2025-07-29;Empacado;GUIA;650,00
+ID;ClienteID;ClienteNombre;ClienteIdentificadorEmpresarial;ClienteDireccion;ClienteTelefono;FechaPedido;FechaEnvio;Estado;GuiaAerea;PrecioTotal;EmpresaTransporte;FechaCreacion;FechaModificacion;UsuarioResponsable;Items
+1;3;MathewsFlowers;1752756674001;Av. Floral 345;+593984854258;2025-08-06;2025-08-08;Exportado;12345678910;1760.00;Kilo;2025-08-06T08:37:55.553677;2025-08-06T08:38:35.993635;admin;PLAYA_BLANCA-8-1040.00|QUEEN_SAND-6-720.00

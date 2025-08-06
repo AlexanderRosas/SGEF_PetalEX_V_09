@@ -1,93 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.example.sgef_petalex_v_09.controllers.ProveedoresController"
-            fx:id="root"
-            styleClass="root"
-            prefWidth="1024" prefHeight="768">
+    xmlns:fx="http://javafx.com/fxml"
+    fx:controller="org.example.sgef_petalex_v_09.controllers.ProveedoresController"
+    fx:id="root"
+    styleClass="root"
+    prefWidth="1024" prefHeight="768">
 
     <!-- Botón Volver -->
     <Button fx:id="btnBack"
-            onAction="#onBack"
-            styleClass="back-button"
-            text="← Volver"
-            AnchorPane.topAnchor="10"
-            AnchorPane.leftAnchor="10"/>
+        onAction="#onBack"
+        styleClass="back-button"
+        text="← Volver"
+        AnchorPane.topAnchor="10"
+        AnchorPane.leftAnchor="10" />
 
     <!-- Título -->
     <Label text="Gestión de Proveedores y Productos"
-           styleClass="header-title"
-           AnchorPane.topAnchor="10"
-           AnchorPane.leftAnchor="120"/>
+        styleClass="header-title"
+        AnchorPane.topAnchor="10"
+        AnchorPane.leftAnchor="120" />
 
     <!-- TabPane con las dos pestañas -->
     <TabPane fx:id="tabPane"
-             AnchorPane.topAnchor="50"
-             AnchorPane.leftAnchor="10"
-             AnchorPane.rightAnchor="10"
-             AnchorPane.bottomAnchor="10"
-             tabClosingPolicy="UNAVAILABLE">
+        AnchorPane.topAnchor="50"
+        AnchorPane.leftAnchor="10"
+        AnchorPane.rightAnchor="10"
+        AnchorPane.bottomAnchor="10"
+        tabClosingPolicy="UNAVAILABLE">
 
         <!-- Pestaña Proveedores -->
         <Tab fx:id="tabProveedores" text="Proveedores">
             <AnchorPane>
 
                 <!-- Barra de herramientas superior -->
-                <HBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10">
+                <HBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10"
+                    AnchorPane.rightAnchor="10">
                     <Button fx:id="btnNuevoProveedor"
-                            onAction="#onNuevoProveedor"
-                            styleClass="toolbar-button"
-                            text="Nuevo"/>
+                        onAction="#onNuevoProveedor"
+                        styleClass="toolbar-button"
+                        text="Nuevo" />
                     <Button fx:id="btnEditarProveedor"
-                            onAction="#onEditarProveedor"
-                            styleClass="toolbar-button"
-                            text="Editar"/>
+                        onAction="#onEditarProveedor"
+                        styleClass="toolbar-button"
+                        text="Editar" />
                     <Button fx:id="btnCambiarEstadoProveedor"
-                            onAction="#onCambiarEstadoProveedor"
-                            styleClass="toolbar-button"
-                            text="Cambiar Estado"/>
+                        onAction="#onCambiarEstadoProveedor"
+                        styleClass="toolbar-button"
+                        text="Cambiar Estado" />
                     <Button fx:id="btnExportarProveedor"
-                            onAction="#onExportarProveedor"
-                            styleClass="toolbar-button"
-                            text="Exportar"/>
+                        onAction="#onExportarProveedor"
+                        styleClass="toolbar-button"
+                        text="Exportar" />
 
                     <!-- Espaciador -->
-                    <Region HBox.hgrow="ALWAYS"/>
+                    <Region HBox.hgrow="ALWAYS" />
 
                     <!-- Filtros -->
                     <TextField fx:id="txtBuscarProveedor"
-                               promptText="Buscar proveedores..."
-                               prefWidth="200"/>
+                        promptText="Buscar proveedores..."
+                        prefWidth="200" />
                     <ComboBox fx:id="cbEstadoProveedor"
-                              promptText="Estado"
-                              prefWidth="120"/>
+                        promptText="Estado"
+                        prefWidth="120" />
                 </HBox>
 
                 <!-- Tabla de proveedores -->
                 <TableView fx:id="tableProveedores"
-                           AnchorPane.topAnchor="60"
-                           AnchorPane.leftAnchor="10"
-                           AnchorPane.rightAnchor="10"
-                           AnchorPane.bottomAnchor="10"
-                           tableMenuButtonVisible="false">
+                    AnchorPane.topAnchor="60"
+                    AnchorPane.leftAnchor="10"
+                    AnchorPane.rightAnchor="10"
+                    AnchorPane.bottomAnchor="10"
+                    tableMenuButtonVisible="false">
 
                     <columns>
-                        <TableColumn fx:id="colRuc" text="RUC" prefWidth="120"/>
-                        <TableColumn fx:id="colNombre" text="Nombre" prefWidth="150"/>
-                        <TableColumn fx:id="colRazonSocial" text="Razón Social" prefWidth="180"/>
-                        <TableColumn fx:id="colTelefono" text="Teléfono" prefWidth="100"/>
-                        <TableColumn fx:id="colCorreo" text="Correo" prefWidth="180"/>
-                        <TableColumn fx:id="colEstado" text="Estado" prefWidth="80"/>
+                        <TableColumn fx:id="colRuc" text="RUC" prefWidth="120" />
+                        <TableColumn fx:id="colNombre" text="Nombre" prefWidth="150" />
+                        <TableColumn fx:id="colRazonSocial" text="Razón Social" prefWidth="180" />
+                        <TableColumn fx:id="colTelefono" text="Teléfono" prefWidth="100" />
+                        <TableColumn fx:id="colDireccion" text="Dirección" prefWidth="180" />
+                        <TableColumn fx:id="colCorreo" text="Correo" prefWidth="180" />
+                        <TableColumn fx:id="colEstado" text="Estado" prefWidth="80" />
+                        <TableColumn fx:id="colFechaRegistro" text="Fecha de Registro"
+                            prefWidth="120" />
+                        <TableColumn fx:id="colFechaModificacion" text="Fecha Modificación"
+                            prefWidth="120" />
+                        <TableColumn fx:id="colUsuarioResponsable" text="Usuario Responsable"
+                            prefWidth="120" />
+                        <!-- NUEVA COLUMNA: Fecha de Registro -->
                     </columns>
 
                     <columnResizePolicy>
-                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                     </columnResizePolicy>
                 </TableView>
 

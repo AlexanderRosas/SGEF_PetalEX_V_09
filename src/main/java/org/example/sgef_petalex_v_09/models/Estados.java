@@ -5,7 +5,7 @@ import javafx.collections.ObservableList;
 
 public class Estados {
     public static final ObservableList<String> ESTADOS_COMPRA= FXCollections.observableArrayList(
-        "Recibida", "Hidratada", "En Cuarto Frío", "Inactiva"
+        "Recibida", "Hidratada", "En Cuarto Frío", "Devuelta"
     );
       public static final ObservableList<String> ESTADOS_PEDIDO= FXCollections.observableArrayList(
          "En Cuarto Frío", "Empacado", "Exportado", "Anulado" 

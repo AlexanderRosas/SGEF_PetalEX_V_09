@@ -108,8 +108,8 @@ public class ComprasController {
             return;
         }
         String estado = compra.getEstadoActual() != null ? compra.getEstadoActual().trim() : "";
-        btnActualizar.setDisable(estado.equalsIgnoreCase("Inactiva") || estado.equalsIgnoreCase("En Cuarto Frío"));
-        btnInactivar.setDisable(estado.equalsIgnoreCase("Inactiva"));
+        btnActualizar.setDisable(estado.equalsIgnoreCase("Devuelta") || estado.equalsIgnoreCase("En Cuarto Frío"));
+        btnInactivar.setDisable(estado.equalsIgnoreCase("Devuelta"));
     }
 
     private void filtrar() {
@@ -137,7 +137,7 @@ public class ComprasController {
             @Override
             protected void updateItem(Compra item, boolean empty) {
                 super.updateItem(item, empty);
-                setStyle((item != null && "Inactiva".equalsIgnoreCase(item.getEstadoActual()))
+                setStyle((item != null && "Devuelta".equalsIgnoreCase(item.getEstadoActual()))
                         ? "-fx-background-color: lightgray;"
                         : "");
             }
@@ -169,7 +169,7 @@ public class ComprasController {
         if (seleccionado == null)
             return;
         String estado = seleccionado.getEstadoActual().trim();
-        if (estado.equalsIgnoreCase("Inactiva") || estado.equalsIgnoreCase("En Cuarto Frío"))
+        if (estado.equalsIgnoreCase("Devuelta") || estado.equalsIgnoreCase("En Cuarto Frío"))
             return;
 
         ObservableList<String> estados = Estados.ESTADOS_COMPRA;
@@ -187,8 +187,8 @@ public class ComprasController {
     private void onInactivar() {
         Window owner = btnInactivar.getScene().getWindow();
         Compra seleccionado = tableCompras.getSelectionModel().getSelectedItem();
-        if (seleccionado != null && confirm(owner, "¿Está seguro/a de inactivar esta compra?")) {
-            seleccionado.setEstadoActual("Inactiva");
+        if (seleccionado != null && confirm(owner, "¿Está seguro/a de devolver esta compra?")) {
+            seleccionado.setEstadoActual("Devuelta");
             tableCompras.refresh();
             DialogHelper.showSuccess(owner, "inactivado la compra");
             actualizarEstadoBotones(seleccionado);

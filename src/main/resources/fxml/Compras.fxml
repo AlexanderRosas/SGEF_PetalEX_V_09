@@ -41,7 +41,7 @@
                     </ImageView>
                 </graphic>
             </Button>
-            <Button fx:id="btnInactivar" text="Inactivar Compra" onAction="#onInactivar"
+            <Button fx:id="btnInactivar" text="Devolver Compra" onAction="#onInactivar"
                 styleClass="toolbar-button" disable="true">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
@@ -51,7 +51,7 @@
                     </ImageView>
                 </graphic>
             </Button>
-            <Button fx:id="btnExportar" text="Exportar" onAction="#onExportar"
+            <Button fx:id="btnExportar" text="Exportar .csv" onAction="#onExportar"
                 styleClass="toolbar-button">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">

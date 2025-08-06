@@ -12,15 +12,9 @@ public class Compra {
     private int cantidad;
     private int cantidadDisponible;
 
-    public int getCantidadDisponible() {
-        return cantidadDisponible;
-    }
-
-    public void setCantidadDisponible(int cantidadDisponible) {
-        this.cantidadDisponible = cantidadDisponible;
-    }
-
     private double costoUnitario;
+    private double precioUnitario;
+    private double precioTotal;
     private LocalDate fechaCompra;
 
     private String estadoActual;
@@ -32,23 +26,31 @@ public class Compra {
 
     private String observaciones;
 
+    private LocalDate fechaUltimaActualizacion;
+    private String usuarioResponsable;
+
     public Compra() {
     }
-public Compra(int id, String proveedor, String ruc, String tipoRosa, String tipoCorte,
-              double largoTallo, int cantidad, double costoUnitario,
-              LocalDate fechaCompra, String estadoActual) {
-    this.id = id;
-    this.proveedor = proveedor;
-    this.ruc = ruc;
-    this.tipoRosa = tipoRosa;
-    this.tipoCorte = tipoCorte;
-    this.largoTallo = largoTallo;
-    this.cantidad = cantidad;
-    this.cantidadDisponible = cantidad; // Se inicializa disponible igual a la cantidad total
-    this.costoUnitario = costoUnitario;
-    this.fechaCompra = fechaCompra;
-    this.estadoActual = estadoActual;
-}
+
+    public Compra(int id, String proveedor, String ruc, String tipoRosa, String tipoCorte,
+                  double largoTallo, int cantidad, double costoUnitario, double precioUnitario,
+                  LocalDate fechaCompra, String estadoActual) {
+        this.id = id;
+        this.proveedor = proveedor;
+        this.ruc = ruc;
+        this.tipoRosa = tipoRosa;
+        this.tipoCorte = tipoCorte;
+        this.largoTallo = largoTallo;
+        this.cantidad = cantidad;
+        this.cantidadDisponible = cantidad; // Se inicializa disponible igual a la cantidad total
+        this.costoUnitario = costoUnitario;
+        this.precioUnitario = precioUnitario;
+        this.precioTotal = precioUnitario * cantidad;
+        this.fechaCompra = fechaCompra;
+        this.estadoActual = estadoActual;
+        this.fechaUltimaActualizacion = LocalDate.now(); // Inicializar con la fecha actual
+        this.usuarioResponsable = "Sistema"; // Inicializar con un valor predeterminado
+    }
 
     // Getters y setters
 
@@ -106,6 +108,16 @@ public Compra(int id, String proveedor, String ruc, String tipoRosa, String tipo
 
     public void setCantidad(int cantidad) {
         this.cantidad = cantidad;
+        this.cantidadDisponible = cantidad; // Actualizar cantidad disponible
+        this.precioTotal = this.precioUnitario * cantidad; // Actualizar precio total
+    }
+
+    public int getCantidadDisponible() {
+        return cantidadDisponible;
+    }
+
+    public void setCantidadDisponible(int cantidadDisponible) {
+        this.cantidadDisponible = cantidadDisponible;
     }
 
     public double getCostoUnitario() {
@@ -114,6 +126,23 @@ public Compra(int id, String proveedor, String ruc, String tipoRosa, String tipo
 
     public void setCostoUnitario(double costoUnitario) {
         this.costoUnitario = costoUnitario;
+    }
+
+    public double getPrecioUnitario() {
+        return precioUnitario;
+    }
+
+    public void setPrecioUnitario(double precioUnitario) {
+        this.precioUnitario = precioUnitario;
+        this.precioTotal = precioUnitario * this.cantidad; // Actualizar precio total
+    }
+
+    public double getPrecioTotal() {
+        return precioTotal;
+    }
+
+    public void setPrecioTotal(double precioTotal) {
+        this.precioTotal = precioTotal;
     }
 
     public LocalDate getFechaCompra() {
@@ -172,15 +201,26 @@ public Compra(int id, String proveedor, String ruc, String tipoRosa, String tipo
         this.observaciones = observaciones;
     }
 
+    public LocalDate getFechaUltimaActualizacion() {
+        return fechaUltimaActualizacion;
+    }
+
+    public void setFechaUltimaActualizacion(LocalDate fechaUltimaActualizacion) {
+        this.fechaUltimaActualizacion = fechaUltimaActualizacion;
+    }
+
+    public String getUsuarioResponsable() {
+        return usuarioResponsable;
+    }
+
+    public void setUsuarioResponsable(String usuarioResponsable) {
+        this.usuarioResponsable = usuarioResponsable;
+    }
+
     public void descontarRosas(int cantidad) {
         this.cantidadDisponible -= cantidad;
     }
 
-    /**
-     * Establece la fecha correspondiente según el estado cambiado.
-     * Por ejemplo, al cambiar a "Hidratado" pone la fechaHidratacion a la fecha
-     * actual.
-     */
     public void setFechaEstado(String estado, LocalDate fecha) {
         switch (estado) {
             case "Hidratado":
@@ -211,7 +251,10 @@ public Compra(int id, String proveedor, String ruc, String tipoRosa, String tipo
                 ", tipoCorte='" + tipoCorte + '\'' +
                 ", largoTallo=" + largoTallo +
                 ", cantidad=" + cantidad +
+                ", cantidadDisponible=" + cantidadDisponible +
                 ", costoUnitario=" + costoUnitario +
+                ", precioUnitario=" + precioUnitario +
+                ", precioTotal=" + precioTotal +
                 ", fechaCompra=" + fechaCompra +
                 ", estadoActual='" + estadoActual + '\'' +
                 ", fechaHidratacion=" + fechaHidratacion +
@@ -219,7 +262,8 @@ public Compra(int id, String proveedor, String ruc, String tipoRosa, String tipo
                 ", fechaEmpaque=" + fechaEmpaque +
                 ", fechaExportacion=" + fechaExportacion +
                 ", observaciones='" + observaciones + '\'' +
+                ", fechaUltimaActualizacion=" + fechaUltimaActualizacion +
+                ", usuarioResponsable='" + usuarioResponsable + '\'' +
                 '}';
-
     }
 }
