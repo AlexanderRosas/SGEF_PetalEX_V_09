@@ -1,6 +1,7 @@
 package org.example.sgef_petalex_v_09.util;
 
 import org.example.sgef_petalex_v_09.models.*;
+import org.example.sgef_petalex_v_09.services.InventarioService;
 
 import java.io.*;
 import java.nio.file.*;
@@ -18,6 +19,8 @@ public class CSVUtil {
     public static final String CLIENTES_CSV = "data/clientes.csv";
     public static final String USUARIOS_CSV = "data/usuarios.csv";
     public static final String PEDIDOS_CSV = "data/pedidos.csv";
+    public static final String COMPRAS_CSV = "data/compras.csv";
+
     public static final String IVA_CSV = "data/iva.csv";
     public static final String PROVEEDORES_CSV = "data/proveedores.csv";
 
@@ -88,6 +91,11 @@ public class CSVUtil {
                             "ID;ClienteID;FechaPedido;FechaEnvio;Estado;GuiaAerea;PrecioTotal;EmpresaTransporte;FechaCreacion;FechaModificacion;UsuarioResponsable;Items");
                 } else if (rutaArchivo.equals(IVA_CSV)) {
                     pw.println("Porcentaje");
+                } else if (rutaArchivo.equals(COMPRAS_CSV)) {
+                    pw.println("ID;RUC;TipoRosa;TipoCorte;LargoTallo;Cantidad;CantidadDisponible;CostoUnitario;" +
+                            "PrecioUnitario;PrecioTotal;FechaCompra;EstadoActual;FechaHidratacion;FechaCuartoFrio;" +
+                            "FechaEmpaque;FechaExportacion;Observaciones;FechaUltimaActualizacion;UsuarioResponsable");
+
                 }
             }
         }
@@ -591,6 +599,134 @@ public class CSVUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static List<Compra> leerCompras() {
+        List<Compra> compras = new ArrayList<>();
+        Path path = Paths.get(COMPRAS_CSV);
+
+        if (!Files.exists(path)) {
+            System.err.println("El archivo de compras no existe: " + COMPRAS_CSV);
+            return compras;
+        }
+
+        try (BufferedReader br = Files.newBufferedReader(path)) {
+            String line;
+            boolean header = true;
+
+            while ((line = br.readLine()) != null) {
+                if (header) {
+                    header = false;
+                    continue;
+                }
+
+                String[] campos = line.split(";", -1);
+                if (campos.length < 19)
+                    continue;
+
+                Compra compra = new Compra();
+                compra.setId(Integer.parseInt(campos[0].trim()));
+
+                // Proveedor
+                Proveedor proveedor = new Proveedor();
+                proveedor.setRuc(campos[1].trim());
+                compra.setProveedor(proveedor);
+                compra.setRuc(campos[1].trim()); // por compatibilidad
+                Proveedor proveedorReal = leerProveedores()
+                        .stream()
+                        .filter(p -> p.getRuc().equals(campos[1].trim()))
+                        .findFirst()
+                        .orElse(null);
+
+                if (proveedorReal != null) {
+                    proveedor.setNombre(proveedorReal.getNombre());
+                    proveedor.setRazon_social(proveedorReal.getRazon_social());
+                    // Opcionalmente copia otros campos si los necesitas
+                }
+                compra.setTipoRosa(campos[2].trim());
+                compra.setTipoCorte(campos[3].trim());
+                compra.setLargoTallo(Double.parseDouble(campos[4].trim()));
+                compra.setCantidad(Integer.parseInt(campos[5].trim()));
+                compra.setCantidadDisponible(Integer.parseInt(campos[6].trim()));
+                compra.setCostoUnitario(Double.parseDouble(campos[7].trim()));
+                compra.setPrecioUnitario(Double.parseDouble(campos[8].trim()));
+                compra.setPrecioTotal(Double.parseDouble(campos[9].trim()));
+                compra.setFechaCompra(LocalDate.parse(campos[10].trim(), formatter));
+                compra.setEstadoActual(campos[11].trim());
+
+                compra.setFechaHidratacion(parseFecha(campos[12]));
+                compra.setFechaCuartoFrio(parseFecha(campos[13]));
+                compra.setFechaEmpaque(parseFecha(campos[14]));
+                compra.setFechaExportacion(parseFecha(campos[15]));
+
+                compra.setObservaciones(campos[16].trim());
+                compra.setFechaUltimaActualizacion(parseFecha(campos[17]));
+                compra.setUsuarioResponsable(campos[18].trim());
+
+                compras.add(compra);
+            }
+        } catch (IOException e) {
+            System.err.println("Error leyendo compras: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return compras;
+    }
+
+    public static void guardarCompras(List<Compra> compras) {
+        try {
+            Files.createDirectories(Paths.get("data"));
+            try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(COMPRAS_CSV))) {
+                writer.write("ID;RUC;TipoRosa;TipoCorte;LargoTallo;Cantidad;CantidadDisponible;CostoUnitario;" +
+                        "PrecioUnitario;PrecioTotal;FechaCompra;EstadoActual;FechaHidratacion;FechaCuartoFrio;" +
+                        "FechaEmpaque;FechaExportacion;Observaciones;FechaUltimaActualizacion;UsuarioResponsable\n");
+
+                for (Compra compra : compras) {
+                    // Retirar unidades del inventario
+                    if (!InventarioService.consumirUnidades(compra.getTipoRosa(), compra.getTipoCorte(),
+                            compra.getCantidad())) {
+                        System.err.println("No hay suficiente stock para retirar: " + compra.getTipoRosa() + " "
+                                + compra.getTipoCorte());
+                        // No guardar esta compra
+                        continue;
+                    }
+
+                    // Solo guardar la compra si hay suficiente stock
+                    writer.write(String.format(Locale.US,
+                            "%d;%s;%s;%s;%.2f;%d;%d;%.2f;%.2f;%.2f;%s;%s;%s;%s;%s;%s;%s;%s;%s\n",
+                            compra.getId(),
+                            compra.getProveedor() != null ? compra.getProveedor().getRuc() : compra.getRuc(),
+                            compra.getTipoRosa(),
+                            compra.getTipoCorte(),
+                            compra.getLargoTallo(),
+                            compra.getCantidad(),
+                            compra.getCantidadDisponible(),
+                            compra.getCostoUnitario(),
+                            compra.getPrecioUnitario(),
+                            compra.getPrecioTotal(),
+                            formatFecha(compra.getFechaCompra()),
+                            compra.getEstadoActual(),
+                            formatFecha(compra.getFechaHidratacion()),
+                            formatFecha(compra.getFechaCuartoFrio()),
+                            formatFecha(compra.getFechaEmpaque()),
+                            formatFecha(compra.getFechaExportacion()),
+                            compra.getObservaciones(),
+                            formatFecha(compra.getFechaUltimaActualizacion()),
+                            compra.getUsuarioResponsable()));
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error guardando compras: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private static String formatFecha(LocalDate fecha) {
+        return fecha != null ? fecha.format(formatter) : "";
+    }
+
+    private static LocalDate parseFecha(String campo) {
+        return campo != null && !campo.trim().isEmpty() ? LocalDate.parse(campo.trim(), formatter) : null;
     }
 
 }

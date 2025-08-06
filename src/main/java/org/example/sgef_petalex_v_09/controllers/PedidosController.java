@@ -23,6 +23,7 @@ import org.example.sgef_petalex_v_09.models.Estados;
 import org.example.sgef_petalex_v_09.models.ItemVenta;
 import org.example.sgef_petalex_v_09.models.Pedido;
 import org.example.sgef_petalex_v_09.models.Venta;
+import org.example.sgef_petalex_v_09.services.InventarioService;
 import org.example.sgef_petalex_v_09.util.CSVUtil;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
 import org.example.sgef_petalex_v_09.validators.DataValidator;
@@ -322,6 +323,14 @@ public class PedidosController {
             pedido.setUsuarioResponsable(UserSession.getUsuarioActual().getUsuario());
             pedido.setUsuarioModificacion(UserSession.getUsuarioActual().getUsuario());
             pedido.setFechaModificacion(LocalDateTime.now());
+
+            try {
+                devolverUnidadesAlStock(pedido);
+            } catch (IOException ex) {
+                DialogHelper.showError(btnAnular.getScene().getWindow(), "Error al actualizar inventario");
+                ex.printStackTrace();
+            }
+
             tablePedidos.refresh();
             actualizarEstadoBotones(true);
 
@@ -330,6 +339,14 @@ public class PedidosController {
             DialogHelper.showSuccess(btnAnular.getScene().getWindow(), "Anulado el pedido");
         }
     }
+
+    private void devolverUnidadesAlStock(Pedido pedido) throws IOException {
+        for (ItemVenta item : pedido.getItemsVenta()) {
+            InventarioService.agregarUnidades(item.getVariedad(), item.getLargo(), item.getCantidad());
+        }
+    }
+
+    
 
     @FXML
     private void onExportar() {

@@ -1,5 +1,8 @@
 package org.example.sgef_petalex_v_09.controllers;
 
+import org.example.sgef_petalex_v_09.util.UserSession;
+import org.example.sgef_petalex_v_09.models.Usuario;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -16,6 +19,7 @@ import javafx.stage.Stage;
 import org.example.sgef_petalex_v_09.models.Estados;
 import org.example.sgef_petalex_v_09.models.ItemVenta;
 import org.example.sgef_petalex_v_09.models.Pedido;
+import org.example.sgef_petalex_v_09.services.InventarioService;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
 import org.example.sgef_petalex_v_09.validators.DataValidator;
 import org.example.sgef_petalex_v_09.validators.ValidationResult;
@@ -287,7 +291,7 @@ public class PedidoDetailController {
     private void onAccept(ActionEvent e) {
         boolean hasErrors = false;
 
-        // Validar la guía aérea
+        // Validaciones existentes...
         ValidationResult waybillResult = DataValidator.validateIATAWaybill(txtGuiaAerea.getText().trim());
         if (!waybillResult.isValid()) {
             setErrorStyle(txtGuiaAerea, waybillResult.getErrorMessage());
@@ -296,7 +300,6 @@ public class PedidoDetailController {
             clearErrorStyle(txtGuiaAerea);
         }
 
-        // Validar la empresa de transporte
         ValidationResult result = DataValidator.validateDireccion(txtEmpresaTransporte.getText().trim());
         if (!result.isValid()) {
             setErrorStyle(txtEmpresaTransporte, result.getErrorMessage());
@@ -305,7 +308,6 @@ public class PedidoDetailController {
             clearErrorStyle(txtEmpresaTransporte);
         }
 
-        // Validar fecha de pedido
         if (dpFechaPedido.getValue() == null) {
             setErrorStyle(dpFechaPedido, "La fecha de pedido es obligatoria.");
             hasErrors = true;
@@ -313,7 +315,6 @@ public class PedidoDetailController {
             clearErrorStyle(dpFechaPedido);
         }
 
-        // Validar fecha de exportación
         if (dpFechaExport.getValue() == null) {
             setErrorStyle(dpFechaExport, "La fecha de exportación es obligatoria.");
             hasErrors = true;
@@ -321,7 +322,6 @@ public class PedidoDetailController {
             clearErrorStyle(dpFechaExport);
         }
 
-        // Validar estado del pedido
         if (cbEstadoPedido.getValue() == null || cbEstadoPedido.getValue().isEmpty()) {
             setErrorStyle(cbEstadoPedido, "El estado del pedido es obligatorio.");
             hasErrors = true;
@@ -329,14 +329,22 @@ public class PedidoDetailController {
             clearErrorStyle(cbEstadoPedido);
         }
 
-        // Si hay errores, mostrar mensaje de error general
         if (hasErrors) {
             DialogHelper.showError(lblCliente.getScene().getWindow(),
                     "Error al registrar pedido, corrige los campos resaltados (mantén el cursor sobre el campo para más información)");
             return;
         }
 
-        // Si todos los campos son válidos
+        // Intentar descontar unidades del stock
+        try {
+            descontarUnidadesDelStock(currentPedido);
+        } catch (IOException ex) {
+            DialogHelper.showError(lblCliente.getScene().getWindow(),
+                    "Error al descontar stock: " + ex.getMessage());
+            return;
+        }
+
+        // Si todo bien, actualizar pedido
         double total = items.stream().mapToDouble(ItemVenta::getPrecioTotal).sum();
         currentPedido.setCodigoGuiaAerea(txtGuiaAerea.getText());
         currentPedido.setEstadoActual(cbEstadoPedido.getValue());
@@ -344,10 +352,21 @@ public class PedidoDetailController {
         currentPedido.setFechaEstimadaEnvio(dpFechaExport.getValue());
         currentPedido.setPrecioTotal(total);
         currentPedido.setEmpresaTransporte(txtEmpresaTransporte.getText().trim());
+        Usuario usuarioActual = UserSession.getUsuarioActual();
+        currentPedido.setUsuarioResponsable(usuarioActual != null ? usuarioActual.getUsuario() : "Sistema");
 
         actualizarTotalLabel();
         pedidoAceptado = true;
         closeWindow();
+    }
+
+    private void descontarUnidadesDelStock(Pedido pedido) throws IOException {
+        for (ItemVenta item : pedido.getItemsVenta()) {
+            boolean ok = InventarioService.consumirUnidades(item.getVariedad(), item.getLargo(), item.getCantidad());
+            if (!ok) {
+                throw new IOException("No hay suficiente stock para " + item.getVariedad() + " " + item.getLargo());
+            }
+        }
     }
 
     private void setErrorStyle(Control control, String message) {

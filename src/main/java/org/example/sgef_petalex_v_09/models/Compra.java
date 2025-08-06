@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public class Compra {
     private int id;
-    private String proveedor; // antes proveedorNombre
+
     private String ruc; // antes proveedorRuc
     private String tipoRosa;
     private String tipoCorte;
@@ -23,6 +23,19 @@ public class Compra {
     private LocalDate fechaCuartoFrio;
     private LocalDate fechaEmpaque;
     private LocalDate fechaExportacion;
+    // Reemplaza esto:
+
+
+    // Por esto:
+    private Proveedor proveedor;
+
+    public Proveedor getProveedor() {
+        return proveedor;
+    }
+
+    public void setProveedor(Proveedor proveedor) {
+        this.proveedor = proveedor;
+    }
 
     private String observaciones;
 
@@ -32,24 +45,23 @@ public class Compra {
     public Compra() {
     }
 
-    public Compra(int id, String proveedor, String ruc, String tipoRosa, String tipoCorte,
-                  double largoTallo, int cantidad, double costoUnitario, double precioUnitario,
-                  LocalDate fechaCompra, String estadoActual) {
+    public Compra(int id, Proveedor proveedor, String tipoRosa, String tipoCorte,
+            double largoTallo, int cantidad, double costoUnitario, double precioUnitario,
+            LocalDate fechaCompra, String estadoActual) {
         this.id = id;
         this.proveedor = proveedor;
-        this.ruc = ruc;
         this.tipoRosa = tipoRosa;
         this.tipoCorte = tipoCorte;
         this.largoTallo = largoTallo;
         this.cantidad = cantidad;
-        this.cantidadDisponible = cantidad; // Se inicializa disponible igual a la cantidad total
+        this.cantidadDisponible = cantidad;
         this.costoUnitario = costoUnitario;
         this.precioUnitario = precioUnitario;
         this.precioTotal = precioUnitario * cantidad;
         this.fechaCompra = fechaCompra;
         this.estadoActual = estadoActual;
-        this.fechaUltimaActualizacion = LocalDate.now(); // Inicializar con la fecha actual
-        this.usuarioResponsable = "Sistema"; // Inicializar con un valor predeterminado
+        this.fechaUltimaActualizacion = LocalDate.now();
+        this.usuarioResponsable = "Sistema";
     }
 
     // Getters y setters
@@ -62,13 +74,7 @@ public class Compra {
         this.id = id;
     }
 
-    public String getProveedor() {
-        return proveedor;
-    }
-
-    public void setProveedor(String proveedor) {
-        this.proveedor = proveedor;
-    }
+ 
 
     public String getRuc() {
         return ruc;

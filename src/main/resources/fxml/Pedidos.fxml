@@ -58,7 +58,7 @@
                     </ImageView>
                 </graphic>
             </Button>
-            <Button fx:id="btnExportar" text="Exportar " onAction="#onExportar"
+            <Button fx:id="btnExportar" text="Exportar en .csv" onAction="#onExportar"
                 styleClass="toolbar-button">
                 <graphic>
                     <ImageView fitWidth="16" preserveRatio="true">
