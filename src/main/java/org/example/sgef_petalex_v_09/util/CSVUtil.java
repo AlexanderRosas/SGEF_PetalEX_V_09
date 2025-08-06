@@ -16,7 +16,52 @@ public class CSVUtil {
     public static final String CLIENTES_CSV = "data/clientes.csv";
     public static final String USUARIOS_CSV = "data/usuarios.csv";
     public static final String PEDIDOS_CSV = "data/pedidos.csv";
+    public static final String IVA_CSV = "data/iva.csv";
+
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    // Método para leer el IVA
+    public static double leerIva() {
+        List<Iva> ivas = new ArrayList<>();
+        try {
+            crearArchivoSiNoExiste(IVA_CSV);
+            try (BufferedReader br = new BufferedReader(new FileReader(IVA_CSV))) {
+                String line;
+                boolean header = true;
+                while ((line = br.readLine()) != null) {
+                    if (header) {
+                        header = false;
+                        continue;
+                    }
+                    String[] campos = line.split(";", -1);
+                    if (campos.length == 1) {
+                        double porcentaje = Double.parseDouble(campos[0].trim());
+                        ivas.add(new Iva(porcentaje));
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error leyendo IVA: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return ivas.isEmpty() ? 15.0 : ivas.get(0).getPorcentaje();
+    }
+
+    // Método para guardar el IVA
+    public static void guardarIva(double porcentaje) {
+        try {
+            crearArchivoSiNoExiste(IVA_CSV);
+            try (PrintWriter pw = new PrintWriter(new FileWriter(IVA_CSV))) {
+                pw.println("Porcentaje");
+                pw.println(porcentaje);
+            }
+        } catch (IOException e) {
+            System.err.println("Error guardando IVA: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // Otros métodos existentes...
 
     private static void crearArchivoSiNoExiste(String rutaArchivo) throws IOException {
         Path path = Paths.get(rutaArchivo);
@@ -35,6 +80,9 @@ public class CSVUtil {
                             "ID;Nombre;Cedula;Correo;Contraseña; Usuario;Rol;Estado;Permisos;UsuarioModificacion;FechaModificacio");
                 } else if (rutaArchivo.equals(PEDIDOS_CSV)) {
                     pw.println("ID;ClienteID;FechaPedido;FechaEnvio;Estado;GuiaAerea;PrecioTotal");
+
+                } else if (rutaArchivo.equals(IVA_CSV)) {
+                    pw.println("Porcentaje");
                 }
             }
         }
@@ -302,85 +350,92 @@ public class CSVUtil {
 
     public static List<Pedido> leerPedidos() {
         List<Pedido> pedidos = new ArrayList<>();
-        Path path = Paths.get(PEDIDOS_CSV);
-
-        if (!Files.exists(path)) {
-            System.err.println("Archivo pedidos.csv no existe, creando uno vacío...");
-            try {
+        try {
+            Path path = Paths.get(PEDIDOS_CSV);
+            if (!Files.exists(path)) {
                 Files.createFile(path);
                 try (PrintWriter pw = new PrintWriter(Files.newBufferedWriter(path))) {
-                    pw.println("ID;ClienteID;FechaPedido;FechaEnvio;Estado;GuiaAerea;PrecioTotal");
+                    pw.println(
+                            "ID;ClienteID;FechaPedido;FechaEnvio;Estado;GuiaAerea;PrecioTotal;EmpresaTransporte;FechaModificacion;UsuarioModificacion");
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return pedidos;
             }
-            return pedidos;
-        }
 
-        try (BufferedReader br = Files.newBufferedReader(path)) {
-            String linea;
-            boolean primeraLinea = true;
-            while ((linea = br.readLine()) != null) {
-                if (primeraLinea) {
-                    primeraLinea = false;
-                    continue;
-                }
-                if (linea.trim().isEmpty())
-                    continue;
-
-                String[] campos = linea.split(";", -1);
-                if (campos.length < 7)
-                    continue;
-
-                try {
-                    int id = Integer.parseInt(campos[0].trim());
-                    String clienteId = campos[1].trim();
-                    LocalDate fechaPedido = LocalDate.parse(campos[2].trim());
-                    LocalDate fechaEnvio = LocalDate.parse(campos[3].trim());
-                    String estado = campos[4].trim();
-                    String guiaAerea = campos[5].trim();
-                    double precioTotal = Double.parseDouble(campos[6].trim().replace(",", "."));
-
-                    Cliente cliente = buscarClientePorId(clienteId);
-                    if (cliente == null) {
-                        System.err.println("Cliente con ID " + clienteId + " no encontrado para pedido " + id);
+            try (BufferedReader br = Files.newBufferedReader(path)) {
+                String linea;
+                boolean primeraLinea = true;
+                while ((linea = br.readLine()) != null) {
+                    if (primeraLinea) {
+                        primeraLinea = false;
                         continue;
                     }
+                    String[] campos = linea.split(";", -1);
+                    if (campos.length < 10)
+                        continue;
 
-                    Pedido pedido = new Pedido(id, cliente, fechaPedido, fechaEnvio, estado, guiaAerea);
-                    pedido.setPrecioTotal(precioTotal);
-                    pedidos.add(pedido);
-                } catch (Exception e) {
-                    System.err.println("Error en línea: " + linea + ", motivo: " + e.getMessage());
+                    try {
+                        int id = Integer.parseInt(campos[0].trim());
+                        String clienteId = campos[1].trim();
+                        LocalDate fechaPedido = LocalDate.parse(campos[2].trim());
+                        LocalDate fechaEnvio = LocalDate.parse(campos[3].trim());
+                        String estado = campos[4].trim();
+                        String guiaAerea = campos[5].trim();
+                        double precioTotal = Double.parseDouble(campos[6].trim().replace(",", "."));
+                        String empresaTransporte = campos[7].trim();
+                        LocalDateTime fechaModificacion = LocalDateTime.parse(campos[8].trim(),
+                                DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                        String usuarioModificacion = campos[9].trim();
+
+                        // Crear cliente “ligero” solo con el ID
+                        Cliente cliente = new Cliente();
+                        cliente.setId(clienteId);
+
+                        Pedido pedido = new Pedido();
+                        pedido.setId(id);
+                        pedido.setCliente(cliente); // ✅
+                        pedido.setFechaPedido(fechaPedido);
+                        pedido.setFechaEstimadaEnvio(fechaEnvio);
+                        pedido.setEstadoActual(estado);
+                        pedido.setCodigoGuiaAerea(guiaAerea);
+                        pedido.setPrecioTotal(precioTotal);
+                        pedido.setEmpresaTransporte(empresaTransporte);
+                        pedido.setFechaModificacion(fechaModificacion);
+                        pedido.setUsuarioModificacion(usuarioModificacion);
+
+                        pedidos.add(pedido);
+                    } catch (Exception e) {
+                        System.err.println("Error en línea: " + linea + ", motivo: " + e.getMessage());
+                    }
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return pedidos;
     }
 
     public static void guardarPedidos(List<Pedido> pedidos) {
-        Path path = Paths.get(PEDIDOS_CSV);
         try {
+            Path path = Paths.get(PEDIDOS_CSV);
             Files.createDirectories(path.getParent());
             try (BufferedWriter bw = Files.newBufferedWriter(path,
                     StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING)) {
-                bw.write("ID;ClienteID;FechaPedido;FechaEnvio;Estado;GuiaAerea;PrecioTotal\n");
+
+                bw.write(
+                        "ID;ClienteID;FechaPedido;FechaEnvio;Estado;GuiaAerea;PrecioTotal;EmpresaTransporte;FechaModificacion;UsuarioModificacion\n");
+
                 for (Pedido p : pedidos) {
-                    String linea = String.format("%d;%s;%s;%s;%s;%s;%.2f",
+                    bw.write(String.format("%d;%s;%s;%s;%s;%s;%.2f;%s;%s;%s\n",
                             p.getId(),
-                            p.getCliente() != null ? p.getCliente().getId() : "",
+                            p.getCliente().getId(), // 👈 id del cliente
                             p.getFechaPedido(),
                             p.getFechaEstimadaEnvio(),
                             p.getEstadoActual(),
                             p.getCodigoGuiaAerea(),
-                            p.getPrecioTotal());
-                    bw.write(linea);
-                    bw.newLine();
+                            p.getPrecioTotal(),
+                            p.getEmpresaTransporte(),
+                            p.getFechaModificacion().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                            p.getUsuarioModificacion()));
                 }
             }
         } catch (IOException e) {

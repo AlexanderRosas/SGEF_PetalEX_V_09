@@ -38,14 +38,9 @@ public class GestionUsuariosController implements Initializable {
 
     @FXML
     private Button btnNuevo, btnEditar, btnEstado;
-    @FXML
-    private TextField txtBuscarNombreNatural;
-    @FXML
-    private TextField txtBuscarNombreUsuario;
+
     @FXML
     private TextField txtBuscarCedula;
-    @FXML
-    private TextField txtBuscarCorreo;
     @FXML
     private Label lblNoUsuarios;
     @FXML
@@ -97,40 +92,35 @@ public class GestionUsuariosController implements Initializable {
     }
 
     private void configurarFiltros() {
-        txtBuscarNombreNatural.textProperty().addListener((obs, o, n) -> aplicarFiltro());
-        txtBuscarNombreUsuario.textProperty().addListener((obs, o, n) -> aplicarFiltro());
+        
+        
         txtBuscarCedula.textProperty().addListener((obs, o, n) -> aplicarFiltro());
-        txtBuscarCorreo.textProperty().addListener((obs, o, n) -> aplicarFiltro());
+        
         cbEstado.valueProperty().addListener((obs, o, n) -> aplicarFiltro());
     }
 
     private void aplicarFiltro() {
-        String nombreNatural = txtBuscarNombreNatural == null ? ""
-                : txtBuscarNombreNatural.getText().toLowerCase().trim();
-        String nombreUsuario = txtBuscarNombreUsuario == null ? ""
-                : txtBuscarNombreUsuario.getText().toLowerCase().trim();
         String cedula = txtBuscarCedula.getText().toLowerCase().trim();
         String estado = cbEstado.getValue();
 
-        boolean hayFiltro = !nombreNatural.isEmpty()
-                || !nombreUsuario.isEmpty()
-                || !cedula.isEmpty()
+        boolean hayFiltro =
+                !cedula.isEmpty()
                 || (estado != null && !estado.equals("Todos"));
 
         filteredData.setPredicate(u -> {
             if (!hayFiltro)
                 return true;
 
-            boolean nombreNaturalMatch = nombreNatural.isEmpty()
-                    || u.getNombre().toLowerCase().contains(nombreNatural);
-            boolean nombreUsuarioMatch = nombreUsuario.isEmpty()
-                    || u.getUsuario().toLowerCase().contains(nombreUsuario);
+            
+            
+            
+            
             boolean cedulaMatch = cedula.isEmpty()
                     || u.getCedula().trim().toLowerCase().startsWith(cedula);
             boolean estadoMatch = estado == null || estado.equals("Todos")
                     || u.getEstado().equalsIgnoreCase(estado);
 
-            return nombreNaturalMatch && nombreUsuarioMatch && cedulaMatch && estadoMatch;
+            return  cedulaMatch && estadoMatch;
         });
 
         boolean sinResultados = filteredData.isEmpty();

@@ -43,10 +43,15 @@ public class PedidosController {
     @FXML
     private TableColumn<Pedido, LocalDate> colFechaPedido, colFechaExportacion;
     @FXML
+    private TableColumn<Pedido, String> colEmpresaTransporte;
+
+
+    @FXML
     private TableColumn<Pedido, Double> colPrecioTotal;
 
     private final ObservableList<Pedido> masterData = FXCollections.observableArrayList();
     private FilteredList<Pedido> filteredData;
+    
 
     @FXML
     public void initialize() {
@@ -70,6 +75,7 @@ public class PedidosController {
             }
         });
     }
+    
 
     private void configurarColumnas() {
         colId.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getId()));
@@ -77,6 +83,8 @@ public class PedidosController {
             Cliente cliente = c.getValue().getCliente();
             return new ReadOnlyStringWrapper(cliente != null ? cliente.getNombre() : "Sin cliente");
         });
+        colEmpresaTransporte.setCellValueFactory(c -> new ReadOnlyStringWrapper(
+                Optional.ofNullable(c.getValue().getEmpresaTransporte()).orElse("")));
         colFechaPedido.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getFechaPedido()));
         colFechaExportacion.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getFechaEstimadaEnvio()));
         colEstado.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().getEstadoActual()));
@@ -84,6 +92,7 @@ public class PedidosController {
                 Optional.ofNullable(c.getValue().getCodigoGuiaAerea()).orElse("")));
         colTotalProductos.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getItems().size()));
         colPrecioTotal.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getPrecioTotal()));
+
     }
 
     private void inicializarComboEstado() {
@@ -171,7 +180,7 @@ public class PedidosController {
         tablePedidos.refresh();
         actualizarEstadoBotones(true);
 
-        CSVUtil.guardarPedidos(masterData);  // <-- Guardar aquí
+        CSVUtil.guardarPedidos(masterData); // <-- Guardar aquí
 
         DialogHelper.showSuccess(btnActualizarEstado.getScene().getWindow(),
                 "Actualizado el estado del pedido a: " + nuevo);
@@ -189,7 +198,7 @@ public class PedidosController {
                     pedido.setCodigoGuiaAerea(p.getCodigoGuiaAerea());
                     tablePedidos.refresh();
 
-                    CSVUtil.guardarPedidos(masterData);  // <-- Guardar aquí
+                    CSVUtil.guardarPedidos(masterData); // <-- Guardar aquí
 
                     DialogHelper.showSuccess(btnEditar.getScene().getWindow(), "Actualizado el pedido");
                 });
@@ -240,7 +249,7 @@ public class PedidosController {
             tablePedidos.refresh();
             actualizarEstadoBotones(true);
 
-            CSVUtil.guardarPedidos(masterData);  // <-- Guardar aquí
+            CSVUtil.guardarPedidos(masterData); // <-- Guardar aquí
 
             DialogHelper.showSuccess(btnAnular.getScene().getWindow(), "Anulado el pedido");
         }
@@ -257,7 +266,7 @@ public class PedidosController {
             tablePedidos.refresh();
             actualizarEstadoBotones(true);
 
-            CSVUtil.guardarPedidos(masterData);  // <-- Guardar aquí
+            CSVUtil.guardarPedidos(masterData); // <-- Guardar aquí
 
             DialogHelper.showSuccess(btnExportar.getScene().getWindow(), "Exportado el pedido");
         }
@@ -307,7 +316,7 @@ public class PedidosController {
             masterData.add(pedidoGuardado);
             tablePedidos.refresh();
 
-            CSVUtil.guardarPedidos(masterData);  // <-- Guardar aquí
+            CSVUtil.guardarPedidos(masterData); // <-- Guardar aquí
 
             DialogHelper.showSuccess(btnNuevo.getScene().getWindow(), "Registrado el pedido");
         });

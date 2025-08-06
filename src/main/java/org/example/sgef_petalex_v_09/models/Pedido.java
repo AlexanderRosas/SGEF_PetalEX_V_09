@@ -1,6 +1,7 @@
 package org.example.sgef_petalex_v_09.models;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,15 +14,14 @@ public class Pedido {
     private String estadoActual;
     private String codigoGuiaAerea;
     private List<String> items;
-
     private List<ItemVenta> itemsVenta = new ArrayList<>();
-
     private Venta venta;
-
     private double precioTotal;
-
-    // Nuevo atributo para TipoEmpaque
     private Rosa.TipoEmpaque tipoEmpaque;
+    private String empresaTransporte; // Nuevo campo
+        private LocalDateTime fechaModificacion; // Fecha de última actualización
+
+private String usuarioModificacion; // Usuario responsable de la última actualización
 
     public Pedido() {
         this.items = new ArrayList<>();
@@ -134,26 +134,36 @@ public class Pedido {
         this.precioTotal = precioTotal;
     }
 
-    public Rosa.TipoEmpaque getTipoEmpaque() {
-        return tipoEmpaque;
+    public String getEmpresaTransporte() {
+        return empresaTransporte;
     }
 
-    public void setTipoEmpaque(Rosa.TipoEmpaque tipoEmpaque) {
-        this.tipoEmpaque = tipoEmpaque;
+    public void setEmpresaTransporte(String empresaTransporte) {
+        this.empresaTransporte = empresaTransporte;
     }
 
-    /**
-     * Suma la cantidad total de rosas de todos los itemsVenta.
-     */
+    public LocalDateTime getFechaModificacion() {
+        return fechaModificacion;
+    }
+
+    public void setFechaModificacion(LocalDateTime fechaModificacion) {
+        this.fechaModificacion = fechaModificacion;
+    }
+
+    public String getUsuarioModificacion() {
+        return usuarioModificacion;
+    }
+
+    public void setUsuarioModificacion(String usuarioModificacion) {
+        this.usuarioModificacion = usuarioModificacion;
+    }
+
     public int getCantidadTotalRosas() {
         return itemsVenta.stream()
                 .mapToInt(ItemVenta::getCantidad)
                 .sum();
     }
 
-    /**
-     * Actualiza el tipo de empaque basado en la cantidad total de rosas.
-     */
     public void actualizarTipoEmpaque() {
         int total = getCantidadTotalRosas();
         this.tipoEmpaque = Rosa.TipoEmpaque.detectarPorCantidad(total).orElse(null);
@@ -161,7 +171,6 @@ public class Pedido {
 
     public Venta generarVentaDesdePedido() {
         Venta nuevaVenta = new Venta();
-       //nuevaVenta.setNumeroVenta("VNT-" + this.id);
         nuevaVenta.setCliente(this.cliente.getNombre());
         nuevaVenta.setDireccion(this.cliente.getDireccion());
         nuevaVenta.setFecha(LocalDate.now());
@@ -187,6 +196,9 @@ public class Pedido {
                 ", items=" + items +
                 ", precioTotal=" + precioTotal +
                 ", tipoEmpaque=" + (tipoEmpaque != null ? tipoEmpaque.getNombre() : "No definido") +
+                ", empresaTransporte='" + empresaTransporte + '\'' +
+                ", fechaModificacion=" + fechaModificacion +
+                ", usuarioModificacion='" + usuarioModificacion + '\'' +
                 '}';
     }
 }

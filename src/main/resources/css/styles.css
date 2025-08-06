@@ -4,6 +4,29 @@
     font-family: "Poppins";
     src: url("../fonts/Poppins-Black.ttf");
 }
+/* Evitar resaltado en AnchorPane */
+.anchor-pane {
+    -fx-background-color: white; /* Fondo blanco */
+    -fx-border-color: transparent; /* Borde transparente */
+    -fx-focus-color: transparent; /* Color de foco transparente */
+    -fx-faint-focus-color: transparent; /* Color de foco suave transparente */
+}
+
+/* Evitar resaltado en TextField */
+.text-field {
+    -fx-background-color: white; /* Fondo blanco */
+    -fx-border-color: gray; /* Borde gris */
+    -fx-focus-color: transparent; /* Color de foco transparente */
+    -fx-faint-focus-color: transparent; /* Color de foco suave transparente */
+}
+
+/* Evitar resaltado en Button */
+.button {
+    -fx-background-color: derive(-fx-base, -15%); /* Fondo suave */
+    -fx-border-color: derive(-fx-base, -15%); /* Borde suave */
+    -fx-focus-color: transparent; /* Color de foco transparente */
+    -fx-faint-focus-color: transparent; /* Color de foco suave transparente */
+}
 
 /* Logo */
 .image-logo {

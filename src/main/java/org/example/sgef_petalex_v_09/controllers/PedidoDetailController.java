@@ -11,10 +11,13 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
 import org.example.sgef_petalex_v_09.models.Estados;
 import org.example.sgef_petalex_v_09.models.ItemVenta;
 import org.example.sgef_petalex_v_09.models.Pedido;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
+import org.example.sgef_petalex_v_09.validators.DataValidator;
+import org.example.sgef_petalex_v_09.validators.ValidationResult;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -60,12 +63,15 @@ public class PedidoDetailController {
     private ComboBox<String> cbEstadoPedido;
     @FXML
     private TextField txtGuiaAerea;
+     @FXML
+    private TextField txtEmpresaTransporte; // Nuevo campo
+    
 
     private boolean pedidoAceptado = false;
     private Pedido currentPedido;
     private final ObservableList<ItemVenta> items = FXCollections.observableArrayList();
 
-    public void initData(Pedido pedido) {
+   public void initData(Pedido pedido) {
         this.currentPedido = pedido;
 
         // Asignar fecha actual si es nuevo
@@ -110,6 +116,8 @@ public class PedidoDetailController {
         txtGuiaAerea.setText(currentPedido.getCodigoGuiaAerea());
         dpFechaPedido.setValue(currentPedido.getFechaPedido());
         dpFechaExport.setValue(currentPedido.getFechaEstimadaEnvio());
+
+        txtEmpresaTransporte.setText(currentPedido.getEmpresaTransporte() != null ? currentPedido.getEmpresaTransporte() : "");
     }
 
     private void actualizarTotalLabel() {
@@ -129,6 +137,7 @@ public class PedidoDetailController {
             currentPedido.setEstadoActual(cbEstadoPedido.getValue());
             currentPedido.setFechaPedido(LocalDate.now());
             currentPedido.setFechaEstimadaEnvio(dpFechaExport.getValue());
+            currentPedido.setEmpresaTransporte(txtEmpresaTransporte.getText().trim());
             return Optional.of(currentPedido);
         }
         return Optional.empty();
@@ -207,7 +216,7 @@ public class PedidoDetailController {
             okBtn.setDisable(!esValido);
         };
 
-        cbLargo.valueProperty().addListener(validador);
+                cbLargo.valueProperty().addListener(validador);
         cbPack.valueProperty().addListener(validador);
         spQty.valueProperty().addListener(validador);
 
@@ -279,12 +288,20 @@ public class PedidoDetailController {
             return;
         }
 
+        // Validar la empresa de transporte
+        ValidationResult result = DataValidator.validateDireccion(txtEmpresaTransporte.getText().trim());
+        if (!result.isValid()) {
+            DialogHelper.showError(lblCliente.getScene().getWindow(), result.getErrorMessage());
+            return;
+        }
+
         double total = items.stream().mapToDouble(ItemVenta::getPrecioTotal).sum();
         currentPedido.setCodigoGuiaAerea(txtGuiaAerea.getText());
         currentPedido.setEstadoActual(cbEstadoPedido.getValue());
         currentPedido.setFechaPedido(LocalDate.now());
         currentPedido.setFechaEstimadaEnvio(dpFechaExport.getValue());
         currentPedido.setPrecioTotal(total);
+        currentPedido.setEmpresaTransporte(txtEmpresaTransporte.getText().trim());
 
         actualizarTotalLabel();
         pedidoAceptado = true;

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<AnchorPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.sgef_petalex_v_09.controllers.ParametrosNegocioController"
+            styleClass="content-pane">
+
+    <!-- Título -->
+    <Label text="Parámetros del Sistema"
+           styleClass="section-title"
+           AnchorPane.topAnchor="20"
+           AnchorPane.leftAnchor="30"/>
+
+    <!-- Label oculto para capturar el foco -->
+    <Label fx:id="lblHiddenFocus" visible="false" managed="false"/>
+
+    <!-- Sección IVA -->
+    <VBox spacing="10"
+          AnchorPane.topAnchor="80"
+          AnchorPane.leftAnchor="30">
+
+        <Label text="Configuración de IVA" styleClass="subsection-title"/>
+
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label text="Porcentaje de IVA (%):"/>
+            <TextField fx:id="tfPorcentajeIVA"
+                       prefWidth="80"
+                       promptText="15"/>
+        </HBox>
+
+        <Button fx:id="btnGuardar"
+                text="Guardar cambios"
+                onAction="#onGuardar"/>
+    </VBox>
+
+</AnchorPane>

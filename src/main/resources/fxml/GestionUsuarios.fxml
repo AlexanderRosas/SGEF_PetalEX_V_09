@@ -59,14 +59,8 @@
         </HBox>
 
         <HBox spacing="10" alignment="CENTER_LEFT" styleClass="toolbar-filters">
-            <TextField fx:id="txtBuscarNombreNatural" layoutX="100" layoutY="100" prefWidth="200.0"
-                promptText="Nombre Natural" />
-            <TextField fx:id="txtBuscarNombreUsuario" layoutX="100" layoutY="100" prefWidth="200.0"
-                promptText="Nombre de Usuario" />
             <TextField fx:id="txtBuscarCedula" layoutX="100" layoutY="150" prefWidth="200.0"
                 promptText="Número de Cédula" />
-            <TextField fx:id="txtBuscarCorreo" layoutX="100" layoutY="200" prefWidth="200.0"
-                promptText="Correo Electrónico" />
             <ComboBox fx:id="cbEstado"
                 promptText="Estado"
                 styleClass="filter-combo" />

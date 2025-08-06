@@ -96,7 +96,10 @@
             <TableColumn fx:id="colTotalProductos" text="Productos" prefWidth="80" />
             <TableColumn fx:id="colPrecioTotal" text="Total" prefWidth="100" />
             <TableColumn fx:id="colGuiaAerea" text="Guía Aérea" prefWidth="120" />
-
+            <!-- NUEVA COLUMNA: Empresa de Transporte -->
+            <TableColumn fx:id="colEmpresaTransporte" text="Empresa de Transporte" prefWidth="150" />
+            <TableColumn fx:id="colFechaModificacion" text="Últ. Modificación" prefWidth="140" />
+            <TableColumn fx:id="colUsuarioModificador" text="Usuario Responsable" prefWidth="140" />
         </columns>
     </TableView>
 
