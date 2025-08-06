@@ -1,3 +1,2 @@
-ID;TipoDestino;Servicio;Cliente;Direccion;Fecha;Precio;IVA;Total;Estado;Items
-V005;Internacional;Ventas;"Flores del Valle S.A.";"null";2025-07-25;0,00;0,00;1170,00;Activo;""
-V002;Internacional;Ventas;"Rosas EverWord. S.A.S";"null";2025-07-28;180,00;0,00;180,00;Activo;""
+ID;TipoDestino;Servicio;Cliente;Direccion;Fecha;Pais;Precio;IVA;Total;Estado;Items
+V001;Internacional;Pedido Exportado;"MathewsFlowers";"Av. Floral 345";2025-08-06;"null";1760,00;0,00;1760,00;Exportado;admin;"PLAYA_BLANCA x8 - $1040,00, QUEEN_SAND x6 - $720,00"

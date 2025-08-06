@@ -50,7 +50,7 @@
                     </text>
                 </Button>
         -->
-                <!--
+            
                 <Button fx:id="btnParametrosNegocio"
                     onAction="#onParametrosNegocio"
                     styleClass="sidebar-button">
@@ -65,7 +65,7 @@
                     <String fx:value="Parámetros de Negocio"/>
                     </text>
                 </Button>
-                -->
+        
 
     </VBox>
 

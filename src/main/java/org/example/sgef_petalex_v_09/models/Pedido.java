@@ -1,6 +1,7 @@
 package org.example.sgef_petalex_v_09.models;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,22 +14,42 @@ public class Pedido {
     private String estadoActual;
     private String codigoGuiaAerea;
     private List<String> items;
-
     private List<ItemVenta> itemsVenta = new ArrayList<>();
-
     private Venta venta;
-
     private double precioTotal;
-
-    // Nuevo atributo para TipoEmpaque
     private Rosa.TipoEmpaque tipoEmpaque;
+    private String empresaTransporte; // Nuevo campo
+    private LocalDateTime fechaModificacion; // Fecha de última actualización
+
+    private String usuarioModificacion; // Usuario responsable de la última actualización
+    private LocalDateTime fechaCreacion;
+    private String usuarioResponsable;
+
+    // ---------------------------------------------
+    // GETTERS / SETTERS
+    // ---------------------------------------------
+    public LocalDateTime getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(LocalDateTime fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
+
+    public String getUsuarioResponsable() {
+        return usuarioResponsable;
+    }
+
+    public void setUsuarioResponsable(String usuarioResponsable) {
+        this.usuarioResponsable = usuarioResponsable;
+    }
 
     public Pedido() {
         this.items = new ArrayList<>();
     }
 
     public Pedido(int id, Cliente cliente, LocalDate fechaPedido, LocalDate fechaEstimadaEnvio,
-                  String estadoActual, String codigoGuiaAerea) {
+            String estadoActual, String codigoGuiaAerea) {
         this.id = id;
         this.cliente = cliente;
         this.fechaPedido = fechaPedido;
@@ -108,13 +129,13 @@ public class Pedido {
 
     public void setItemsVenta(List<ItemVenta> itemsVenta) {
         this.itemsVenta = itemsVenta;
-        actualizarTipoEmpaque();  // Actualizamos empaque cuando se setea la lista
+        actualizarTipoEmpaque(); // Actualizamos empaque cuando se setea la lista
     }
 
     public void agregarItemVenta(ItemVenta item) {
         if (item != null) {
             itemsVenta.add(item);
-            actualizarTipoEmpaque();  // Actualizamos empaque al agregar item
+            actualizarTipoEmpaque(); // Actualizamos empaque al agregar item
         }
     }
 
@@ -134,48 +155,57 @@ public class Pedido {
         this.precioTotal = precioTotal;
     }
 
-    public Rosa.TipoEmpaque getTipoEmpaque() {
-        return tipoEmpaque;
+    public String getEmpresaTransporte() {
+        return empresaTransporte;
     }
 
-    public void setTipoEmpaque(Rosa.TipoEmpaque tipoEmpaque) {
-        this.tipoEmpaque = tipoEmpaque;
+    public void setEmpresaTransporte(String empresaTransporte) {
+        this.empresaTransporte = empresaTransporte;
     }
 
-    /**
-     * Suma la cantidad total de rosas de todos los itemsVenta.
-     */
+    public LocalDateTime getFechaModificacion() {
+        return fechaModificacion;
+    }
+
+    public void setFechaModificacion(LocalDateTime fechaModificacion) {
+        this.fechaModificacion = fechaModificacion;
+    }
+
+    public String getUsuarioModificacion() {
+        return usuarioModificacion;
+    }
+
+    public void setUsuarioModificacion(String usuarioModificacion) {
+        this.usuarioModificacion = usuarioModificacion;
+    }
+
     public int getCantidadTotalRosas() {
         return itemsVenta.stream()
                 .mapToInt(ItemVenta::getCantidad)
                 .sum();
     }
 
-    /**
-     * Actualiza el tipo de empaque basado en la cantidad total de rosas.
-     */
     public void actualizarTipoEmpaque() {
         int total = getCantidadTotalRosas();
         this.tipoEmpaque = Rosa.TipoEmpaque.detectarPorCantidad(total).orElse(null);
     }
 
     public Venta generarVentaDesdePedido() {
-        Venta nuevaVenta = new Venta();
-       //nuevaVenta.setNumeroVenta("VNT-" + this.id);
-        nuevaVenta.setCliente(this.cliente.getNombre());
-        nuevaVenta.setDireccion(this.cliente.getDireccion());
-        nuevaVenta.setFecha(LocalDate.now());
+    Venta nuevaVenta = new Venta();
+    nuevaVenta.setCliente(this.cliente); // Aquí debes pasar el objeto Cliente completo
+    nuevaVenta.setFecha(LocalDate.now());
+    nuevaVenta.servicioProperty().set("Pedido Exportado"); // Establece el servicio
 
-        for (ItemVenta item : this.itemsVenta) {
-            nuevaVenta.addItem(item);
-        }
-
-        nuevaVenta.setTotal(this.getPrecioTotal());
-
-        return nuevaVenta;
+    for (ItemVenta item : this.itemsVenta) {
+        nuevaVenta.addItem(item);
     }
 
-    @Override
+    // Establece el total usando la propiedad
+    nuevaVenta.totalProperty().set(this.getPrecioTotal());
+
+    return nuevaVenta;
+}
+     @Override
     public String toString() {
         return "Pedido{" +
                 "id=" + id +
@@ -187,6 +217,9 @@ public class Pedido {
                 ", items=" + items +
                 ", precioTotal=" + precioTotal +
                 ", tipoEmpaque=" + (tipoEmpaque != null ? tipoEmpaque.getNombre() : "No definido") +
+                ", empresaTransporte='" + empresaTransporte + '\'' +
+                ", fechaModificacion=" + fechaModificacion +
+                ", usuarioModificacion='" + usuarioModificacion + '\'' +
                 '}';
     }
 }

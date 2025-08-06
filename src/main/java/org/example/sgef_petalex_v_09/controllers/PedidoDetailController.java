@@ -1,5 +1,6 @@
 package org.example.sgef_petalex_v_09.controllers;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -11,10 +12,13 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
 import org.example.sgef_petalex_v_09.models.Estados;
 import org.example.sgef_petalex_v_09.models.ItemVenta;
 import org.example.sgef_petalex_v_09.models.Pedido;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
+import org.example.sgef_petalex_v_09.validators.DataValidator;
+import org.example.sgef_petalex_v_09.validators.ValidationResult;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -60,6 +64,8 @@ public class PedidoDetailController {
     private ComboBox<String> cbEstadoPedido;
     @FXML
     private TextField txtGuiaAerea;
+    @FXML
+    private TextField txtEmpresaTransporte; // Nuevo campo
 
     private boolean pedidoAceptado = false;
     private Pedido currentPedido;
@@ -81,6 +87,10 @@ public class PedidoDetailController {
     private void setup() {
         dpFechaPedido.setDisable(true);
         btnAccept.setDisable(items.isEmpty());
+        tableItems.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            btnRemoveItem.setDisable(newSel == null);
+        });
+        btnRemoveItem.setDisable(true); // Inicia deshabilitado
 
         items.addListener((javafx.collections.ListChangeListener.Change<? extends ItemVenta> c) -> {
             btnAccept.setDisable(items.isEmpty());
@@ -110,6 +120,9 @@ public class PedidoDetailController {
         txtGuiaAerea.setText(currentPedido.getCodigoGuiaAerea());
         dpFechaPedido.setValue(currentPedido.getFechaPedido());
         dpFechaExport.setValue(currentPedido.getFechaEstimadaEnvio());
+
+        txtEmpresaTransporte
+                .setText(currentPedido.getEmpresaTransporte() != null ? currentPedido.getEmpresaTransporte() : "");
     }
 
     private void actualizarTotalLabel() {
@@ -129,6 +142,7 @@ public class PedidoDetailController {
             currentPedido.setEstadoActual(cbEstadoPedido.getValue());
             currentPedido.setFechaPedido(LocalDate.now());
             currentPedido.setFechaEstimadaEnvio(dpFechaExport.getValue());
+            currentPedido.setEmpresaTransporte(txtEmpresaTransporte.getText().trim());
             return Optional.of(currentPedido);
         }
         return Optional.empty();
@@ -140,6 +154,9 @@ public class PedidoDetailController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/RoseSelection.fxml"));
             Parent root = loader.load();
 
+            RoseSelectionController controller = loader.getController();
+            controller.setModoOperacion(RoseSelectionController.ModoOperacion.AGREGAR_A_PEDIDO);
+
             Stage dialog = new Stage();
             dialog.initOwner(lblCliente.getScene().getWindow());
             dialog.initModality(Modality.APPLICATION_MODAL);
@@ -147,24 +164,18 @@ public class PedidoDetailController {
             dialog.setScene(new Scene(root, 600, 600));
             dialog.showAndWait();
 
-            RoseSelectionController controller = loader.getController();
-            String variedadSeleccionada = controller.getSelectedRose();
-            if (variedadSeleccionada == null || variedadSeleccionada.isEmpty()) return;
-
-            ItemVenta nuevoItem = showPaqueteCantidadDialog(variedadSeleccionada);
+            ItemVenta nuevoItem = controller.getItemSeleccionado();
             if (nuevoItem != null) {
                 nuevoItem.setItem(items.size() + 1);
                 items.add(nuevoItem);
             }
-
         } catch (IOException ex) {
             ex.printStackTrace();
-            DialogHelper.showError(lblCliente.getScene().getWindow(),
-                    "Error al cargar selección de rosas.");
+            DialogHelper.showError(lblCliente.getScene().getWindow(), "Error al cargar selección de rosas.");
         }
     }
 
-    private ItemVenta showPaqueteCantidadDialog(String variedad) {
+    public ItemVenta showPaqueteCantidadDialog(String variedad) {
         Dialog<ItemVenta> dlg = new Dialog<>();
         dlg.setTitle("Configurar ítem");
 
@@ -202,8 +213,8 @@ public class PedidoDetailController {
 
         javafx.beans.value.ChangeListener<Object> validador = (obs, oldV, newV) -> {
             boolean esValido = cbLargo.getValue() != null &&
-                               cbPack.getValue() != null &&
-                               spQty.getValue() != null && spQty.getValue() > 0;
+                    cbPack.getValue() != null &&
+                    spQty.getValue() != null && spQty.getValue() > 0;
             okBtn.setDisable(!esValido);
         };
 
@@ -224,7 +235,8 @@ public class PedidoDetailController {
                     case "Caja Full" -> 120.0;
                     default -> 30.0;
                 };
-                if ("RUSO".equals(cbLargo.getValue())) base += 10.0;
+                if ("RUSO".equals(cbLargo.getValue()))
+                    base += 10.0;
 
                 it.setPrecioUnit(base);
                 it.setPrecioTotal(base * spQty.getValue());
@@ -273,21 +285,86 @@ public class PedidoDetailController {
 
     @FXML
     private void onAccept(ActionEvent e) {
-        if (items.isEmpty()) {
-            DialogHelper.showWarning(lblCliente.getScene().getWindow(),
-                    "Debe agregar al menos un ítem.");
+        boolean hasErrors = false;
+
+        // Validar la guía aérea
+        ValidationResult waybillResult = DataValidator.validateIATAWaybill(txtGuiaAerea.getText().trim());
+        if (!waybillResult.isValid()) {
+            setErrorStyle(txtGuiaAerea, waybillResult.getErrorMessage());
+            hasErrors = true;
+        } else {
+            clearErrorStyle(txtGuiaAerea);
+        }
+
+        // Validar la empresa de transporte
+        ValidationResult result = DataValidator.validateDireccion(txtEmpresaTransporte.getText().trim());
+        if (!result.isValid()) {
+            setErrorStyle(txtEmpresaTransporte, result.getErrorMessage());
+            hasErrors = true;
+        } else {
+            clearErrorStyle(txtEmpresaTransporte);
+        }
+
+        // Validar fecha de pedido
+        if (dpFechaPedido.getValue() == null) {
+            setErrorStyle(dpFechaPedido, "La fecha de pedido es obligatoria.");
+            hasErrors = true;
+        } else {
+            clearErrorStyle(dpFechaPedido);
+        }
+
+        // Validar fecha de exportación
+        if (dpFechaExport.getValue() == null) {
+            setErrorStyle(dpFechaExport, "La fecha de exportación es obligatoria.");
+            hasErrors = true;
+        } else {
+            clearErrorStyle(dpFechaExport);
+        }
+
+        // Validar estado del pedido
+        if (cbEstadoPedido.getValue() == null || cbEstadoPedido.getValue().isEmpty()) {
+            setErrorStyle(cbEstadoPedido, "El estado del pedido es obligatorio.");
+            hasErrors = true;
+        } else {
+            clearErrorStyle(cbEstadoPedido);
+        }
+
+        // Si hay errores, mostrar mensaje de error general
+        if (hasErrors) {
+            DialogHelper.showError(lblCliente.getScene().getWindow(),
+                    "Error al registrar pedido, corrige los campos resaltados (mantén el cursor sobre el campo para más información)");
             return;
         }
 
+        // Si todos los campos son válidos
         double total = items.stream().mapToDouble(ItemVenta::getPrecioTotal).sum();
         currentPedido.setCodigoGuiaAerea(txtGuiaAerea.getText());
         currentPedido.setEstadoActual(cbEstadoPedido.getValue());
         currentPedido.setFechaPedido(LocalDate.now());
         currentPedido.setFechaEstimadaEnvio(dpFechaExport.getValue());
         currentPedido.setPrecioTotal(total);
+        currentPedido.setEmpresaTransporte(txtEmpresaTransporte.getText().trim());
 
         actualizarTotalLabel();
         pedidoAceptado = true;
         closeWindow();
+    }
+
+    private void setErrorStyle(Control control, String message) {
+        Platform.runLater(() -> {
+            control.setStyle("-fx-border-color: red; -fx-border-width: 2px;");
+            Tooltip tooltip = new Tooltip(
+                    "Error, corrige los campos resaltados (mantén el cursor sobre el campo para más información)\n"
+                            + message);
+            tooltip.setStyle("-fx-background-color: #ffdddd; -fx-text-fill: red;");
+            control.setTooltip(tooltip);
+        });
+    }
+
+    private void clearErrorStyle(Control control) {
+        Platform.runLater(() -> {
+            control.setStyle(null);
+            control.setTooltip(null);
+        });
     }
 }

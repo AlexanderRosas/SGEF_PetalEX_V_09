@@ -5,6 +5,8 @@ module org.example.sgef_petalex_v_09 {
     requires javafx.graphics;
     requires javafx.base;
 
+    requires java.desktop; // <-- Agrega esto
+
     opens org.example.sgef_petalex_v_09 to javafx.fxml;
     opens org.example.sgef_petalex_v_09.controllers to javafx.fxml;
     opens org.example.sgef_petalex_v_09.models to javafx.base, javafx.fxml;

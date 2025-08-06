@@ -1,5 +1,6 @@
 package org.example.sgef_petalex_v_09.controllers;
 
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,22 +16,20 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.Window;
-import org.example.sgef_petalex_v_09.models.Cliente;
 import org.example.sgef_petalex_v_09.models.Venta;
 import org.example.sgef_petalex_v_09.util.CSVUtil;
 import org.example.sgef_petalex_v_09.util.DialogHelper;
-import org.example.sgef_petalex_v_09.util.NavigationHelper;
 import org.example.sgef_petalex_v_09.util.UserSession;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -40,18 +39,27 @@ public class VentasController implements Initializable {
 
     @FXML
     private Button btnBack;
+
     @FXML
     private TextField txtPuntoEmision;
     @FXML
     private TextField txtFecha;
     @FXML
     private TextField txtSucursal;
+
     @FXML
-    private Button btnNuevo;
+    private Button btnExportarFactura;
+    @FXML
+    private Button btnAnularVenta;
     @FXML
     private Button btnRecaudar;
     @FXML
     private Button btnEliminar;
+
+    @FXML
+    private DatePicker dpFechaDesde;
+    @FXML
+    private DatePicker dpFechaHasta;
 
     @FXML
     private TableView<Venta> tablaVentas;
@@ -66,11 +74,17 @@ public class VentasController implements Initializable {
     @FXML
     private TableColumn<Venta, String> colDetalle;
     @FXML
-    private TableColumn<Venta, Double> colPrecio;
+    private TableColumn<Venta, Number> colPrecio;
     @FXML
-    private TableColumn<Venta, Double> colIva;
+    private TableColumn<Venta, Number> colIva;
     @FXML
-    private TableColumn<Venta, Double> colTotal;
+    private TableColumn<Venta, Number> colTotal;
+    @FXML
+    private TableColumn<Venta, String> colEstado;
+    @FXML
+    private TableColumn<Venta, String> colFecha;
+    @FXML
+    private TableColumn<Venta, String> colUsuarioResponsable;
 
     private final ObservableList<Venta> listaVentas = FXCollections.observableArrayList();
 
@@ -80,31 +94,46 @@ public class VentasController implements Initializable {
         cargarDatos();
         configurarCamposFijos();
         configurarListeners();
+
+        Platform.runLater(() -> {
+            Stage stage = (Stage) tablaVentas.getScene().getWindow();
+            stage.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+                if (isFocused) {
+                    cargarDatos();
+                }
+            });
+        });
     }
 
     private void configurarColumnas() {
         colId.setCellValueFactory(c -> c.getValue().idProperty());
         colDestino.setCellValueFactory(c -> c.getValue().tipoDestinoProperty());
         colServicio.setCellValueFactory(c -> c.getValue().servicioProperty());
-        colCliente.setCellValueFactory(c -> c.getValue().clienteProperty());
-        colDetalle.setCellValueFactory(c -> new SimpleStringProperty(
-                (String) c.getValue().getDetalleResumen()));
-        colPrecio.setCellValueFactory(c -> c.getValue().precioProperty().asObject());
-        colIva.setCellValueFactory(c -> c.getValue().ivaProperty());
-        colTotal.setCellValueFactory(c -> c.getValue().totalProperty().asObject());
+        colCliente.setCellValueFactory(c -> c.getValue().clienteNombreProperty());
+        colDetalle.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getDetalleProductos()));
 
-        // Formateo monetario
-        formatoMoneda(colPrecio);
-        formatoMoneda(colIva);
-        formatoMoneda(colTotal);
+        colPrecio.setCellValueFactory(c -> c.getValue().precioProperty());
+        colIva.setCellValueFactory(c -> c.getValue().ivaProperty());
+        colTotal.setCellValueFactory(c -> c.getValue().totalProperty());
+
+        colEstado.setCellValueFactory(c -> c.getValue().estadoProperty());
+        colFecha.setCellValueFactory(c -> new SimpleStringProperty(
+                c.getValue().getFecha().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))));
+        colUsuarioResponsable.setCellValueFactory(c -> c.getValue().usuarioResponsableProperty());
+
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("es", "EC"));
+
+        formatoMoneda(colPrecio, currencyFormat);
+        formatoMoneda(colIva, currencyFormat);
+        formatoMoneda(colTotal, currencyFormat);
     }
 
-    private void formatoMoneda(TableColumn<Venta, Double> col) {
-        col.setCellFactory(tc -> new TableCell<>() {
+    private void formatoMoneda(TableColumn<Venta, Number> col, NumberFormat format) {
+        col.setCellFactory(tc -> new TableCell<Venta, Number>() {
             @Override
-            protected void updateItem(Double val, boolean empty) {
-                super.updateItem(val, empty);
-                setText(empty || val == null ? null : String.format("$%.2f", val));
+            protected void updateItem(Number value, boolean empty) {
+                super.updateItem(value, empty);
+                setText(empty || value == null ? null : format.format(value.doubleValue()));
             }
         });
     }
@@ -118,6 +147,7 @@ public class VentasController implements Initializable {
         txtPuntoEmision.setText(UserSession.getPuntoEmision());
         txtFecha.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
         txtSucursal.setText(UserSession.getSucursal());
+
         txtPuntoEmision.setEditable(false);
         txtFecha.setEditable(false);
         txtSucursal.setEditable(false);
@@ -129,107 +159,54 @@ public class VentasController implements Initializable {
                     boolean sel = newSel != null;
                     btnRecaudar.setDisable(!sel);
                     btnEliminar.setDisable(!sel);
+                    btnAnularVenta.setDisable(!sel);
+                    btnExportarFactura.setDisable(false); // Siempre habilitado para emitir facturas
                 });
     }
 
     @FXML
-    private void onNuevo(ActionEvent event) {
-        // 1) Tipo de Destino
-        List<String> opciones = Arrays.asList("Nacional", "Internacional");
-        ChoiceDialog<String> tipoDialog = new ChoiceDialog<>(opciones.get(0), opciones);
-        tipoDialog.setTitle("Nueva Venta – Tipo de Destino");
-        tipoDialog.setHeaderText(null);
-        tipoDialog.setContentText("Selecciona el Tipo de Destino:");
+    private void onExportarFactura(ActionEvent event) {
+        LocalDate desde = dpFechaDesde.getValue();
+        LocalDate hasta = dpFechaHasta.getValue();
 
-        // Deshabilitar OK si no hay selección
-        Button okBtn = (Button) tipoDialog.getDialogPane().lookupButton(ButtonType.OK);
-        okBtn.disableProperty().bind(tipoDialog.selectedItemProperty().isNull());
-
-        Optional<String> tipoOpt = tipoDialog.showAndWait();
-        if (!tipoOpt.isPresent())
+        if (desde == null || hasta == null) {
+            showWarning("Por favor seleccione el rango de fechas para emitir facturas.");
             return;
-        String tipoDestino = tipoOpt.get();
+        }
+        if (hasta.isBefore(desde)) {
+            showWarning("La fecha 'Hasta' no puede ser anterior a la fecha 'Desde'.");
+            return;
+        }
 
-        // 2) Selección de Cliente
-        try {
-            FXMLLoader clLoader = new FXMLLoader(
-                    getClass().getResource("/fxml/ClienteSelection.fxml"));
-            Parent clRoot = clLoader.load();
-            Stage clStage = new Stage();
-            clStage.initModality(Modality.WINDOW_MODAL);
-            clStage.initOwner(((Node) event.getSource()).getScene().getWindow());
-            clStage.setTitle("Seleccionar Cliente");
-            clStage.setScene(new Scene(clRoot));
-            clStage.showAndWait();
+        List<Venta> ventasFiltradas = listaVentas.stream()
+                .filter(v -> !v.getFecha().isBefore(desde) && !v.getFecha().isAfter(hasta))
+                .toList();
 
-            ClienteSelectionController clCtrl = clLoader.getController();
-            Optional<Cliente> clienteOpt = clCtrl.getClienteSeleccionado();
-            if (!clienteOpt.isPresent())
-                return;
-            Cliente cliente = clienteOpt.get();
+        // Aquí deberías implementar la lógica para exportar esas facturas
 
-            // 3) Detalle de Venta
-            FXMLLoader vdLoader = new FXMLLoader(
-                    getClass().getResource("/fxml/VentaDetail.fxml"));
-            Parent vdRoot = vdLoader.load();
-            Stage vdStage = new Stage();
-            vdStage.initModality(Modality.WINDOW_MODAL);
-            vdStage.initOwner(clStage);
-            vdStage.setTitle("Nueva Venta – " + tipoDestino);
-            Scene vdScene = new Scene(vdRoot);
-            vdScene.getStylesheets().add(
-                    getClass().getResource("/css/styles.css").toExternalForm());
-            vdStage.setScene(vdScene);
+        showInfo("Facturas emitidas para ventas del " + desde + " al " + hasta);
+    }
 
-            // Inicializar datos
-            VentaDetailController vdCtrl = vdLoader.getController();
-            Venta nuevaVenta = new Venta();
-            nuevaVenta.setTipoDestino(tipoDestino);
-            nuevaVenta.setCliente(cliente.getId());
-            nuevaVenta.setFecha(LocalDate.now());
-            vdCtrl.initData(nuevaVenta);
+    @FXML
+    private void onAnularVenta(ActionEvent event) {
+        Venta ventaSel = tablaVentas.getSelectionModel().getSelectedItem();
+        if (ventaSel == null) {
+            showWarning("Seleccione una venta para anular.");
+            return;
+        }
 
-            vdStage.showAndWait();
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                "¿Está seguro de anular la venta " + ventaSel.getId() + "?",
+                ButtonType.OK, ButtonType.CANCEL);
+        confirm.setHeaderText(null);
+        confirm.initOwner(tablaVentas.getScene().getWindow());
 
-            vdCtrl.getVentaCreated().ifPresent(venta -> {
-                // 1) Generar ID de la venta
-                String id = String.format("V%03d", listaVentas.size() + 1);
-                venta.setId(id);
-                venta.setServicio("Ventas");
-
-                // 2) Reemplazar el campo “cliente” (que llevaba el ID) por el nombre real
-                String clienteId = venta.getCliente();
-                Cliente cli = CSVUtil.buscarClientePorId(clienteId);
-                if (cli != null) {
-                    venta.setCliente(cli.getNombre());
-                }
-
-                // 3) Añadir y persistir
-                listaVentas.add(venta);
-                CSVUtil.guardarVentas(listaVentas, VENTAS_CSV);
-            });
-
-        } catch (IOException e) {
-            // Construir la traza en un String
-            StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            String exceptionText = sw.toString();
-
-            // TextArea para que puedas copiarla
-            TextArea textArea = new TextArea(exceptionText);
-            textArea.setEditable(false);
-            textArea.setWrapText(true);
-            textArea.setMaxWidth(Double.MAX_VALUE);
-            textArea.setMaxHeight(Double.MAX_VALUE);
-            GridPane.setVgrow(textArea, Priority.ALWAYS);
-            GridPane.setHgrow(textArea, Priority.ALWAYS);
-
-            // Mostrarla en un Alert
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error al crear nueva venta");
-            alert.setHeaderText(e.getMessage());
-            alert.getDialogPane().setContent(textArea);
-            alert.showAndWait();
+        Optional<ButtonType> res = confirm.showAndWait();
+        if (res.isPresent() && res.get() == ButtonType.OK) {
+            ventaSel.setEstado("Anulada");
+            CSVUtil.guardarVentas(listaVentas, VENTAS_CSV);
+            tablaVentas.refresh();
+            showInfo("Venta anulada correctamente.");
         }
     }
 
@@ -238,6 +215,7 @@ public class VentasController implements Initializable {
         Venta sel = tablaVentas.getSelectionModel().getSelectedItem();
         if (sel != null) {
             UserSession.setVentaSeleccionada(sel);
+            // Aquí la navegación al módulo de recaudación si está implementado
             // NavigationHelper.cargarVista(event, "/fxml/Recaudacion.fxml", "Recaudación");
         }
     }
@@ -264,7 +242,6 @@ public class VentasController implements Initializable {
         try {
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
-            // Guardar estado ventana actual para restaurar si quieres (opcional)
             boolean wasMaximized = stage.isMaximized();
             double width = stage.getWidth();
             double height = stage.getHeight();
@@ -274,7 +251,6 @@ public class VentasController implements Initializable {
             Scene scene = stage.getScene();
             scene.setRoot(root);
 
-            // Reaplicar CSS si usas hojas externas
             scene.getStylesheets().clear();
             scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
 
@@ -297,15 +273,15 @@ public class VentasController implements Initializable {
     }
 
     /* — Utilitarios de alerta — */
-    private void showError(String msg, Exception e) {
-        Alert a = new Alert(Alert.AlertType.ERROR, msg + "\n" + e.getMessage());
+    private void showWarning(String msg) {
+        Alert a = new Alert(Alert.AlertType.WARNING, msg);
         a.initOwner(tablaVentas.getScene().getWindow());
         a.setHeaderText(null);
         a.showAndWait();
     }
 
-    private void showWarning(String msg) {
-        Alert a = new Alert(Alert.AlertType.WARNING, msg);
+    private void showInfo(String msg) {
+        Alert a = new Alert(Alert.AlertType.INFORMATION, msg);
         a.initOwner(tablaVentas.getScene().getWindow());
         a.setHeaderText(null);
         a.showAndWait();

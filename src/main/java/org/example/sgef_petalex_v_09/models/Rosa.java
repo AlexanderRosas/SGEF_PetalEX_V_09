@@ -1,5 +1,6 @@
 package org.example.sgef_petalex_v_09.models;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -10,6 +11,37 @@ public class Rosa {
         GOTCHA, QUEEN_SAND, NINA, PLAYA_BLANCA,
         MOMENTUM, PINK_FLOYD, VENDELA, HERMOSA;
     }
+
+
+
+    private String nombre;
+    private File imagen;
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public File getImagen() {
+        return imagen;
+    }
+
+    public void setImagen(File imagen) {
+        this.imagen = imagen;
+    }
+
+    public Rosa(String nombre, File imagen, TipoRosa tipoRosa, TipoCorte tipoCorte, int cantidad) {
+        this.nombre = nombre;
+        this.imagen = imagen;
+        this.tipoRosa = tipoRosa;
+        this.tipoCorte = tipoCorte;
+        this.cantidad = cantidad;
+    }
+
+    // Getter/Setters...
 
     public enum TipoCorte {
         RUSO(70), AMERICANO(80);
@@ -24,42 +56,45 @@ public class Rosa {
             return largoEnCm;
         }
     }
-
     public enum TipoEmpaque {
-        CAJA_TABACO("Caja Tabaco", 100, 125, "Mercados premium (EE.UU./Canadá)"),
-        CAJA_FULL("Caja Full", 300, 350, "Mercados masivos (Rusia/Holanda)"),
-        CUARTOS("Cuartos", 100, 125, "Pedidos pequeños");
+    CAJA_TABACO("Caja Tabaco", 125, "Mercados premium (EE.UU./Canadá)"),
+    CAJA_FULL("Caja Full", 350, "Mercados masivos (Rusia/Holanda)"),
+    CUARTOS("Cuartos", 125, "Pedidos pequeños");
 
-        private final String nombre;
-        private final int cantidadMin;
-        private final int cantidadMax;
-        private final String destino;
+    private final String nombre;
+    private final int cantidad;  // cantidad fija
+    private final String destino;
 
-        TipoEmpaque(String nombre, int cantidadMin, int cantidadMax, String destino) {
-            this.nombre = nombre;
-            this.cantidadMin = cantidadMin;
-            this.cantidadMax = cantidadMax;
-            this.destino = destino;
-        }
-
-        public boolean permiteCantidad(int cantidad) {
-            return cantidad >= cantidadMin && cantidad <= cantidadMax;
-        }
-
-        public String getNombre() {
-            return nombre;
-        }
-
-        public String getDestino() {
-            return destino;
-        }
-
-        public static Optional<TipoEmpaque> detectarPorCantidad(int cantidad) {
-            return Arrays.stream(values())
-                    .filter(empaque -> empaque.permiteCantidad(cantidad))
-                    .findFirst();
-        }
+    TipoEmpaque(String nombre, int cantidad, String destino) {
+        this.nombre = nombre;
+        this.cantidad = cantidad;
+        this.destino = destino;
     }
+
+    // Cambiar la validación para solo permitir exactamente esa cantidad fija
+    public boolean permiteCantidad(int cantidad) {
+        return this.cantidad == cantidad;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public int getCantidad() {
+        return cantidad;
+    }
+
+    public String getDestino() {
+        return destino;
+    }
+
+    // Detectar empaque por cantidad exacta
+    public static Optional<TipoEmpaque> detectarPorCantidad(int cantidad) {
+        return Arrays.stream(values())
+                .filter(empaque -> empaque.permiteCantidad(cantidad))
+                .findFirst();
+    }
+}
 
     private TipoRosa tipoRosa;
     private TipoCorte tipoCorte;

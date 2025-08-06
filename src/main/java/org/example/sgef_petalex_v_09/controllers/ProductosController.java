@@ -76,7 +76,7 @@ public class ProductosController {
                 });
 
         // Cargar datos de ejemplo
-        cargarProveedoresEjemplo();
+
         cargarDatosEjemplo();
 
         // Configurar filtrado
@@ -451,25 +451,6 @@ public class ProductosController {
                         "15 tallos",
                         1.20, 0.20, 12.0, 1, LocalDate.now().minusDays(10),
                         LocalDate.now().minusDays(2), "1790456789001"));
-    }
-
-    private void cargarProveedoresEjemplo() {
-        proveedoresDisponibles.addAll(
-                new Proveedor("1790123456001", "FloriPetals", "FloriPetals S.A.", "02-2345678",
-                        "Av. de las Rosas 123, Quito", "1234567890", "contacto@floripetalsa.com",
-                        LocalDate.now().minusMonths(6), "Activo"),
-                new Proveedor("1790234567001", "Roses Export", "Roses Export Ecuador Cia. Ltda.", "02-3456789",
-                        "Calle Flores 456, Cayambe", "2345678901", "ventas@rosesexport.com",
-                        LocalDate.now().minusMonths(4), "Activo"),
-                new Proveedor("1790345678001", "Garden Flowers", "Garden Flowers Cia. Ltda.", "02-4567890",
-                        "Av. Floresta 789, Tabacundo", "3456789012", "info@gardenflowers.ec",
-                        LocalDate.now().minusMonths(8), "Activo"),
-                new Proveedor("1790456789001", "EcuaFlores", "EcuaFlores Internacional S.A.", "02-5678901",
-                        "Km 25 Vía Cayambe, Cayambe", "4567890123", "admin@ecuaflores.com",
-                        LocalDate.now().minusMonths(12), "Activo"),
-                new Proveedor("1790567890001", "Premium Blooms", "Premium Blooms del Ecuador S.A.", "02-6789012",
-                        "Sector La Esperanza, Pedro Moncayo", "5678901234", "premium@blooms.ec",
-                        LocalDate.now().minusMonths(2), "Activo"));
     }
 
     private Window getWindow() {

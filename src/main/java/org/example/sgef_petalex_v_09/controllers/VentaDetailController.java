@@ -36,27 +36,46 @@ public class VentaDetailController implements Initializable {
     private final ObservableList<ItemVenta> items = FXCollections.observableArrayList();
 
     // —— FXML controls ——
-    @FXML private Label lblCliente;
-    @FXML private Label lblDireccion;
-    @FXML private Label lblTelefono;
-    @FXML private Label lblCorreo;
-    @FXML private Label lblFecha;
-    @FXML private Label lblTipoDestino;
-    @FXML private Label lblEstadoCliente;
-    @FXML private Label lblTotal;
+    @FXML
+    private Label lblCliente;
+    @FXML
+    private Label lblDireccion;
+    @FXML
+    private Label lblTelefono;
+    @FXML
+    private Label lblCorreo;
+    @FXML
+    private Label lblFecha;
+    @FXML
+    private Label lblTipoDestino;
+    @FXML
+    private Label lblEstadoCliente;
+    @FXML
+    private Label lblTotal;
 
-    @FXML private TableView<ItemVenta> tableItems;
-    @FXML private TableColumn<ItemVenta, Integer> colItem;
-    @FXML private TableColumn<ItemVenta, String>  colVariedad;
-    @FXML private TableColumn<ItemVenta, String>  colPaquete;
-    @FXML private TableColumn<ItemVenta, Integer> colCantidad;
-    @FXML private TableColumn<ItemVenta, Double>  colPrecioU;
-    @FXML private TableColumn<ItemVenta, Double>  colPrecioT;
+    @FXML
+    private TableView<ItemVenta> tableItems;
+    @FXML
+    private TableColumn<ItemVenta, Integer> colItem;
+    @FXML
+    private TableColumn<ItemVenta, String> colVariedad;
+    @FXML
+    private TableColumn<ItemVenta, String> colPaquete;
+    @FXML
+    private TableColumn<ItemVenta, Integer> colCantidad;
+    @FXML
+    private TableColumn<ItemVenta, Double> colPrecioU;
+    @FXML
+    private TableColumn<ItemVenta, Double> colPrecioT;
 
-    @FXML private Button btnAddItem;
-    @FXML private Button btnEliminarItem;
-    @FXML private Button btnCancelVenta;
-    @FXML private Button btnAcceptVenta;
+    @FXML
+    private Button btnAddItem;
+    @FXML
+    private Button btnEliminarItem;
+    @FXML
+    private Button btnCancelVenta;
+    @FXML
+    private Button btnAcceptVenta;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -67,32 +86,32 @@ public class VentaDetailController implements Initializable {
         }
 
         // Configurar columnas con PropertyValueFactory
-        colItem    .setCellValueFactory(new PropertyValueFactory<>("item"));
+        colItem.setCellValueFactory(new PropertyValueFactory<>("item"));
         colVariedad.setCellValueFactory(new PropertyValueFactory<>("variedad"));
-        colPaquete .setCellValueFactory(new PropertyValueFactory<>("paquete"));
+        colPaquete.setCellValueFactory(new PropertyValueFactory<>("paquete"));
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
-        colPrecioU .setCellValueFactory(new PropertyValueFactory<>("precioUnitario"));
-        colPrecioT .setCellValueFactory(new PropertyValueFactory<>("precioTotal"));
+        colPrecioU.setCellValueFactory(new PropertyValueFactory<>("precioUnitario"));
+        colPrecioT.setCellValueFactory(new PropertyValueFactory<>("precioTotal"));
 
         // Carga la lista de ítems en la tabla
         tableItems.setItems(items);
 
         // Configurar handlers de botones
-        btnAddItem      .setOnAction(this::onAddItem);
-        btnEliminarItem .setOnAction(this::onEliminarItem);
-        btnCancelVenta  .setOnAction(this::onCancelVenta);
-        btnAcceptVenta  .setOnAction(this::onAcceptVenta);
+        btnAddItem.setOnAction(this::onAddItem);
+        btnEliminarItem.setOnAction(this::onEliminarItem);
+        btnCancelVenta.setOnAction(this::onCancelVenta);
+        btnAcceptVenta.setOnAction(this::onAcceptVenta);
 
         // Inicialmente deshabilitar Eliminar y Aceptar
         btnEliminarItem.setDisable(true);
-        btnAcceptVenta .setDisable(true);
+        btnAcceptVenta.setDisable(true);
 
         // Activar Eliminar cuando haya una selección
         tableItems.getSelectionModel().selectedItemProperty().addListener(
-                (obs, oldSel, newSel) -> btnEliminarItem.setDisable(newSel == null)
-        );
+                (obs, oldSel, newSel) -> btnEliminarItem.setDisable(newSel == null));
 
-        // Cada vez que cambian los ítems, recálculo totales y habilito/deshabilito Aceptar
+        // Cada vez que cambian los ítems, recálculo totales y habilito/deshabilito
+        // Aceptar
         items.addListener((ListChangeListener<ItemVenta>) change -> {
             updateTotal();
             btnAcceptVenta.setDisable(items.isEmpty());
@@ -113,22 +132,20 @@ public class VentaDetailController implements Initializable {
 
     private void setupVentaInfo() {
         // 1) Obtener el cliente completo
-        String clienteId = currentVenta.getCliente();               // p.ej. "C001"
-        Cliente cliente = CSVUtil.buscarClientePorId(clienteId);    // devuelve null si no existe
+        Cliente cliente = currentVenta.getCliente(); // Obtener el objeto Cliente
 
         if (cliente != null) {
-            lblCliente.setText("Cliente: "    + cliente.getNombre());
+            lblCliente.setText("Cliente: " + cliente.getNombre());
             lblDireccion.setText("Dirección: " + cliente.getDireccion());
-            lblTelefono.setText("Teléfono: "   + cliente.getTelefono());
-            lblCorreo.setText("Correo: "       + cliente.getCorreo());
+            lblTelefono.setText("Teléfono: " + cliente.getTelefono());
+            lblCorreo.setText("Correo: " + cliente.getCorreo());
 
             // Estado visual según activo/inactivo
             String est = cliente.getEstado();
             lblEstadoCliente.setText("Estado: " + est);
             lblEstadoCliente.getStyleClass().setAll(
                     "estado-label",
-                    est.equalsIgnoreCase("Activo") ? "estado-activo" : "estado-inactivo"
-            );
+                    est.equalsIgnoreCase("Activo") ? "estado-activo" : "estado-inactivo");
         } else {
             // Si no se encontró, mostrarlos vacíos o con un mensaje por defecto
             lblCliente.setText("Cliente: No encontrado");
@@ -152,12 +169,12 @@ public class VentaDetailController implements Initializable {
         double subtotal = items.stream()
                 .mapToDouble(ItemVenta::getPrecioTotal)
                 .sum();
-        double iva   = 0.0;       // IVA siempre cero
-        double total = subtotal;  // total = subtotal + iva
+        double iva = 0.0; // IVA siempre cero
+        double total = subtotal; // total = subtotal + iva
 
-        currentVenta.setPrecio(subtotal);
-        currentVenta.setIva(iva);
-        currentVenta.setTotal(total);
+        currentVenta.precioProperty().set(subtotal); // Usar propiedad directamente
+        currentVenta.ivaProperty().set(iva); // Usar propiedad directamente
+        currentVenta.totalProperty().set(total); // Usar propiedad directamente
 
         lblTotal.setText(String.format(
                 "Subtotal: $%.2f   IVA: $%.2f   Total: $%.2f",
@@ -170,7 +187,7 @@ public class VentaDetailController implements Initializable {
             DialogHelper.showWarning(getWindow(), "Debe agregar al menos un ítem.");
             return false;
         }
-        if (currentVenta.getCliente() == null || currentVenta.getCliente().isEmpty()) {
+        if (currentVenta.getCliente() == null) {
             DialogHelper.showWarning(getWindow(), "Debe seleccionar un cliente.");
             return false;
         }

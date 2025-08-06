@@ -38,18 +38,16 @@ public class GestionUsuariosController implements Initializable {
 
     @FXML
     private Button btnNuevo, btnEditar, btnEstado;
-    @FXML
-    private TextField txtBuscarNombreNatural;
-    @FXML
-    private TextField txtBuscarNombreUsuario;
+
     @FXML
     private TextField txtBuscarCedula;
     @FXML
-    private TextField txtBuscarCorreo;
+    private Label lblNoUsuarios;
     @FXML
     private ComboBox<String> cbEstado;
     private final ObservableList<Usuario> data = FXCollections.observableArrayList();
     private FilteredList<Usuario> filteredData;
+    private boolean mostrarErrorSiNoHayResultados = false;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -94,35 +92,39 @@ public class GestionUsuariosController implements Initializable {
     }
 
     private void configurarFiltros() {
-        txtBuscarNombreNatural.textProperty().addListener((obs, o, n) -> aplicarFiltro());
-        txtBuscarNombreUsuario.textProperty().addListener((obs, o, n) -> aplicarFiltro());
+        
+        
         txtBuscarCedula.textProperty().addListener((obs, o, n) -> aplicarFiltro());
-        txtBuscarCorreo.textProperty().addListener((obs, o, n) -> aplicarFiltro());
+        
         cbEstado.valueProperty().addListener((obs, o, n) -> aplicarFiltro());
     }
 
     private void aplicarFiltro() {
-        String nombreNatural = txtBuscarNombreNatural.getText().toLowerCase();
-        String nombreUsuario = txtBuscarNombreUsuario.getText().toLowerCase();
-        String cedula = txtBuscarCedula.getText().toLowerCase();
-        String correo = txtBuscarCorreo.getText().toLowerCase();
+        String cedula = txtBuscarCedula.getText().toLowerCase().trim();
         String estado = cbEstado.getValue();
 
+        boolean hayFiltro =
+                !cedula.isEmpty()
+                || (estado != null && !estado.equals("Todos"));
+
         filteredData.setPredicate(u -> {
-            if (nombreNatural.isEmpty() && nombreUsuario.isEmpty() && cedula.isEmpty() && correo.isEmpty()
-                    && (estado == null || estado.equals("Todos"))) {
+            if (!hayFiltro)
                 return true;
-            }
 
-            boolean nombreNaturalMatch = nombreNatural.isEmpty() || u.getNombre().toLowerCase().contains(nombreNatural);
-            boolean nombreUsuarioMatch = nombreUsuario.isEmpty()
-                    || u.getUsuario().toLowerCase().contains(nombreUsuario);
-            boolean cedulaMatch = cedula.isEmpty() || u.getCedula().toLowerCase().contains(cedula);
-            boolean correoMatch = correo.isEmpty() || u.getCorreo().toLowerCase().contains(correo);
-            boolean estadoMatch = estado == null || estado.equals("Todos") || u.getEstado().equalsIgnoreCase(estado);
+            
+            
+            
+            
+            boolean cedulaMatch = cedula.isEmpty()
+                    || u.getCedula().trim().toLowerCase().startsWith(cedula);
+            boolean estadoMatch = estado == null || estado.equals("Todos")
+                    || u.getEstado().equalsIgnoreCase(estado);
 
-            return nombreNaturalMatch && nombreUsuarioMatch && cedulaMatch && correoMatch && estadoMatch;
+            return  cedulaMatch && estadoMatch;
         });
+
+        boolean sinResultados = filteredData.isEmpty();
+
     }
 
     @FXML
@@ -400,12 +402,10 @@ public class GestionUsuariosController implements Initializable {
         ComboBox<String> cbRol = new ComboBox<>(FXCollections.observableArrayList(PermisosUtil.getRolesDisponibles()));
         cbRol.setValue(usuarioExistente.getRol());
         txtNombre.setDisable(true); // No editable
+
         // Si el usuario es Administrador, deshabilitar el ComboBox de roles
-        if ("Administrador".equalsIgnoreCase(usuarioExistente.getRol())) {
-            cbRol.setDisable(true); // desactivar ComboBox
-            cbRol.setStyle("-fx-opacity: 0.6;"); // aspecto visual
-        }
-        
+        cbRol.setDisable(true);
+
         grid.addRow(0, new Label("Nombre Natural:"), txtNombre);
         grid.addRow(2, new Label("Usuario:"), txtUsuario);
         grid.addRow(1, new Label("Correo Electrónico:"), txtCorreo);

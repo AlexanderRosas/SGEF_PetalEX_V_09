@@ -13,13 +13,10 @@ import java.io.IOException;
 
 public class AdministracionController {
 
-    @FXML
-    private Button btnBack;
-    @FXML
-    private Button btnGestionUsuarios;
-
-    @FXML
-    private AnchorPane contentPane;
+    @FXML private Button btnBack;
+    @FXML private Button btnGestionUsuarios;
+    @FXML private Button btnParametrosNegocio; // NUEVO
+    @FXML private AnchorPane contentPane;
 
     @FXML
     public void initialize() {
@@ -32,25 +29,19 @@ public class AdministracionController {
         try {
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
-            // Guardar estado actual
             boolean wasMaximized = stage.isMaximized();
             double width = stage.getWidth();
             double height = stage.getHeight();
 
-            // Cargar raíz principal
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/MainMenu.fxml"));
             AnchorPane mainRoot = loader.load();
 
             Scene scene = stage.getScene();
-
-            // Cambiar raíz
             scene.setRoot(mainRoot);
 
-            // Reaplicar CSS
             scene.getStylesheets().clear();
             scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
 
-            // Restaurar estado ventana
             stage.setResizable(false);
             if (wasMaximized) {
                 stage.setMaximized(true);
@@ -61,7 +52,6 @@ public class AdministracionController {
                 stage.centerOnScreen();
             }
 
-            // Actualizar título
             stage.setTitle("Index Blooms – Menú Principal");
         } catch (IOException e) {
             e.printStackTrace();
@@ -74,13 +64,18 @@ public class AdministracionController {
         resaltarBoton(btnGestionUsuarios);
     }
 
+    @FXML
+    private void onParametrosNegocio(ActionEvent event) { // NUEVO
+        cargarSeccion("ParametrosNegocio.fxml");
+        resaltarBoton(btnParametrosNegocio);
+    }
+
     private void cargarSeccion(String fxmlFile) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/" + fxmlFile));
             AnchorPane pane = loader.load();
             contentPane.getChildren().setAll(pane);
 
-            // Ajustar el panel cargado para que ocupe todo el espacio disponible
             AnchorPane.setTopAnchor(pane, 0.0);
             AnchorPane.setRightAnchor(pane, 0.0);
             AnchorPane.setBottomAnchor(pane, 0.0);
@@ -91,10 +86,11 @@ public class AdministracionController {
     }
 
     private void resaltarBoton(Button activo) {
-        // Remover la clase active de todos los botones
+        // Remueve "active" de todos los botones
         btnGestionUsuarios.getStyleClass().remove("active");
+        btnParametrosNegocio.getStyleClass().remove("active"); // NUEVO
 
-        // Agregar la clase active al botón seleccionado
+        // Agrega "active" al botón seleccionado
         if (activo != null && !activo.getStyleClass().contains("active")) {
             activo.getStyleClass().add("active");
         }
